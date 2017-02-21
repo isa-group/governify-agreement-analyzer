@@ -1,0 +1,7 @@
+development:
+  reasoner:
+    type: 'local' # local or api
+    api:
+      version: 'v2'
+      server: 'https://localhost:10044/module-minizinc'
+      operationPath: 'models/mzn/operations/execute'

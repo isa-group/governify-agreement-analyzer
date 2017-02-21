@@ -1,0 +1,68 @@
+---
+swagger: "2.0"
+info:
+  description: "An API REST to receive analysis agreement operation requests"
+  version: "0.0.1"
+  title: "Governify Agreement Analyzer REST"
+  termsOfService: "www.isa.us.es"
+  contact:
+    name: "ISA Research Group"
+    url: "www.isa.us.es"
+    email: "isagroup.us@gmail.com"
+  license:
+    name: "MIT"
+    url: "http://opensource.org/licenses/MIT"
+host: "agreement-analyzer.governify.io"
+basePath: "/api/v1"
+schemes:
+- "http"
+- "https"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /analysis/{operationName}:
+    post:
+      description: "Perform an analysis operation over an agreement"
+      operationId: "analysisPOST"
+      parameters:
+      - name: "operationName"
+        in: "path"
+        description: "Call <i>'operationName'</i> operation defined in Analyzer"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "analysisRequest"
+        description: "XXX"
+        required: true
+        schema:
+          $ref: "#/definitions/analysisRequest"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/cspToolsReponse"
+        400:
+          description: "Bad request"
+          schema:
+            $ref: "#/definitions/inline_response_400"
+      x-swagger-router-controller: "Default"
+definitions:
+  analysisRequest:
+    type: "object"
+    properties:
+      fileUri:
+        type: "string"
+  cspToolsReponse:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+  inline_response_400:
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      message:
+        type: "string"
