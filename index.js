@@ -1,5 +1,7 @@
 'use strict';
 
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"; // unsecure
+
 var app = require('connect')();
 var http = require('http');
 var swaggerTools = require('swagger-tools');

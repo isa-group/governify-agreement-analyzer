@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-21
+governify-agreement-analyzer 0.0.1, built on: 2017-02-22
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -39,13 +39,14 @@ var Translator = (function () {
         });
         var guarantees = agModel["terms"]["guarantees"];
         guarantees.forEach(function (guarantee) {
-            guarantee.of.forEach(function (of) {
+            guarantee.of.forEach(function (of, index) {
                 var constraint;
+                var constId = guarantee.id + "_" + index;
                 if (of.precondition && of.precondition !== "") {
-                    constraint = new CSPConstraint_1.default("(" + of.precondition + ") -> (" + of.objective + ")");
+                    constraint = new CSPConstraint_1.default(constId, "(" + of.precondition + ") -> (" + of.objective + ")");
                 }
                 else if (of.objective && of.objective !== "") {
-                    constraint = new CSPConstraint_1.default(of.objective);
+                    constraint = new CSPConstraint_1.default(constId, of.objective);
                 }
                 constraints.push(constraint);
             });

@@ -12,22 +12,24 @@ It has to be defined by following the schema:
 ```yaml
 ---
 title: Reasoner configuration file schema
-type: object
+type: 'object'
 properties:
   type:
     enum:
-    - api
-    - local
-    - docker    # not implemented yet
-  api:          # only necessary if type is 'api'
-    type: object
+    - 'api'
+    - 'local'
+    - 'docker'    # not implemented yet
+  folder:
+    type: 'string'
+  api:            # only if type is 'api'
+    type: 'object'
     properties:
       version:
-        type: string
+        type: 'string'
       server:
-        type: string
+        type: 'string'
       operationPath:
-        type: string
+        type: 'string'
 
 ```
 
@@ -60,7 +62,7 @@ This class contains all necessary methods to translate an `AgreementModel` to an
 Defines analysis operations over an agremeent.
 
 #### `isConsistent(agModel: Object, config: Object): boolean`
-Checks if an agreement is consistent.### Latest release
+Checks if an agreement is consistent.###### Latest release
 
 The version 0.0.1 is the latest stable version of governify-agreement-analyzer component.
 see [release note](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.0.1) for details.

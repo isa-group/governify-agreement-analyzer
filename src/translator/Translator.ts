@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-21
+governify-agreement-analyzer 0.0.1, built on: 2017-02-22
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -53,14 +53,15 @@ export default class Translator {
 
 		var guarantees = agModel["terms"]["guarantees"];
 		guarantees.forEach(function (guarantee: any) {
-			guarantee.of.forEach(function (of: any) {
+			guarantee.of.forEach(function (of: any, index: number) {
 				var constraint: CSPConstraint;
+				var constId: string = guarantee.id + "_" + index;
 				if (of.precondition && of.precondition !== "") {
 					// Use "precondition->objective" to define constraint
-					constraint = new CSPConstraint("(" + of.precondition + ") -> (" + of.objective + ")");
+					constraint = new CSPConstraint(constId, "(" + of.precondition + ") -> (" + of.objective + ")");
 				} else if (of.objective && of.objective !== "") {
 					// Use "objective" property to define constraint
-					constraint = new CSPConstraint(of.objective);
+					constraint = new CSPConstraint(constId, of.objective);
 				}
 				constraints.push(constraint);
 			});

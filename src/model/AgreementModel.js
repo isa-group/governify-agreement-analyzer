@@ -17,12 +17,23 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-var CSPModel_1 = require("../../../model/csp/CSPModel");
-var CSPBuilder = (function () {
-    function CSPBuilder() {
-        this.model = new CSPModel_1.default();
+var Ajv = require("ajv");
+var ajv = new Ajv({ unknownFormats: ["int32", "int64", "float", "double", "byte", "binary", "date", "date-time", "password"] });
+var logger = require("../logger/logger");
+var AgreementModel = (function () {
+    function AgreementModel(agreement) {
+        this.agreement = agreement;
     }
-    return CSPBuilder;
+    AgreementModel.prototype.validate = function () {
+        logger.info("Validate agreement");
+        var schema = require("../schemas/agreement.json");
+        var isValidModel = ajv.validate(schema, this.agreement);
+        if (!isValidModel) {
+            logger.error("Error in agreement validation:", ajv.errors);
+        }
+        return isValidModel;
+    };
+    return AgreementModel;
 }());
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = CSPBuilder;
+exports.default = AgreementModel;

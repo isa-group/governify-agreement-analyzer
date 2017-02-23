@@ -1,7 +1,16 @@
-development:
+production:
   reasoner:
-    type: 'local' # local or api
+    type: 'docker'
     api:
       version: 'v2'
       server: 'https://localhost:10044/module-minizinc'
       operationPath: 'models/mzn/operations/execute'
+    folder: csp_files
+development:
+  reasoner:
+    type: 'docker'
+    api:
+      version: 'v2'
+      server: 'https://localhost:10044/module-minizinc'
+      operationPath: 'models/mzn/operations/execute'
+    folder: csp_files

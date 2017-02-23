@@ -71,7 +71,7 @@ terms:
   guarantees:
   - id: GNWT_RESOLUTION_WITH_SEVERITY_CODE_1
     of:
-    - objective: resolutionHours <= 4 /\ resolutionHours > 4
+    - objective: resolutionHours <= 4
       comment: How to express 'OnlyIf SeverityCode = 1'?
       with:
         resolutionHours: {}

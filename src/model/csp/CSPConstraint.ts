@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-21
+governify-agreement-analyzer 0.0.1, built on: 2017-02-22
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -20,9 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 export default class CSPConstraint {
 
-    expression: String;
+    id: string;
+    expression: string;
 
-    constructor(expression: String) {
+    constructor(id: string, expression: string) {
+        this.id = id;
         this.expression = expression;
     }
 

@@ -17,23 +17,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
+const Ajv = require("ajv");
+const ajv = new Ajv({ unknownFormats: ["int32", "int64", "float", "double", "byte", "binary", "date", "date-time", "password"] });
+const logger = require("../logger/logger");
 
-export default class CSPParameter {
+export default class AgreementModel {
 
-    id: String;
-    type: String;
-    value: String;
-    values: Array<String>;
+    agreement: any;
 
-    constructor(id: String, type: String, value: any) {
-        this.id = id;
-        this.type = type;
-
-        if (value.type === "string") {
-            this.value = value;
-        } else {
-            this.values = value;
-        }
+    constructor(agreement: any) {
+        this.agreement = agreement;
     }
 
+    validate(): boolean {
+        logger.info("Validate agreement");
+        let schema = require("../schemas/agreement.json");
+        let isValidModel = ajv.validate(schema, this.agreement);
+        if (!isValidModel) {
+            logger.error("Error in agreement validation:", ajv.errors);
+        }
+        return isValidModel;
+    }
 }

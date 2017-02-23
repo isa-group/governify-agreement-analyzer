@@ -3,22 +3,25 @@
   "version": "0.0.1",
   "description": "An API REST to receive analysis agreement operation requests",
   "homepage": "https://github.com/isa-group/governify-agreement-analyzer",
-  "main": "server.js",
+  "main": "index.js",
   "dependencies": {
+    "ajv": "^4.11.3",
     "bluebird": "^3.4.7",
+    "connect": "^3.2.0",
     "js-yaml": "^3.8.1",
     "moment": "^2.17.1",
     "request": "^2.79.0",
-    "winston": "^2.3.1",
+    "swagger-tools": "0.10.1",
     "tslint": "^4.4.2",
     "typescript": "^2.1.6",
-    "connect": "^3.2.0",
-    "swagger-tools": "0.10.1"
+    "winston": "^2.3.1"
   },
   "devDependencies": {
+    "@types/node": "^7.0.5",
     "chai": "^3.5.0",
     "grunt": "^1.0.1",
     "grunt-banner": "^0.6.0",
+    "grunt-clean": "^0.4.0",
     "grunt-contrib-jshint": "^1.1.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-dockerize": "0.0.1",
@@ -28,11 +31,10 @@
     "grunt-ts": "^6.0.0-beta.11",
     "grunt-tslint": "^4.0.0",
     "mocha": "^3.2.0",
-    "@types/node": "^7.0.5",
     "typescript": "^2.1.6"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "node index.js",
     "prestart": "npm install",
     "test": "grunt test"
   },

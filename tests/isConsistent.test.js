@@ -20,10 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 'use strict';
 
-var expect = require('chai').expect;
-var lib = require('../src');
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"; // unsecure
+
+const expect = require('chai').expect;
 const Analyzer = require("../src/operators/Analyzer").default;
 const fs = require("fs");
+const logger = ("../src/logger/logger");
 
 
 /*
@@ -36,16 +38,22 @@ describe('Analyzer operations', function () {
     describe('Local', function () {
         it('is consistent', (done) => {
 
-            fs.readFile("./tests/resources/agreements/agreement.yaml", "utf8", function (err, agreement) {
+            fs.readFile("./tests/resources/agreements/agreement-valid.yaml", "utf8", function (err, agreement) {
                 if (err) {
                     return console.log(err);
                 }
-                new Analyzer(agreement).isConsistent(function (sol) {
-                    expect(sol).to.be.equal(true);
+                try {
+                    new Analyzer(agreement).isConsistent(function (err, sol) {
+                        expect(sol).to.be.equal(true);
+                        done();
+                    }, {
+                        type: 'local',
+                        folder: 'test_csp_files'
+                    });
+                } catch (err) {
+                    logger.error(err);
                     done();
-                }, {
-                    type: 'local'
-                });
+                }
             });
 
         });
@@ -56,11 +64,12 @@ describe('Analyzer operations', function () {
                 if (err) {
                     return console.log(err);
                 }
-                new Analyzer(agreement).isConsistent(function (sol) {
+                new Analyzer(agreement).isConsistent(function (err, sol) {
                     expect(sol).to.be.equal(false);
                     done();
                 }, {
-                    type: 'local'
+                    type: 'local',
+                    folder: 'test_csp_files'
                 });
             });
 
@@ -70,15 +79,16 @@ describe('Analyzer operations', function () {
     describe('Remote', function () {
         it('is consistent', (done) => {
 
-            fs.readFile("./tests/resources/agreements/agreement.yaml", "utf8", function (err, agreement) {
+            fs.readFile("./tests/resources/agreements/agreement-valid.yaml", "utf8", function (err, agreement) {
                 if (err) {
                     return console.log(err);
                 }
-                new Analyzer(agreement).isConsistent(function (sol) {
+                new Analyzer(agreement).isConsistent(function (err, sol) {
                     expect(sol).to.be.equal(true);
                     done();
                 }, {
                     type: 'api',
+                    folder: 'test_csp_files',
                     api: {
                         version: 'v2',
                         server: 'https://designer.governify.io:10044/module-minizinc',
@@ -95,7 +105,7 @@ describe('Analyzer operations', function () {
                 if (err) {
                     return console.log(err);
                 }
-                new Analyzer(agreement).isConsistent(function (sol) {
+                new Analyzer(agreement).isConsistent(function (err, sol) {
                     expect(sol).to.be.equal(false);
                     done();
                 }, {
@@ -107,7 +117,42 @@ describe('Analyzer operations', function () {
                     }
                 });
             });
-
         });
     });
+
+    describe('Docker', function () {
+        it('is consistent', (done) => {
+
+            fs.readFile("./tests/resources/agreements/agreement-valid.yaml", "utf8", function (err, agreement) {
+                if (err) {
+                    return console.log(err);
+                }
+                new Analyzer(agreement).isConsistent(function (err, sol) {
+                    expect(sol).to.be.equal(true);
+                    done();
+                }, {
+                    type: 'docker',
+                    folder: 'test_csp_files'
+                });
+            });
+
+        });
+
+        it('is inconsistent', (done) => {
+
+            fs.readFile("./tests/resources/agreements/agreement-inconsistent.yaml", "utf8", function (err, agreement) {
+                if (err) {
+                    return console.log(err);
+                }
+                new Analyzer(agreement).isConsistent(function (err, sol) {
+                    expect(sol).to.be.equal(false);
+                    done();
+                }, {
+                    type: 'docker',
+                    folder: 'test_csp_files'
+                });
+            });
+        });
+    });
+
 });
