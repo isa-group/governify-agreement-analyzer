@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-22
+governify-agreement-analyzer 0.0.0, built on: 2017-02-23
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -39,11 +39,13 @@ export default class Analyzer implements AnalyzerInterface {
 
     constructor(agreement: Object) {
         let _model = yaml.safeLoad(agreement);
-        let isValid: boolean = new AgreementModel(_model).validate();
+        let agModel: AgreementModel = new AgreementModel(_model);
+        let isValid: boolean = agModel.validate();
         if (isValid) {
             this.agreement = _model;
         } else {
-            return null;
+            logger.error(agModel.validationErrors);
+            throw agModel.validationErrors;
         }
     }
 
@@ -57,12 +59,12 @@ export default class Analyzer implements AnalyzerInterface {
         var reasoner = new Reasoner(reasonerConfig ? reasonerConfig : config.reasoner);
         reasoner.solve(model, (error, sol) => {
             if (error) {
-                logger.info("'isConsistent' error:", error);
+                logger.info("There was an error while on Reasoner solution of 'isConsistent' operation:", error);
                 callback(error, sol);
             } else {
                 let condition = (typeof sol === "string" && sol.indexOf("----------") !== -1) ||
                     (typeof sol === "object" && sol.status === "OK" && sol.message.indexOf("----------") !== -1);
-                logger.info("'isConsistent' result:", condition);
+                logger.info("Result of 'isConsistent' operation:", condition);
                 callback(error, condition);
             }
         });

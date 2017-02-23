@@ -42,7 +42,7 @@ exports.analysisPOST = function (args, res, next) {
 
         } catch (err) {
             resp['application/json'] = {
-                "Error": String(err)
+                "Error": err
             };
             res.end(JSON.stringify(resp[Object.keys(resp)[0]] || {}, null, 2));
         }
