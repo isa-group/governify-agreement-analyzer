@@ -25,7 +25,7 @@ import AgreementModel from "../model/AgreementModel";
 
 const yaml = require("js-yaml");
 const config = require("../configurations/config");
-const Reasoner = require("../../../governify-csp-tools").Reasoner;
+const Reasoner = require("governify-csp-tools").Reasoner;
 const logger = require("../logger/logger");
 const exception = require("../util/exceptions/IllegalArgumentException");
 

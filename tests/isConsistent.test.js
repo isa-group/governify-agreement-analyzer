@@ -119,40 +119,4 @@ describe('Analyzer operations', function () {
             });
         });
     });
-
-    describe('Docker', function () {
-        it('is consistent', (done) => {
-
-            fs.readFile("./tests/resources/agreements/agreement-valid.yaml", "utf8", function (err, agreement) {
-                if (err) {
-                    return console.log(err);
-                }
-                new Analyzer(agreement).isConsistent(function (err, sol) {
-                    expect(sol).to.be.equal(true);
-                    done();
-                }, {
-                    type: 'docker',
-                    folder: 'test_csp_files'
-                });
-            });
-
-        });
-
-        it('is inconsistent', (done) => {
-
-            fs.readFile("./tests/resources/agreements/agreement-inconsistent.yaml", "utf8", function (err, agreement) {
-                if (err) {
-                    return console.log(err);
-                }
-                new Analyzer(agreement).isConsistent(function (err, sol) {
-                    expect(sol).to.be.equal(false);
-                    done();
-                }, {
-                    type: 'docker',
-                    folder: 'test_csp_files'
-                });
-            });
-        });
-    });
-
 });
