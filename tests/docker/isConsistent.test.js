@@ -32,10 +32,11 @@ const logger = ("../../src/logger/logger");
  * USE MOCHA AND CHAI for testing your code
  */
 describe('Analyzer operations', function () {
-
-    this.timeout(10000);
+    
+    this.timeout(600000);
 
     describe('Docker', function () {
+
         it('is consistent', (done) => {
 
             fs.readFile("./tests/resources/agreements/agreement-valid.yaml", "utf8", function (err, agreement) {
