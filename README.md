@@ -21,7 +21,7 @@ to configure the Reasoner.
 
 ## How to use this application
 1. **Set** the Reasoner configuration of CSP Tools in `./src/configurations/reasoner.yaml`.
-2. **Start** API REST by executing: `npm start`.
+2. **Start** the API REST by executing: `npm start`.
 3. **Test** the API by performing a post request to `http://localhost:8080/api/v1/analysis/isConsistent`
 with the example body:
 ```json
