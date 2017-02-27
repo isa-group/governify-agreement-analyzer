@@ -117,13 +117,9 @@ module.exports = function (grunt) {
                 githubReleaseBody: 'See [CHANGELOG.md](./CHANGELOG.md) for details.', //NOT CHANGE
                 npm: false, //CHANGE TO TRUE IF YOUR PROJECT IS A NPM MODULE 
                 //npmtag: true, //default: no tag
-                beforeBump: [], // IS NOT READY YET
-                afterBump: [], // IS NOT READY YET
-                beforeRelease: [], // IS NOT READY YET
-                afterRelease: [], // IS NOT READY YET
                 updateVars: ['pkg'], //NOT CHANGE
                 github: {
-                    repo: "isa-group/project-template-nodejs",
+                    repo: "isa-group/governify-agreement-analyzer", //SET WITH YOUR PROJECT ID
                     accessTokenVar: "GITHUB_ACCESS_TOKEN", //SET ENVIRONMENT VARIABLE WITH THIS NAME
                     usernameVar: "GITHUB_USERNAME" //SET ENVIRONMENT VARIABLE WITH THIS NAME
                 }
