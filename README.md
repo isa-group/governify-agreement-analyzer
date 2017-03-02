@@ -59,7 +59,7 @@ Defines analysis operations over an agreement.
 ##### `isConsistent(agModel: Object, config: Object): boolean`
 Checks if the agreement constraints are consistent.
 
-## Latest release
+#### Latest release
 
 The version 0.0.1 is the latest stable version of governify-agreement-analyzer component.
 see [release note](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.0.1) for details.
@@ -67,3 +67,5 @@ see [release note](http://github.com/isa-group/governify-agreement-analyzer/rele
 For running:
 
 - Download latest version from [0.0.1](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.0.1)
+
+[![Build Status](https://travis-ci.org/isa-group/governify-agreement-analyzer.svg?branch=master)](https://travis-ci.org/http://github.com/isa-group/governify-agreement-analyzer)
