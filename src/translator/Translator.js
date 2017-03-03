@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-27
+governify-agreement-analyzer 0.0.1, built on: 2017-03-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -17,14 +17,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-var CSPBuilder_1 = require("../translator/builders/csp/CSPBuilder");
-var CSPVar_1 = require("../model/csp/CSPVar");
-var CSPConstraint_1 = require("../model/csp/CSPConstraint");
-var Translator = (function () {
-    function Translator(builder) {
+Object.defineProperty(exports, "__esModule", { value: true });
+const CSPBuilder_1 = require("../translator/builders/csp/CSPBuilder");
+const CSPVar_1 = require("../model/csp/CSPVar");
+const CSPConstraint_1 = require("../model/csp/CSPConstraint");
+class Translator {
+    constructor(builder) {
         this.builder = builder;
     }
-    Translator.prototype.translate = function (agModel) {
+    translate(agModel) {
         var parameters = [];
         var variables = [];
         var constraints = [];
@@ -56,8 +57,6 @@ var Translator = (function () {
         builder.model.constraints = constraints;
         this.builder = builder;
         return builder.model;
-    };
-    return Translator;
-}());
-Object.defineProperty(exports, "__esModule", { value: true });
+    }
+}
 exports.default = Translator;

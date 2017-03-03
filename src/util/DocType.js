@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-27
+governify-agreement-analyzer 0.0.1, built on: 2017-03-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -17,11 +17,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var DocType;
 (function (DocType) {
     DocType[DocType["TEMPLATE"] = 0] = "TEMPLATE";
     DocType[DocType["OFFER"] = 1] = "OFFER";
     DocType[DocType["AGREEMENT"] = 2] = "AGREEMENT";
 })(DocType || (DocType = {}));
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = DocType;

@@ -4,7 +4,7 @@ production:
     api:
       version: 'v2'
       server: 'https://localhost:10044/module-minizinc'
-      operationPath: 'models/mzn/operations/execute'
+      operationPath: 'models/csp/operations/execute'
     folder: csp_files
 development:
   reasoner:
@@ -12,5 +12,5 @@ development:
     api:
       version: 'v2'
       server: 'https://localhost:10044/module-minizinc'
-      operationPath: 'models/mzn/operations/execute'
+      operationPath: 'models/csp/operations/execute'
     folder: csp_files

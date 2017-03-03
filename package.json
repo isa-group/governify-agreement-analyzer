@@ -13,8 +13,6 @@
     "moment": "^2.17.1",
     "request": "^2.79.0",
     "swagger-tools": "0.10.1",
-    "tslint": "^4.4.2",
-    "typescript": "^2.1.6",
     "winston": "^2.3.1"
   },
   "devDependencies": {
@@ -32,7 +30,8 @@
     "grunt-ts": "^6.0.0-beta.11",
     "grunt-tslint": "^4.0.0",
     "mocha": "^3.2.0",
-    "typescript": "^2.1.6"
+    "tslint": "^4.4.2",
+    "typescript": "^2.2.1"
   },
   "scripts": {
     "start": "node index.js",
@@ -40,9 +39,10 @@
     "test": "grunt test"
   },
   "keywords": [
-    "agremeent",
+    "agreement",
     "csp",
-    "iagree"
+    "iagree",
+    "swagger"
   ],
   "author": {
     "name": "ISA group",

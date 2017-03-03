@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-27
+governify-agreement-analyzer 0.0.1, built on: 2017-03-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -171,7 +171,7 @@ module.exports = function (grunt) {
                 }],
                 options: {
                     module: "commonjs",
-                    target: "es5",
+                    target: "es2017",
                     noImplicitAny: false,
                     sourceMap: false,
                     noLib: false,

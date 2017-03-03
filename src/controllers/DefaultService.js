@@ -12,41 +12,14 @@ exports.analysisPOST = function (args, res, next) {
      * returns cspToolsReponse
      **/
 
-    let fileUri = args.analysisRequest.value.fileUrl;
+    var resp = {};
 
-    request(fileUri, (error, response, agreement) => {
+    new Analyzer(args.analysisRequest.value).isConsistent((error, sol) => {
 
-        var resp = {};
-
-        try {
-
-            new Analyzer(agreement).isConsistent((err, sol) => {
-
-                if (error || err) {
-                    resp['application/json'] = {
-                        "Error": error || err
-                    };
-                } else if (!error && response.statusCode == 200) {
-                    resp['application/json'] = {
-                        "result": sol
-                    };
-
-                    if (Object.keys(resp).length > 0) {
-                        res.setHeader('Content-Type', 'application/json');
-                    } else {
-                        res.end();
-                    }
-                }
-                res.end(JSON.stringify(resp[Object.keys(resp)[0]] || {}, null, 2));
-            });
-
-        } catch (err) {
-            resp['application/json'] = {
-                "Error": err
-            };
-            res.end(JSON.stringify(resp[Object.keys(resp)[0]] || {}, null, 2));
-        }
-
+        res.end(JSON.stringify({
+            "result": error || sol
+        }), null, 2);
+        
     });
 
 };

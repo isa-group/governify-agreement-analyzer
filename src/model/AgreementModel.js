@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-27
+governify-agreement-analyzer 0.0.1, built on: 2017-03-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -17,23 +17,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-var Ajv = require("ajv");
-var ajv = new Ajv({ unknownFormats: ["int32", "int64", "float", "double", "byte", "binary", "date", "date-time", "password"] });
-var logger = require("../logger/logger");
-var AgreementModel = (function () {
-    function AgreementModel(agreement) {
+Object.defineProperty(exports, "__esModule", { value: true });
+const Ajv = require("ajv");
+const ajv = new Ajv({ unknownFormats: ["int32", "int64", "float", "double", "byte", "binary", "date", "date-time", "password"] });
+const logger = require("../logger/logger");
+class AgreementModel {
+    constructor(agreement) {
         this.agreement = agreement;
     }
-    AgreementModel.prototype.validate = function () {
-        logger.info("Validate agreement");
+    validate() {
         var schema = require("../schemas/agreement.json");
         var isValidModel = ajv.validate(schema, this.agreement);
         if (!isValidModel) {
             this.validationErrors = ajv.errors;
         }
         return isValidModel;
-    };
-    return AgreementModel;
-}());
-Object.defineProperty(exports, "__esModule", { value: true });
+    }
+}
 exports.default = AgreementModel;

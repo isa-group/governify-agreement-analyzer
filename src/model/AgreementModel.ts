@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-27
+governify-agreement-analyzer 0.0.1, built on: 2017-03-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -32,7 +32,6 @@ export default class AgreementModel {
     }
 
     validate(): boolean {
-        logger.info("Validate agreement");
         var schema = require("../schemas/agreement.json");
         var isValidModel = ajv.validate(schema, this.agreement);
         if (!isValidModel) {

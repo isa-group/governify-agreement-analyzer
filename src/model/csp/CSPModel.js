@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-27
+governify-agreement-analyzer 0.0.1, built on: 2017-03-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -17,19 +17,20 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-var CSPModel = (function () {
-    function CSPModel() {
+Object.defineProperty(exports, "__esModule", { value: true });
+class CSPModel {
+    constructor() {
         this.parameters = [];
         this.variables = [];
         this.constraints = [];
         this.goals = [];
     }
-    CSPModel.prototype.addParameter = function (param) {
+    addParameter(param) {
         if (!this.existParam(param)) {
             this.parameters.push(param);
         }
-    };
-    CSPModel.prototype.existParam = function (param) {
+    }
+    existParam(param) {
         var exists = false;
         this.parameters.forEach(function (p) {
             if (!exists && p.id === param.id && p.type === param.type && p.value === param.value) {
@@ -37,11 +38,9 @@ var CSPModel = (function () {
             }
         });
         return exists;
-    };
-    CSPModel.prototype.setGoal = function (goal) {
+    }
+    setGoal(goal) {
         this.goals = [goal];
-    };
-    return CSPModel;
-}());
-Object.defineProperty(exports, "__esModule", { value: true });
+    }
+}
 exports.default = CSPModel;

@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-02-27
+governify-agreement-analyzer 0.0.1, built on: 2017-03-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -17,8 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-var CSPVar = (function () {
-    function CSPVar(id, valueOrRange) {
+Object.defineProperty(exports, "__esModule", { value: true });
+class CSPVar {
+    constructor(id, valueOrRange) {
         this.id = id;
         if (typeof valueOrRange === "object") {
             this.range = valueOrRange;
@@ -29,7 +30,5 @@ var CSPVar = (function () {
             this.type = valueOrRange;
         }
     }
-    return CSPVar;
-}());
-Object.defineProperty(exports, "__esModule", { value: true });
+}
 exports.default = CSPVar;
