@@ -27,12 +27,7 @@ const Analyzer = require("../../src/operators/Analyzer").default;
 const fs = require("fs");
 const logger = ("../../src/logger/logger");
 
-const localReasonerConfig = {
-    type: 'local',
-    folder: 'csp_files_test'
-};
-
-describe('local consistency tests', function () {
+describe('Local reasoner consistency tests', function () {
 
     this.timeout(600000);
 
@@ -44,8 +39,14 @@ describe('local consistency tests', function () {
 
             // Create local analyzer for local consistent agreement
             var analyzer = new Analyzer({
-                file: "./tests/resources/agreements/agreement-valid.yaml"
-            }, localReasonerConfig);
+                agreement: {
+                    file: "./tests/resources/agreements/agreement-valid.yaml"
+                },
+                reasoner: {
+                    type: 'local',
+                    folder: 'csp_files_test'
+                }
+            });
 
             analyzer.isConsistent(function (err, sol) {
                 expect(sol).to.be.equal(true);
@@ -54,15 +55,21 @@ describe('local consistency tests', function () {
 
         });
 
-        it('Inconsistent agreement returns false', function (done) {
+        it('Inconsistent agreement returns unsatisfiable message', function (done) {
 
             // Create local analyzer for local inconsistent agreement
             var analyzer = new Analyzer({
-                file: "./tests/resources/agreements/agreement-inconsistent.yaml"
-            }, localReasonerConfig);
+                agreement: {
+                    file: "./tests/resources/agreements/agreement-inconsistent.yaml"
+                },
+                reasoner: {
+                    type: 'local',
+                    folder: 'csp_files_test'
+                }
+            });
 
-            analyzer.isConsistent(function (err, sol) {
-                expect(sol).to.be.equal(false);
+            analyzer.isConsistent(function (err, sol, stdout) {
+                expect(stdout.indexOf("=====UNSATISFIABLE=====") !== -1).to.be.equal(true);
                 done();
             });
 
@@ -72,10 +79,15 @@ describe('local consistency tests', function () {
 
             // Create local analyzer for local invalid agreement
             var analyzer = new Analyzer({
-                file: "./tests/resources/agreements/agreement-invalid.yaml"
-            }, localReasonerConfig);
+                agreement: {
+                    file: "./tests/resources/agreements/agreement-invalid.yaml"
+                },
+                reasoner: {
+                    type: 'local',
+                    folder: 'csp_files_test'
+                }
+            });
 
-            // Throws exception
             analyzer.isConsistent(function (err) {
                 expect(JSON.stringify(err[0])).to.be.equal('{"keyword":"type","dataPath":".version","schemaPath":"#/properties/version/type","params":{"type":"string"},"message":"should be string"}');
                 done();
@@ -93,8 +105,14 @@ describe('local consistency tests', function () {
 
             // Create local analyzer for Remote consistent agreement
             var analyzer = new Analyzer({
-                url: "https://gist.github.com/feserafim/eaba5c2ad4eb82245c2eca154a64c264/raw/732706de8e1b12e6b8c4e75bb02802b165779b17/agreement-valid.yaml"
-            }, localReasonerConfig);
+                agreement: {
+                    url: "https://gist.github.com/feserafim/eaba5c2ad4eb82245c2eca154a64c264/raw/732706de8e1b12e6b8c4e75bb02802b165779b17/agreement-valid.yaml"
+                },
+                reasoner: {
+                    type: 'local',
+                    folder: 'csp_files_test'
+                }
+            });
 
             analyzer.isConsistent(function (err, sol) {
                 expect(sol).to.be.equal(true);
@@ -103,15 +121,21 @@ describe('local consistency tests', function () {
 
         });
 
-        it('Inconsistent agreement returns false', function (done) {
+        it('Inconsistent agreement returns unsatisfiable message', function (done) {
 
             // Create local analyzer for Remote inconsistent agreement
             var analyzer = new Analyzer({
-                url: "https://gist.github.com/feserafim/01b9bdd21b3e047e166c32c0cfe5ecac/raw/258a622c3bd8e833ef5ffac2c2c3b1fc84614dc2/agreement-inconsistent.yaml"
-            }, localReasonerConfig);
+                agreement: {
+                    url: "https://gist.github.com/feserafim/01b9bdd21b3e047e166c32c0cfe5ecac/raw/258a622c3bd8e833ef5ffac2c2c3b1fc84614dc2/agreement-inconsistent.yaml"
+                },
+                reasoner: {
+                    type: 'local',
+                    folder: 'csp_files_test'
+                }
+            });
 
-            analyzer.isConsistent(function (err, sol) {
-                expect(sol).to.be.equal(false);
+            analyzer.isConsistent(function (err, sol, stdout) {
+                expect(stdout.indexOf("=====UNSATISFIABLE=====") !== -1).to.be.equal(true);
                 done();
             });
 
@@ -121,10 +145,15 @@ describe('local consistency tests', function () {
 
             // Create local analyzer for Remote invalid agreement
             var analyzer = new Analyzer({
-                url: "https://gist.github.com/feserafim/3a19701b319e7b7f6b63cdac3184c1ff/raw/61064cc6a6261c3da4d2171c5b9df644b6dddc66/agreement-invalid.yaml"
-            }, localReasonerConfig);
+                agreement: {
+                    url: "https://gist.github.com/feserafim/3a19701b319e7b7f6b63cdac3184c1ff/raw/61064cc6a6261c3da4d2171c5b9df644b6dddc66/agreement-invalid.yaml"
+                },
+                reasoner: {
+                    type: 'local',
+                    folder: 'csp_files_test'
+                }
+            });
 
-            // Throws exception
             analyzer.isConsistent(function (err) {
                 expect(JSON.stringify(err[0])).to.be.equal('{"keyword":"type","dataPath":".version","schemaPath":"#/properties/version/type","params":{"type":"string"},"message":"should be string"}');
                 done();

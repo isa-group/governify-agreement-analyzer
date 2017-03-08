@@ -1,0 +1,99 @@
+---
+id: GNWT
+version: '1.0'
+type: agreement
+context:
+  provider: Provider
+  consumer: Government of the Northwest Territories
+  validity:
+    initial: '2016-07-13T00:00:00.000Z'
+    timeZone: Europe/Madrid
+  definitions:
+    schemas:
+      invoicePenalty:
+        description: Percentage to decrease the amount invoiced for the project
+        type: integer
+        unit: "%"
+      invoiceReward:
+        description: Percentage to increase the amount invoiced for the project
+        type: integer
+        unit: "%"
+      feePenalty:
+        description: Percentage to decrease the next monthly fee
+        type: integer
+        unit: "%"
+      feeReward:
+        description: Percentage to increase the next monthly fee
+        type: integer
+        unit: "%"
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+      - over:
+          invoicePenalty:
+            "$ref": "#/context/definitions/schemas/InvoicePenalty"
+      - over:
+          feePenalty:
+            "$ref": "#/context/definitions/schemas/FeePenalty"
+      rewards:
+      - over:
+          feeReward:
+            "$ref": "#/context/definitions/schemas/FeePenalty"
+  metrics:
+    daysBeforeMeetingDay:
+      schema:
+        description: Number of days before the meeting day
+        type: integer
+        unit: day
+      computer: http://GNWT/GNWT_DaysBeforeMeetingDay/
+    resolutionHours:
+      schema:
+        description: Hours to solve a problem
+        type: integer
+        unit: hour
+      computer: http://GNWT/GNWT_ResolutionHours/
+    maxResolutionDays:
+      schema:
+        description: Maximum number of days to solve a problem
+        type: integer
+        unit: day
+      computer: http://GNWT/GNWT_MaxResolutionDays/
+    elapseDaysUntilDelivery:
+      schema:
+        description: Percentage of the actual number of days to delivery versus planned
+        type: integer
+        unit: day
+      computer: http://GNWT/GNWT_elapsedDaysUntilDelivery/
+  guarantees:
+  - id: GNWT_RESOLUTION_WITH_SEVERITY_CODE_1
+    of:
+    - objective: resolutionHours <= 4
+      comment: How to express 'OnlyIf SeverityCode = 1'?
+      with:
+        resolutionHours: {}
+      window:
+        type: static
+        period: monthly
+        initial: '2016-07-13T00:00:00.000Z'
+      penalties:
+      - over:
+          feePenalty:
+            "$ref": "#/context/definitions/schemas/FeePenalty"
+        of:
+        - value: "-10"
+          condition: resolutionHours > 4
+          comment: How to express 'exists'?
+      rewards:
+      - over:
+          feeReward:
+            "$ref": "#/context/definitions/schemas/FeeReward"
+        of:
+        - value: "+10"
+          condition: resolutionHours <= 2
+          comment: How to express 'all'?
+      scope: {}
+    scope: {}

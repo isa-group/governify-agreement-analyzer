@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-03-03
+governify-agreement-analyzer 0.0.1, built on: 2017-03-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -16,31 +16,35 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class CSPModel {
+
+
+class ApiConfiguration {
+    version: string;
+    server: string;
+    operationPath: string;
+}
+
+class ReasonerConfiguration {
+    type: string;
+    folder: string;
+    api: ApiConfiguration;
     constructor() {
-        this.parameters = [];
-        this.variables = [];
-        this.constraints = [];
-        this.goals = [];
-    }
-    addParameter(param) {
-        if (!this.existParam(param)) {
-            this.parameters.push(param);
-        }
-    }
-    existParam(param) {
-        var exists = false;
-        this.parameters.forEach(function (p) {
-            if (!exists && p.id === param.id && p.type === param.type && p.value === param.value) {
-                exists = true;
-            }
-        });
-        return exists;
-    }
-    setGoal(goal) {
-        this.goals = [goal];
+        this.api = new ApiConfiguration();
     }
 }
-exports.default = CSPModel;
+
+class AgreementConfiguration {
+    url: string;
+    file: string;
+}
+
+export default class AnalyzerConfiguration {
+
+    agreement: AgreementConfiguration;
+    reasoner: ReasonerConfiguration;
+
+    constructor() {
+        this.agreement = new AgreementConfiguration();
+        this.reasoner = new ReasonerConfiguration();
+    }
+}

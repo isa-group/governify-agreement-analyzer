@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-03-03
+governify-agreement-analyzer 0.0.1, built on: 2017-03-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -18,13 +18,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
-import AbstractModel from "../model/AbstractModel";
-import CSPBuilder from "../translator/builders/csp/CSPBuilder";
-import CSPModel from "../model/csp/CSPModel";
-import CSPParameter from "../model/csp/CSPParameter";
-import CSPVar from "../model/csp/CSPVar";
-import CSPConstraint from "../model/csp/CSPConstraint";
+import CSPBuilder from "./builders/csp/CSPBuilder";
 import IBuilder from "./IBuilder";
+
+const CSPTools = require("governify-csp-tools");
+const CSPModel = CSPTools.CSPModel;
+const CSPParameter = CSPTools.CSPParameter;
+const CSPVar = CSPTools.CSPVar;
+const CSPConstraint = CSPTools.CSPConstraint;
 
 export default class Translator {
 
@@ -34,12 +35,11 @@ export default class Translator {
 		this.builder = builder;
 	}
 
-	translate(agModel: Object): CSPModel {
+	translate(agModel: Object): typeof CSPModel {
 
-		var parameters: Array<CSPParameter> = [];
-		var variables: Array<CSPVar> = [];
-		var constraints: Array<CSPConstraint> = [];
-		var goals: Array<String> = [];
+		var parameters: Array<typeof CSPParameter> = [];
+		var variables: Array<typeof CSPVar> = [];
+		var constraints: Array<typeof CSPConstraint> = [];
 
 		var definitions = agModel["context"]["definitions"]["schemas"];
 		Object.keys(definitions).forEach(function (name: string) {
@@ -54,7 +54,7 @@ export default class Translator {
 		var guarantees = agModel["terms"]["guarantees"];
 		guarantees.forEach(function (guarantee: any) {
 			guarantee.of.forEach(function (of: any, index: number) {
-				var constraint: CSPConstraint;
+				var constraint: typeof CSPConstraint;
 				var constId: string = guarantee.id + "_" + index;
 				if (of.precondition && of.precondition !== "") {
 					// Use "precondition->objective" to define constraint
@@ -78,7 +78,7 @@ export default class Translator {
 
 	// translate(model: AgreementModel): AbstractModel{
 	// try {
-	// 	declare var _builder: IBuilder;
+	// 	declare var _builder: typeof IBuilder;
 	// 	_builder.docType(model.docType());
 	// 	builder = _builder;
 	// 	translate(model, builder);

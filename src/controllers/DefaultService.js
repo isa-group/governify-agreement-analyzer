@@ -12,14 +12,14 @@ exports.analysisPOST = function (args, res, next) {
      * returns cspToolsReponse
      **/
 
+    var config = args.analysisRequest.value;
+    var analyzer = new Analyzer(config);
     var resp = {};
 
-    new Analyzer(args.analysisRequest.value).isConsistent((error, sol) => {
-
+    analyzer.isConsistent(function (err, sol) {
         res.end(JSON.stringify({
-            "result": error || sol
+            "result": err || sol
         }), null, 2);
-        
     });
 
 };

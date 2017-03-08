@@ -65,3 +65,5 @@ githubCredential.json
 .vscode/
 data/
 .tscache/
+csp_files_test/
+csp_files/

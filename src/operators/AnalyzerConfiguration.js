@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-03-03
+governify-agreement-analyzer 0.0.1, built on: 2017-03-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -18,10 +18,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class CSPConstraint {
-    constructor(id, expression) {
-        this.id = id;
-        this.expression = expression;
+class ApiConfiguration {
+}
+class ReasonerConfiguration {
+    constructor() {
+        this.api = new ApiConfiguration();
     }
 }
-exports.default = CSPConstraint;
+class AgreementConfiguration {
+}
+class AnalyzerConfiguration {
+    constructor() {
+        this.agreement = new AgreementConfiguration();
+        this.reasoner = new ReasonerConfiguration();
+    }
+}
+exports.default = AnalyzerConfiguration;

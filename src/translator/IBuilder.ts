@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-03-03
+governify-agreement-analyzer 0.0.1, built on: 2017-03-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
 import DocType from "../util/DocType";
-import AbstractModel from "../model/AbstractModel";
+// import AbstractModel from "../model/AbstractModel";
 
 interface IBuilder {
 
@@ -43,7 +43,7 @@ interface IBuilder {
 
     // generate(): String;
 
-    model: AbstractModel;
+    // model: AbstractModel;
 
 }
 

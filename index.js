@@ -1,20 +1,10 @@
 'use strict';
 
-var Analyzer = require('./src/operators/Analyzer').default;
+var AgreementAnalyzer = require('./src/operators/Analyzer').default;
 
 function SwaggerServer() {}
 
-SwaggerServer.prototype.initialize = (app, reasonerConfiguration) => {
-
-    if (!app) {
-        throw new Error('Missing parameter: app (Express)');
-    }
-
-    if (!reasonerConfiguration) {
-        throw new Error('Missing parameter: reasonerConfiguration (Object)');
-    }
-
-    this.reasonerConfig = reasonerConfiguration;
+SwaggerServer.prototype.initialize = (app) => {
 
     // Disable tls rejection
     process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
@@ -59,57 +49,10 @@ SwaggerServer.prototype.initialize = (app, reasonerConfiguration) => {
 
 };
 
-SwaggerServer.prototype.isConsistent = (agreement) => {
+// function AgreementAnalyzer() {}
 
-    if (!agreement) {
-        throw new Error('Missing parameter: agreement (Object)');
-    }
-
-    if (!agreement.url) {
-        throw new Error('Missing parameter: agreement.url (Object)');
-    }
-
-    request(agreement.url, (error, response, agreement) => {
-
-        var resp = {};
-
-        try {
-
-            new Analyzer(agreement).isConsistent((err, sol) => {
-
-                if (error || err) {
-                    resp['application/json'] = {
-                        "Error": error || err
-                    };
-                } else if (!error && response.statusCode == 200) {
-                    resp['application/json'] = {
-                        "result": sol
-                    };
-
-                    if (Object.keys(resp).length > 0) {
-                        res.setHeader('Content-Type', 'application/json');
-                    } else {
-                        res.end();
-                    }
-                }
-                res.end(JSON.stringify(resp[Object.keys(resp)[0]] || {}, null, 2));
-            });
-
-        } catch (err) {
-            resp['application/json'] = {
-                "Error": err
-            };
-            res.end(JSON.stringify(resp[Object.keys(resp)[0]] || {}, null, 2));
-        }
-
-    });
-
-};
-
-function AgreementAnalyzer() {}
-
-AgreementAnalyzer.prototype = Analyzer.prototype;
-AgreementAnalyzer.prototype.constructor = AgreementAnalyzer;
+// AgreementAnalyzer.prototype = Analyzer.prototype;
+// AgreementAnalyzer.prototype.constructor = Analyzer.prototype.constructor;
 AgreementAnalyzer.api = SwaggerServer;
 
 module.exports = AgreementAnalyzer;

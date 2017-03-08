@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.0.1, built on: 2017-03-03
+governify-agreement-analyzer 0.0.1, built on: 2017-03-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -20,36 +20,67 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 import CSPBuilder from "../translator/builders/csp/CSPBuilder";
 import Translator from "../translator/Translator";
-import CSPModel from "../model/csp/CSPModel";
 import AgreementModel from "../model/AgreementModel";
+import AnalyzerConfiguration from "./AnalyzerConfiguration";
 
 const request = require("request");
 const fs = require("fs");
 const yaml = require("js-yaml");
-const config = require("../configurations/config");
-const Reasoner = require("governify-csp-tools").Reasoner;
 const logger = require("../logger/logger");
 const exception = require("../util/exceptions/IllegalArgumentException");
+const CSPTools = require("governify-csp-tools");
+const CSPModel = CSPTools.CSPModel;
+const Reasoner = CSPTools.Reasoner;
 var Promise = require("bluebird");
 
 interface AnalyzerInterface {
     isConsistent(callback: (condition: Boolean) => void);
 }
 
-interface AgreementInput {
-    url: string;
-    file: string;
-}
-
 export default class Analyzer implements AnalyzerInterface {
 
-    private _agreementPromise;
+    _agreementPromise: typeof Promise;
     agreement: Object;
-    reasonerConfig: Object;
+    configuration: AnalyzerConfiguration;
 
-    constructor(private agreementInput: AgreementInput, reasonerConfig?: any) {
-        this.agreementInput = agreementInput;
-        this.reasonerConfig = reasonerConfig ? reasonerConfig : config.reasoner;
+    constructor(configuration: AnalyzerConfiguration) {
+
+        if (!configuration) {
+            throw new Error("Missing parameter: configuration (Object)");
+        }
+
+        if (!configuration.agreement) {
+            throw new Error("Missing parameter: agreement (Object)");
+        }
+
+        if (!configuration.reasoner) {
+            throw new Error("Missing parameter: reasoner (Object)");
+        }
+
+        if (!configuration.agreement.file && !configuration.agreement.url) {
+            throw new Error("Missing parameter: agreement.file or agreement.url (String)");
+        }
+
+        if (!configuration.reasoner.type) {
+            throw new Error("Missing parameter: reasoner.type (String)");
+        }
+
+        if (!configuration.reasoner.folder) {
+            throw new Error("Missing parameter: reasoner.folder (String)");
+        }
+
+        this.configuration = new AnalyzerConfiguration();
+        this.configuration.agreement.file = configuration.agreement.file;
+        this.configuration.agreement.url = configuration.agreement.url;
+        this.configuration.reasoner.type = configuration.reasoner.type;
+        this.configuration.reasoner.folder = configuration.reasoner.folder;
+        if (configuration.reasoner.api) {
+            this.configuration.reasoner.api = configuration.reasoner.api;
+            this.configuration.reasoner.api.version = configuration.reasoner.api.version;
+            this.configuration.reasoner.api.server = configuration.reasoner.api.server;
+            this.configuration.reasoner.api.operationPath = configuration.reasoner.api.operationPath;
+        }
+
     }
 
     /**
@@ -82,28 +113,32 @@ export default class Analyzer implements AnalyzerInterface {
 
     private _getAgreementPromise(): Promise<Object> {
 
-        if (!this._agreementPromise && !this.agreement) {
+        var _prevThis = this;
 
-            this._agreementPromise = new Promise((resolve, reject) => {
+        if (!_prevThis._agreementPromise && !_prevThis.agreement) {
 
-                if (this.agreementInput.file && this.agreementInput.file !== "") {
+            _prevThis._agreementPromise = new Promise((resolve, reject) => {
+
+                if (_prevThis.configuration.agreement.file && _prevThis.configuration.agreement.file !== "") {
 
                     // Get agreement from file path
-                    let filePath = this.agreementInput.file.startsWith("./") ? this.agreementInput.file : "./" + this.agreementInput.file;
+                    let filePath = _prevThis.configuration.agreement.file.startsWith("./") ?
+                        _prevThis.configuration.agreement.file : "./" + _prevThis.configuration.agreement.file;
+
                     fs.readFile(filePath, "utf8", function (error: any, data: any) {
                         if (error) {
-                            throw new Error("Cannot find local agreement in: " + this.agreementInput.url + "\n" + error);
+                            throw new Error("Cannot find local agreement in: " + _prevThis.configuration.agreement.url + "\n" + error);
                         } else {
                             resolve(yaml.safeLoad(data));
                         }
                     });
 
-                } else if (this.agreementInput.url && this.agreementInput.url !== "") {
+                } else if (_prevThis.configuration.agreement.url && _prevThis.configuration.agreement.url !== "") {
 
                     // Get agreement from url
-                    request(this.agreementInput.url, function (error: any, response: any, data: any) {
+                    request(_prevThis.configuration.agreement.url, function (error: any, response: any, data: any) {
                         if (error) {
-                            throw new Error("Cannot find remote agreement in: " + this.agreementInput.url + "\n" + error);
+                            throw new Error("Cannot find remote agreement in: " + _prevThis.configuration.agreement.url + "\n" + error);
                         } else {
                             resolve(yaml.safeLoad(data));
                         }
@@ -123,7 +158,7 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isConsistent(callback: (error: any, solution?: Boolean) => void) {
+    isConsistent(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
 
         this._loadAgreement((error: any) => {
 
@@ -133,24 +168,24 @@ export default class Analyzer implements AnalyzerInterface {
 
                 // Translate agreement object to CSPModel
                 var translator: Translator = new Translator(new CSPBuilder());
-                var model: CSPModel = translator.translate(this.agreement);
-                model.setGoal("satisfy");
+                var model: typeof CSPModel = translator.translate(this.agreement);
+                model.goal = "satisfy";
 
                 // Call Reasoner solver
-                var reasoner = new Reasoner(this.reasonerConfig);
+                var reasoner = new Reasoner(this.configuration.reasoner);
                 reasoner.solve(model, (err, sol) => {
 
                     if (err) {
 
                         logger.info("Reasoner returned an error:", err);
-                        callback(err, sol);
+                        callback(err, sol, sol);
 
                     } else {
 
                         let condition = (typeof sol === "string" && sol.indexOf("----------") !== -1) ||
                             (typeof sol === "object" && sol.status === "OK" && sol.message.indexOf("----------") !== -1);
                         logger.info("Reasoner result:", condition);
-                        callback(err, condition);
+                        callback(err, condition, sol);
 
                     }
 

@@ -8,7 +8,7 @@
     "ajv": "^4.11.3",
     "bluebird": "^3.4.7",
     "connect": "^3.2.0",
-    "governify-csp-tools": "0.0.1",
+    "governify-csp-tools": "^0.1.0",
     "js-yaml": "^3.8.1",
     "moment": "^2.17.1",
     "request": "^2.79.0",
