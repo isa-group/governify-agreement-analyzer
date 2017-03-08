@@ -49,10 +49,6 @@ SwaggerServer.prototype.initialize = (app) => {
 
 };
 
-// function AgreementAnalyzer() {}
-
-// AgreementAnalyzer.prototype = Analyzer.prototype;
-// AgreementAnalyzer.prototype.constructor = Analyzer.prototype.constructor;
 AgreementAnalyzer.api = SwaggerServer;
 
 module.exports = AgreementAnalyzer;
