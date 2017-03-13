@@ -179,7 +179,12 @@ class AgreementCompensationCSPModelBuilder {
         let cspModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
         cspModel.constraints = [new CSPTools.CSPConstraint("ogt", cfc.constraints[0].expression + " /\\ " + penaltyRewardConst)];
-        cspModel.goal = "satisfy";
+        if (this.metrics.length === 0) {
+            throw "Unable to find a metric to minimize";
+        }
+        else {
+            cspModel.goal = "minimize " + this.metrics[0].name;
+        }
         return cspModel;
     }
     buildOBT() {
@@ -200,7 +205,12 @@ class AgreementCompensationCSPModelBuilder {
         let cspModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
         cspModel.constraints = [new CSPTools.CSPConstraint("obt", cfc.constraints[0].expression + " /\\ " + penaltyRewardConst)];
-        cspModel.goal = "satisfy";
+        if (this.metrics.length === 0) {
+            throw "Unable to find a metric to maximize";
+        }
+        else {
+            cspModel.goal = "maximize " + this.metrics[0].name;
+        }
         return cspModel;
     }
     loadMetrics() {
