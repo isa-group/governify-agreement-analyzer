@@ -22,16 +22,9 @@ export default class Domain {
 
     min: number;
     max: number;
-    type: string;
 
-    constructor(typeOrMin: any, max?: number) {
-
-        if (isNaN(parseInt(typeOrMin))) {
-            this.type = typeOrMin;
-        } else {
-            this.min = typeOrMin;
-            this.max = max;
-        }
-
+    constructor(min: any, max?: number) {
+        this.min = min;
+        this.max = max;
     }
 }

@@ -25,8 +25,10 @@ import Definition from "../model/Definition";
 import Expression from "../model/Expression";
 import Domain from "../model/Domain";
 
-const CSPTools = require("governify-csp-tools");
+const CSPTools = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
+const cspConfig = CSPTools.config;
+const minMaxMap = require("../configurations/config").minMaxMap;
 const logger = require("../logger/logger");
 
 export default class AgreementCompensationCSPModelBuilder {
@@ -97,14 +99,14 @@ export default class AgreementCompensationCSPModelBuilder {
         mockBuilder.penalties = mockBuilder.penalties.map((p) => {
             if (mockBuilder.cspModel.variables.filter((_p) => p.name === _p.id).length === 0) {
                 mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
-                    p.name, new CSPTools.CSPRange(0, 100)
+                    p.name, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)
                 ));
             }
             p.condition.expr = p.condition.getMockExpression(AgreementCompensationCSPModelBuilder.mockSuffix);
             p.condition.variables.forEach((v) => {
                 if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + AgreementCompensationCSPModelBuilder.mockSuffix).length === 0) {
                     mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
-                        v + AgreementCompensationCSPModelBuilder.mockSuffix, new CSPTools.CSPRange(0, 100)
+                        v + AgreementCompensationCSPModelBuilder.mockSuffix, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)
                     ));
                 }
             });
@@ -113,14 +115,14 @@ export default class AgreementCompensationCSPModelBuilder {
         mockBuilder.rewards = mockBuilder.rewards.map((r) => {
             if (mockBuilder.cspModel.variables.filter((_r) => r.name === _r.id).length === 0) {
                 mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
-                    r.name, new CSPTools.CSPRange(0, 100)
+                    r.name, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)
                 ));
             }
             r.condition.expr = r.condition.getMockExpression(AgreementCompensationCSPModelBuilder.mockSuffix);
             r.condition.variables.forEach((v) => {
                 if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + AgreementCompensationCSPModelBuilder.mockSuffix).length === 0) {
                     mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
-                        v + AgreementCompensationCSPModelBuilder.mockSuffix, new CSPTools.CSPRange(0, 100)
+                        v + AgreementCompensationCSPModelBuilder.mockSuffix, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)
                     ));
                 }
             });
@@ -274,23 +276,65 @@ export default class AgreementCompensationCSPModelBuilder {
     }
 
     private loadMetrics(): void {
+
         let metricNames = Object.keys(this.agreement.terms.metrics);
         this.metrics = [];
         var _pthis = this;
+
         metricNames.forEach((metricName) => {
-            _pthis.metrics.push(new Metric(metricName, new Domain(0, 100))); // _pthis.agreement.terms.metrics[metricName].schema.type
-            _pthis.cspModel.variables.push(new CSPTools.CSPVar(metricName, new CSPTools.CSPRange(0, 100)));
+
+            var min: number = _pthis.agreement.terms.metrics[metricName].schema.minimum;
+            var max: number = _pthis.agreement.terms.metrics[metricName].schema.maximum;
+            var type: number = _pthis.agreement.terms.metrics[metricName].schema.type;
+
+            // Create CSP Range to define variable on CSP Model.
+            if (isNaN(min) || isNaN(max)) {
+                // Obtain max and min values for domain
+                if (!(type in cspConfig.translator.typeMap)) {
+                    throw "Unable to find type \"" + type + "\" of metric \"" + metricName + "\"";
+                } else {
+                    let cspType: string = cspConfig.translator.typeMap[type];
+                    min = minMaxMap[cspType].min;
+                    max = minMaxMap[cspType].max;
+                }
+            }
+
+            _pthis.metrics.push(new Metric(metricName, new Domain(min, max))); // _pthis.agreement.terms.metrics[metricName].schema.type
+            _pthis.cspModel.variables.push(new CSPTools.CSPVar(metricName, new CSPTools.CSPRange(min, max)));
+
         });
+
     }
 
     private loadDefinitions(): void {
+
         let definitionNames = Object.keys(this.agreement.context.definitions.schemas);
         this.definitions = [];
         var _pthis = this;
+
         definitionNames.forEach((defName) => {
-            _pthis.definitions.push(new Definition(defName, new Domain(0, 100))); // _pthis.agreement.context.definitions.schemas[defName].type
-            _pthis.cspModel.variables.push(new CSPTools.CSPVar(defName, new CSPTools.CSPRange(0, 100)));
+
+            var min: number = _pthis.agreement.context.definitions.schemas[defName].minimum;
+            var max: number = _pthis.agreement.context.definitions.schemas[defName].maximum;
+            var type: number = _pthis.agreement.context.definitions.schemas[defName].type;
+
+            // Create CSP Range to define variable on CSP Model.
+            if (isNaN(min) || isNaN(max)) {
+                // Obtain max and min values for domain
+                if (!(type in cspConfig.translator.typeMap)) {
+                    throw "Unable to find type \"" + type + "\" of definition \"" + defName + "\"";
+                } else {
+                    let cspType: string = cspConfig.translator.typeMap[type];
+                    min = minMaxMap[cspType].min;
+                    max = minMaxMap[cspType].max;
+                }
+            }
+
+            _pthis.definitions.push(new Definition(defName, new Domain(min, max))); // _pthis.agreement.terms.metrics[metricName].schema.type
+            _pthis.cspModel.variables.push(new CSPTools.CSPVar(defName, new CSPTools.CSPRange(min, max)));
+
         });
+
     }
 
     private loadPenalties(): void {
@@ -302,7 +346,7 @@ export default class AgreementCompensationCSPModelBuilder {
                     var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0]; // only considers the first "over"
                     var newPenal = new Penalty(g.id, def, p.of[0].value, new Expression(p.of[0].condition), new Expression(ofi.objective));
                     _pthis.penalties.push(newPenal);
-                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenal.name, new CSPTools.CSPRange(0, 100)));
+                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenal.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
                 });
             });
         });
@@ -317,7 +361,7 @@ export default class AgreementCompensationCSPModelBuilder {
                     var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0]; // only considers the first "over"
                     var newReward = new Reward(g.id, def, p.of[0].value, new Expression(p.of[0].condition), new Expression(ofi.objective));
                     _pthis.rewards.push(newReward);
-                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, new CSPTools.CSPRange(0, 100)));
+                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
                 });
             });
         });
@@ -325,8 +369,8 @@ export default class AgreementCompensationCSPModelBuilder {
 
     private loadConstraints(): void {
         var _pthis = this;
-        this.agreement.terms.guarantees.forEach(function(g: any, gi: number) {
-            g.of.forEach(function(of: any, ofi: number) {
+        this.agreement.terms.guarantees.forEach(function (g: any, gi: number) {
+            g.of.forEach(function (of: any, ofi: number) {
                 var _id: string = "C" + gi + "_" + ofi;
                 if (of.precondition && of.precondition !== "") {
                     // Use "precondition->objective" to define constraint
@@ -339,6 +383,19 @@ export default class AgreementCompensationCSPModelBuilder {
                 }
             });
         });
+    }
+
+    /**
+     * Tries to obtain definition by name.
+     * @param id Definition name
+     */
+    private getDefinitionByName(id: string): Definition {
+        var ret: Definition;
+        let defs: Definition[] = this.definitions.filter((d) => id === d.name);
+        if (defs.length > 0) {
+            ret = defs[0];
+        }
+        return ret;
     }
 
 }

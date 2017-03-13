@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const CSPModel = require("governify-csp-tools").CSPModel;
+const CSPModel = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools").CSPModel;
 class CSPBuilder {
     constructor() {
         this.model = new CSPModel();

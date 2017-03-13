@@ -1,7 +1,21 @@
 production:
   loglevel: info
   logfile: '../logs'
+  minMaxMap:
+    int:
+      min: -999999
+      max: 999999
+    float:
+      min: -999999.9
+      max: 999999.9
 
 development:
   loglevel: debug
   logfile: '../logs'
+  minMaxMap:
+    int:
+      min: -999999
+      max: 999999
+    float:
+      min: -999999.9
+      max: 999999.9

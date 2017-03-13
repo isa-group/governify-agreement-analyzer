@@ -19,14 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Domain {
-    constructor(typeOrMin, max) {
-        if (isNaN(parseInt(typeOrMin))) {
-            this.type = typeOrMin;
-        }
-        else {
-            this.min = typeOrMin;
-            this.max = max;
-        }
+    constructor(min, max) {
+        this.min = min;
+        this.max = max;
     }
 }
 exports.default = Domain;

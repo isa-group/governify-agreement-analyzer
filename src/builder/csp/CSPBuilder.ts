@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 import IBuilder from "../../translator/IBuilder";
 
-const CSPModel = require("governify-csp-tools").CSPModel;
+const CSPModel = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools").CSPModel;
 
 export default class CSPBuilder implements IBuilder {
 

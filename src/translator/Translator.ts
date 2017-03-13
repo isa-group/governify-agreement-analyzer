@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 import CSPBuilder from "../builder/csp/CSPBuilder";
 import IBuilder from "./IBuilder";
 
-const CSPTools = require("governify-csp-tools");
+const CSPTools = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const CSPParameter = CSPTools.CSPParameter;
 const CSPVar = CSPTools.CSPVar;

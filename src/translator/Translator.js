@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const CSPBuilder_1 = require("../builder/csp/CSPBuilder");
-const CSPTools = require("governify-csp-tools");
+const CSPTools = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const CSPParameter = CSPTools.CSPParameter;
 const CSPVar = CSPTools.CSPVar;
