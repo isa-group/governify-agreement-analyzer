@@ -131,11 +131,14 @@ export default class AgreementCompensationCSPModelBuilder {
 
         var penaltiesORRewardsConst = ""; // (p1 > p2 OR r1 < r2)
         for (var i = 0; i < this.penalties.length; i++) {
-            if (penaltiesORRewardsConst !== "") {
-                penaltiesORRewardsConst += " /\\ ";
+            if (i === 0) {
+                penaltiesORRewardsConst += "((" + this.penalties[i].name + " > " + mockBuilder.penalties[i].name + ") \\/ " +
+                    "(" + this.rewards[i].name + " < " + mockBuilder.rewards[i].name + ") \\/ " +
+                    "not ((" + this.penalties[i].name + ") * (" + this.rewards[i].name + ") == 0))";
+            } else {
+                penaltiesORRewardsConst += " /\\ ((" + this.penalties[i].name + " > " + mockBuilder.penalties[i].name + ") \\/ " +
+                    "(" + this.rewards[i].name + " < " + mockBuilder.rewards[i].name + "))";
             }
-            penaltiesORRewardsConst += "((" + this.penalties[i].name + " > " + mockBuilder.penalties[i].name + ") \\/ (" +
-                this.rewards[i].name + " < " + mockBuilder.rewards[i].name + "))";
         }
 
         var utilityConst = ""; // (Utility(m1) > Utility(m2))

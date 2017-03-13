@@ -97,11 +97,15 @@ class AgreementCompensationCSPModelBuilder {
         });
         var penaltiesORRewardsConst = "";
         for (var i = 0; i < this.penalties.length; i++) {
-            if (penaltiesORRewardsConst !== "") {
-                penaltiesORRewardsConst += " /\\ ";
+            if (i === 0) {
+                penaltiesORRewardsConst += "((" + this.penalties[i].name + " > " + mockBuilder.penalties[i].name + ") \\/ " +
+                    "(" + this.rewards[i].name + " < " + mockBuilder.rewards[i].name + ") \\/ " +
+                    "not ((" + this.penalties[i].name + ") * (" + this.rewards[i].name + ") == 0))";
             }
-            penaltiesORRewardsConst += "((" + this.penalties[i].name + " > " + mockBuilder.penalties[i].name + ") \\/ (" +
-                this.rewards[i].name + " < " + mockBuilder.rewards[i].name + "))";
+            else {
+                penaltiesORRewardsConst += " /\\ ((" + this.penalties[i].name + " > " + mockBuilder.penalties[i].name + ") \\/ " +
+                    "(" + this.rewards[i].name + " < " + mockBuilder.rewards[i].name + "))";
+            }
         }
         var utilityConst = "";
         for (var i = 0; i < this.metrics.length; i++) {
