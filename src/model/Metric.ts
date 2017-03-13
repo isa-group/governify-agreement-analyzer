@@ -18,8 +18,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
-enum DocType {
-    TEMPLATE, OFFER, AGREEMENT
-}
+import Domain from "./Domain";
 
-export default DocType;
+export default class Metric {
+    constructor(public name: string, public domain: Domain) { }
+}

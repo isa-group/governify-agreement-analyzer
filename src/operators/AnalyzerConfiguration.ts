@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-08
+governify-agreement-analyzer 0.1.1, built on: 2017-03-13
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -36,6 +36,7 @@ class ReasonerConfiguration {
 class AgreementConfiguration {
     url: string;
     file: string;
+    content: Object;
 }
 
 export default class AnalyzerConfiguration {

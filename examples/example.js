@@ -34,3 +34,7 @@ analyzer.isConsistent(function (err, sol) {
         console.log(sol);
     }
 });
+
+analyzer.isSatisfiableCFC(function (err, sol) {
+    
+});

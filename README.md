@@ -5,7 +5,7 @@ This is a Node.js API REST to analyze agreements defined by following the [iAgre
  - An API for programmers to peform agreement analysis operations.
  - An API REST to peform agreement analysis operations over a service.
 
-**Governify Agreement Analyzer** executes all CSP by using the **Reasoner** tool defined on [governify-csp-tools](https://github.com/isa-group/governify-csp-tools) project, which in turn executes the CSP based on [MiniZinc](http://www.minizinc.org/) language.
+**Governify Agreement Analyzer** executes all CSP by using the **Reasoner** tool defined on [E:\\Documents\\Coding\\CSP\\governify-csp-tools](https://github.com/isa-group/E:\\Documents\\Coding\\CSP\\governify-csp-tools) project, which in turn executes the CSP based on [MiniZinc](http://www.minizinc.org/) language.
 
 **Governify Agreement Analyzer** has been developed on TypeScript and transpiled to JavaScript in order to be
 executed as a Node.js module. Also, it has been developed by following the [project-template-nodejs](https://github.com/isa-group/project-template-nodejs) development guidelines.
@@ -81,7 +81,7 @@ var configuration = {
 ```
 
 Please, consider:
-  - **Reasoner** can be configured for local, remote or docker execution. Please, take a look at [reasoner documentation](https://github.com/isa-group/governify-csp-tools#reasoner-configuration) to know which are the requirements to run reasoner in each environment.
+  - **Reasoner** can be configured for local, remote or docker execution. Please, take a look at [reasoner documentation](https://github.com/isa-group/E:\\Documents\\Coding\\CSP\\governify-csp-tools#reasoner-configuration) to know which are the requirements to run reasoner in each environment.
   - Use `agreement.file` property to define use an local agreement file located in your project. You can also use `agreement.url` to define a remote agreement file.
 
 The JSON schema associated to analyzer configuration:
@@ -96,8 +96,10 @@ properties:
         type: 'string'
       url: 
         type: 'string'
+      content: 
+        type: 'object'
   reasoner:
-    # Reasoner configuration of governify-csp-tools project
+    # Reasoner configuration of E:\\Documents\\Coding\\CSP\\governify-csp-tools project
     type: 'object'
     properties:
       type:

@@ -18,8 +18,30 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
-enum DocType {
-    TEMPLATE, OFFER, AGREEMENT
-}
+import Definition from "./Definition";
+import Expression from "./Expression";
 
-export default DocType;
+export default class Penalty {
+
+    private _name: string;
+
+    constructor(public guarantee: string, public over: Definition, public value: number,
+        public condition: Expression, public objective: Expression) { }
+
+    toComparison(): string {
+        return this.name + " == " + Math.abs(this.value);
+    }
+
+    toLessComparison(): string {
+        return this.name + " == 0";
+    }
+
+    get name(): string {
+        return "Penalty_" + this.guarantee + "_" + this.over.name;
+    }
+
+    getCFC(): string {
+        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + ")) xor ((" +
+            this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
+    }
+}

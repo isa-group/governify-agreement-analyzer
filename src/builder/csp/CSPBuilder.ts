@@ -18,8 +18,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
-enum DocType {
-    TEMPLATE, OFFER, AGREEMENT
-}
+import IBuilder from "../../translator/IBuilder";
 
-export default DocType;
+const CSPModel = require("governify-csp-tools").CSPModel;
+
+export default class CSPBuilder implements IBuilder {
+
+    model: typeof CSPModel;
+
+    constructor() {
+        this.model = new CSPModel();
+    }
+
+}

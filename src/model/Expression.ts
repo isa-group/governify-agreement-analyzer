@@ -18,8 +18,36 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
-enum DocType {
-    TEMPLATE, OFFER, AGREEMENT
-}
+export default class Expression {
 
-export default DocType;
+    private _variables: string[];
+
+    constructor(private _expr: string) {
+        this.loadVariables();
+    }
+
+    private loadVariables(): void {
+        this._variables = this.expr.match(/[a-z_]\w*(?!\w*\s*\()/ig);
+    }
+
+    get variables(): string[] {
+        return this._variables;
+    }
+
+    get expr(): string {
+        return this._expr;
+    }
+
+    set expr(expr: string) {
+        this._expr = expr;
+    }
+
+    getMockExpression(suffix: string): string {
+        var expr: string = this.expr;
+        this.variables.forEach((v) => {
+            expr = expr.replace(v, v + suffix);
+        });
+        return expr;
+    }
+
+}

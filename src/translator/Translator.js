@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-08
+governify-agreement-analyzer 0.1.1, built on: 2017-03-13
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const CSPBuilder_1 = require("./builders/csp/CSPBuilder");
+const CSPBuilder_1 = require("../builder/csp/CSPBuilder");
 const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const CSPParameter = CSPTools.CSPParameter;

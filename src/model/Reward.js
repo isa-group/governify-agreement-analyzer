@@ -16,10 +16,28 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
-
-enum DocType {
-    TEMPLATE, OFFER, AGREEMENT
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Reward {
+    constructor(guarantee, over, value, condition, objective) {
+        this.guarantee = guarantee;
+        this.over = over;
+        this.value = value;
+        this.condition = condition;
+        this.objective = objective;
+    }
+    toComparison() {
+        return this.name + " == " + Math.abs(this.value);
+    }
+    toLessComparison() {
+        return this.name + " == 0";
+    }
+    get name() {
+        return "Reward_" + this.guarantee + "_" + this.over.name;
+    }
+    getCFC() {
+        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + ")) xor ((" +
+            this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
+    }
 }
-
-export default DocType;
+exports.default = Reward;

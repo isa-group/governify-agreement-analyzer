@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-08
+governify-agreement-analyzer 0.1.1, built on: 2017-03-13
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -18,10 +18,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const CSPBuilder_1 = require("../translator/builders/csp/CSPBuilder");
+const CSPBuilder_1 = require("../builder/csp/CSPBuilder");
 const Translator_1 = require("../translator/Translator");
 const AgreementModel_1 = require("../model/AgreementModel");
 const AnalyzerConfiguration_1 = require("./AnalyzerConfiguration");
+const AgreementCompensationCSPModelBuilder_1 = require("../builder/AgreementCompensationCSPModelBuilder");
 const request = require("request");
 const fs = require("fs");
 const yaml = require("js-yaml");
@@ -42,7 +43,7 @@ class Analyzer {
         if (!configuration.reasoner) {
             throw new Error("Missing parameter: reasoner (Object)");
         }
-        if (!configuration.agreement.file && !configuration.agreement.url) {
+        if (!configuration.agreement.file && !configuration.agreement.url && !configuration.agreement.content) {
             throw new Error("Missing parameter: agreement.file or agreement.url (String)");
         }
         if (!configuration.reasoner.type) {
@@ -54,6 +55,8 @@ class Analyzer {
         this.configuration = new AnalyzerConfiguration_1.default();
         this.configuration.agreement.file = configuration.agreement.file;
         this.configuration.agreement.url = configuration.agreement.url;
+        this.configuration.agreement.content = configuration.agreement.content;
+        this.agreement = configuration.agreement.content;
         this.configuration.reasoner.type = configuration.reasoner.type;
         this.configuration.reasoner.folder = configuration.reasoner.folder;
         if (configuration.reasoner.api) {
@@ -115,6 +118,27 @@ class Analyzer {
         }
         return this._agreementPromise;
     }
+    isSatisfiableConstraints(callback) {
+        var _pthis = this;
+        this._loadAgreement((error) => {
+            if (!error) {
+                let mznDocument = new AgreementCompensationCSPModelBuilder_1.default(_pthis.agreement).buildConstraints();
+                var reasoner = new Reasoner(this.configuration.reasoner);
+                reasoner.solve(mznDocument, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    }
+                    else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+            }
+            else {
+                callback(error);
+            }
+        });
+    }
     isConsistent(callback) {
         this._loadAgreement((error) => {
             if (!error) {
@@ -134,6 +158,138 @@ class Analyzer {
                         logger.info("Reasoner result:", condition);
                         callback(err, condition, sol);
                     }
+                });
+            }
+            else {
+                callback(error);
+            }
+        });
+    }
+    isSatisfiableCFC(callback) {
+        this._loadAgreement((error) => {
+            if (!error) {
+                logger.info("Executing \"isSatisfiableCFC\" analysis operation on Reasoner...");
+                let builder = new AgreementCompensationCSPModelBuilder_1.default(this.agreement);
+                let model = builder.buildCFC();
+                var reasoner = new Reasoner(this.configuration.reasoner);
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    }
+                    else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+            }
+            else {
+                callback(error);
+            }
+        });
+    }
+    isSatisfiableCCC(callback) {
+        this._loadAgreement((error) => {
+            if (!error) {
+                logger.info("Executing \"isSatisfiableCCC\" analysis operation on Reasoner...");
+                let builder = new AgreementCompensationCSPModelBuilder_1.default(this.agreement);
+                let model = builder.buildCCC();
+                var reasoner = new Reasoner(this.configuration.reasoner);
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    }
+                    else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+            }
+            else {
+                callback(error);
+            }
+        });
+    }
+    isSatisfiableCSC(callback) {
+        this._loadAgreement((error) => {
+            if (!error) {
+                logger.info("Executing \"isSatisfiableCSC\" analysis operation on Reasoner...");
+                let builder = new AgreementCompensationCSPModelBuilder_1.default(this.agreement);
+                let model = builder.buildCSC();
+                var reasoner = new Reasoner(this.configuration.reasoner);
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    }
+                    else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+            }
+            else {
+                callback(error);
+            }
+        });
+    }
+    isSatisfiableGCC(callback) {
+        this._loadAgreement((error) => {
+            if (!error) {
+                logger.info("Executing \"isSatisfiableGCC\" analysis operation on Reasoner...");
+                let builder = new AgreementCompensationCSPModelBuilder_1.default(this.agreement);
+                let model = builder.buildGCC();
+                var reasoner = new Reasoner(this.configuration.reasoner);
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    }
+                    else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+            }
+            else {
+                callback(error);
+            }
+        });
+    }
+    isSatisfiableOGT(callback) {
+        this._loadAgreement((error) => {
+            if (!error) {
+                logger.info("Executing \"isSatisfiableOGT\" analysis operation on Reasoner...");
+                let builder = new AgreementCompensationCSPModelBuilder_1.default(this.agreement);
+                let model = builder.buildOGT();
+                var reasoner = new Reasoner(this.configuration.reasoner);
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    }
+                    else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+            }
+            else {
+                callback(error);
+            }
+        });
+    }
+    isSatisfiableOBT(callback) {
+        this._loadAgreement((error) => {
+            if (!error) {
+                logger.info("Executing \"isSatisfiableOBT\" analysis operation on Reasoner...");
+                let builder = new AgreementCompensationCSPModelBuilder_1.default(this.agreement);
+                let model = builder.buildOBT();
+                var reasoner = new Reasoner(this.configuration.reasoner);
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    }
+                    else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
                 });
             }
             else {

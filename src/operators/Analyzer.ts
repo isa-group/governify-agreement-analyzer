@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-08
+governify-agreement-analyzer 0.1.1, built on: 2017-03-13
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -18,10 +18,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
-import CSPBuilder from "../translator/builders/csp/CSPBuilder";
+import CSPBuilder from "../builder/csp/CSPBuilder";
 import Translator from "../translator/Translator";
 import AgreementModel from "../model/AgreementModel";
 import AnalyzerConfiguration from "./AnalyzerConfiguration";
+import AgreementCompensationCSPModelBuilder from "../builder/AgreementCompensationCSPModelBuilder";
 
 const request = require("request");
 const fs = require("fs");
@@ -34,7 +35,14 @@ const Reasoner = CSPTools.Reasoner;
 var Promise = require("bluebird");
 
 interface AnalyzerInterface {
-    isConsistent(callback: (condition: Boolean) => void);
+    isConsistent(callback: (error: any, solution?: Boolean, stdout?: string) => void);
+    isSatisfiableCFC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
+    isSatisfiableCFC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
+    isSatisfiableCCC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
+    isSatisfiableCSC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
+    isSatisfiableGCC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
+    isSatisfiableOGT(callback: (error: any, solution?: Boolean, stdout?: string) => void);
+    isSatisfiableOBT(callback: (error: any, solution?: Boolean, stdout?: string) => void);
 }
 
 export default class Analyzer implements AnalyzerInterface {
@@ -42,6 +50,7 @@ export default class Analyzer implements AnalyzerInterface {
     _agreementPromise: typeof Promise;
     agreement: Object;
     configuration: AnalyzerConfiguration;
+    compensationBuilder: AgreementCompensationCSPModelBuilder;
 
     constructor(configuration: AnalyzerConfiguration) {
 
@@ -57,7 +66,7 @@ export default class Analyzer implements AnalyzerInterface {
             throw new Error("Missing parameter: reasoner (Object)");
         }
 
-        if (!configuration.agreement.file && !configuration.agreement.url) {
+        if (!configuration.agreement.file && !configuration.agreement.url && !configuration.agreement.content) {
             throw new Error("Missing parameter: agreement.file or agreement.url (String)");
         }
 
@@ -72,6 +81,8 @@ export default class Analyzer implements AnalyzerInterface {
         this.configuration = new AnalyzerConfiguration();
         this.configuration.agreement.file = configuration.agreement.file;
         this.configuration.agreement.url = configuration.agreement.url;
+        this.configuration.agreement.content = configuration.agreement.content;
+        this.agreement = configuration.agreement.content;
         this.configuration.reasoner.type = configuration.reasoner.type;
         this.configuration.reasoner.folder = configuration.reasoner.folder;
         if (configuration.reasoner.api) {
@@ -158,6 +169,33 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
+    isSatisfiableConstraints(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+
+        var _pthis = this;
+
+        this._loadAgreement((error: any) => {
+
+            if (!error) {
+
+                let mznDocument: string = new AgreementCompensationCSPModelBuilder(_pthis.agreement).buildConstraints();
+                var reasoner = new Reasoner(this.configuration.reasoner);
+
+                reasoner.solve(mznDocument, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    } else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+
+            } else {
+                callback(error);
+            }
+
+        });
+    }
+
     isConsistent(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
 
         this._loadAgreement((error: any) => {
@@ -197,4 +235,185 @@ export default class Analyzer implements AnalyzerInterface {
 
         });
     }
+
+    isSatisfiableCFC(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+
+        this._loadAgreement((error: any) => {
+
+            if (!error) {
+
+                logger.info("Executing \"isSatisfiableCFC\" analysis operation on Reasoner...");
+
+                let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+                let model: typeof CSPModel = builder.buildCFC();
+
+                var reasoner = new Reasoner(this.configuration.reasoner);
+
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    } else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+
+            } else {
+                callback(error);
+            }
+
+        });
+
+    }
+
+    isSatisfiableCCC(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+
+        this._loadAgreement((error: any) => {
+
+            if (!error) {
+
+                logger.info("Executing \"isSatisfiableCCC\" analysis operation on Reasoner...");
+
+                let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+                let model: typeof CSPModel = builder.buildCCC();
+
+                var reasoner = new Reasoner(this.configuration.reasoner);
+
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    } else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+
+            } else {
+                callback(error);
+            }
+
+        });
+
+    }
+
+    isSatisfiableCSC(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+
+        this._loadAgreement((error: any) => {
+
+            if (!error) {
+
+                logger.info("Executing \"isSatisfiableCSC\" analysis operation on Reasoner...");
+
+                let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+                let model: typeof CSPModel = builder.buildCSC();
+
+                var reasoner = new Reasoner(this.configuration.reasoner);
+
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    } else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+
+            } else {
+                callback(error);
+            }
+
+        });
+
+    }
+
+    isSatisfiableGCC(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+
+        this._loadAgreement((error: any) => {
+
+            if (!error) {
+
+                logger.info("Executing \"isSatisfiableGCC\" analysis operation on Reasoner...");
+
+                let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+                let model: typeof CSPModel = builder.buildGCC();
+
+                var reasoner = new Reasoner(this.configuration.reasoner);
+
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    } else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+
+            } else {
+                callback(error);
+            }
+
+        });
+
+    }
+
+    isSatisfiableOGT(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+
+        this._loadAgreement((error: any) => {
+
+            if (!error) {
+
+                logger.info("Executing \"isSatisfiableOGT\" analysis operation on Reasoner...");
+
+                let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+                let model: typeof CSPModel = builder.buildOGT();
+
+                var reasoner = new Reasoner(this.configuration.reasoner);
+
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    } else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+
+            } else {
+                callback(error);
+            }
+
+        });
+
+    }
+
+    isSatisfiableOBT(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+
+        this._loadAgreement((error: any) => {
+
+            if (!error) {
+
+                logger.info("Executing \"isSatisfiableOBT\" analysis operation on Reasoner...");
+
+                let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+                let model: typeof CSPModel = builder.buildOBT();
+
+                var reasoner = new Reasoner(this.configuration.reasoner);
+
+                reasoner.solve(model, (err, sol) => {
+                    if (err) {
+                        logger.info("Reasoner returned an error:", err);
+                    } else {
+                        logger.info("Reasoner result:", sol);
+                    }
+                    callback(err, sol);
+                });
+
+            } else {
+                callback(error);
+            }
+
+        });
+
+    }
+
 }

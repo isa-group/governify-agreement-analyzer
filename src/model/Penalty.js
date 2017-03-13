@@ -18,20 +18,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Ajv = require("ajv");
-const ajv = new Ajv({ unknownFormats: ["int32", "int64", "float", "double", "byte", "binary", "date", "date-time", "password"] });
-const logger = require("../logger/logger");
-class AgreementModel {
-    constructor(agreement) {
-        this.agreement = agreement;
+class Penalty {
+    constructor(guarantee, over, value, condition, objective) {
+        this.guarantee = guarantee;
+        this.over = over;
+        this.value = value;
+        this.condition = condition;
+        this.objective = objective;
     }
-    validate() {
-        var schema = require("../schemas/agreement.json");
-        var isValidModel = ajv.validate(schema, this.agreement);
-        if (!isValidModel) {
-            this.validationErrors = ajv.errors;
-        }
-        return isValidModel;
+    toComparison() {
+        return this.name + " == " + Math.abs(this.value);
+    }
+    toLessComparison() {
+        return this.name + " == 0";
+    }
+    get name() {
+        return "Penalty_" + this.guarantee + "_" + this.over.name;
+    }
+    getCFC() {
+        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + ")) xor ((" +
+            this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
     }
 }
-exports.default = AgreementModel;
+exports.default = Penalty;

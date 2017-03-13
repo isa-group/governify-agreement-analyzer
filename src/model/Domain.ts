@@ -18,8 +18,20 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 
-enum DocType {
-    TEMPLATE, OFFER, AGREEMENT
-}
+export default class Domain {
 
-export default DocType;
+    min: number;
+    max: number;
+    type: string;
+
+    constructor(typeOrMin: any, max?: number) {
+
+        if (isNaN(parseInt(typeOrMin))) {
+            this.type = typeOrMin;
+        } else {
+            this.min = typeOrMin;
+            this.max = max;
+        }
+
+    }
+}
