@@ -37,6 +37,7 @@ class AgreementCompensationCSPModelBuilder {
         this.loadDefinitions();
         this.loadPenalties();
         this.loadRewards();
+        this.equalizePenaltyReward();
     }
     buildConstraints() {
         var constraints = [];
@@ -62,39 +63,8 @@ class AgreementCompensationCSPModelBuilder {
         return cspModel;
     }
     buildCCC() {
-        var mockBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
-        mockBuilder.definitions = mockBuilder.definitions.map((def) => {
-            def.name = def.name + AgreementCompensationCSPModelBuilder.mockSuffix;
-            return def;
-        });
-        mockBuilder.metrics = mockBuilder.metrics.map((met) => {
-            met.name = met.name + AgreementCompensationCSPModelBuilder.mockSuffix;
-            return met;
-        });
-        mockBuilder.penalties = mockBuilder.penalties.map((p) => {
-            if (mockBuilder.cspModel.variables.filter((_p) => p.name === _p.id).length === 0) {
-                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(p.name, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)));
-            }
-            p.condition.expr = p.condition.getMockExpression(AgreementCompensationCSPModelBuilder.mockSuffix);
-            p.condition.variables.forEach((v) => {
-                if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + AgreementCompensationCSPModelBuilder.mockSuffix).length === 0) {
-                    mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(v + AgreementCompensationCSPModelBuilder.mockSuffix, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)));
-                }
-            });
-            return p;
-        });
-        mockBuilder.rewards = mockBuilder.rewards.map((r) => {
-            if (mockBuilder.cspModel.variables.filter((_r) => r.name === _r.id).length === 0) {
-                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(r.name, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)));
-            }
-            r.condition.expr = r.condition.getMockExpression(AgreementCompensationCSPModelBuilder.mockSuffix);
-            r.condition.variables.forEach((v) => {
-                if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + AgreementCompensationCSPModelBuilder.mockSuffix).length === 0) {
-                    mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(v + AgreementCompensationCSPModelBuilder.mockSuffix, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)));
-                }
-            });
-            return r;
-        });
+        let mockSuffix = "2";
+        var mockBuilder = this.getMockInstance(mockSuffix);
         var penaltiesORRewardsConst = "";
         for (var i = 0; i < this.penalties.length; i++) {
             if (i === 0) {
@@ -118,6 +88,7 @@ class AgreementCompensationCSPModelBuilder {
         let cfc2 = mockBuilder.buildCFC();
         let cspModel = new CSPModel();
         cspModel.variables = mockBuilder.cspModel.variables;
+        cspModel.parameters = mockBuilder.cspModel.parameters;
         cspModel.constraints = [new CSPTools.CSPConstraint("ccc", cfc1.constraints[0].expression + " /\\ " + cfc2.constraints[0].expression +
                 " /\\ " + penaltiesORRewardsConst + " /\\ " + utilityConst)];
         cspModel.goal = "satisfy";
@@ -266,12 +237,14 @@ class AgreementCompensationCSPModelBuilder {
         var _pthis = this;
         this.agreement.terms.guarantees.forEach((g) => {
             g.of.forEach((ofi) => {
-                ofi.penalties.forEach((p) => {
-                    var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0];
-                    var newPenal = new Penalty_1.default(g.id, def, p.of[0].value, new Expression_1.default(p.of[0].condition), new Expression_1.default(ofi.objective));
-                    _pthis.penalties.push(newPenal);
-                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenal.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
-                });
+                if (ofi.penalties) {
+                    ofi.penalties.forEach((p) => {
+                        var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0];
+                        var newPenal = new Penalty_1.default(g.id, def, p.of[0].value, new Expression_1.default(p.of[0].condition), new Expression_1.default(ofi.objective));
+                        _pthis.penalties.push(newPenal);
+                        _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenal.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                    });
+                }
             });
         });
     }
@@ -280,12 +253,44 @@ class AgreementCompensationCSPModelBuilder {
         var _pthis = this;
         this.agreement.terms.guarantees.forEach((g) => {
             g.of.forEach((ofi) => {
-                ofi.rewards.forEach((p) => {
-                    var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0];
-                    var newReward = new Reward_1.default(g.id, def, p.of[0].value, new Expression_1.default(p.of[0].condition), new Expression_1.default(ofi.objective));
+                if (ofi.rewards) {
+                    ofi.rewards.forEach((r) => {
+                        var def = _pthis.definitions.filter((d) => d.name === Object.keys(r.over)[0])[0];
+                        var newReward = new Reward_1.default(g.id, def, r.of[0].value, new Expression_1.default(r.of[0].condition), new Expression_1.default(ofi.objective));
+                        _pthis.rewards.push(newReward);
+                        _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                    });
+                }
+            });
+        });
+    }
+    equalizePenaltyReward() {
+        var _pthis = this;
+        this.agreement.terms.guarantees.forEach((g, gi) => {
+            g.of.forEach((_of, ofi) => {
+                var of = [{
+                        over: {},
+                        of: [{
+                                value: 0,
+                                condition: "true"
+                            }]
+                    }];
+                if (!_of.penalties) {
+                    let def = _pthis.getPricingPenalty();
+                    of[0].over[def.name] = null;
+                    _pthis.agreement.terms.guarantees[gi].of[ofi]["penalties"] = of;
+                    let newPenalty = new Penalty_1.default(g.id, def, 0, new Expression_1.default("true"), new Expression_1.default(_of.objective));
+                    _pthis.penalties.push(newPenalty);
+                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                }
+                if (!_of.rewards) {
+                    let def = _pthis.getPricingReward();
+                    of[0].over[def.name] = null;
+                    _pthis.agreement.terms.guarantees[gi].of[ofi]["rewards"] = of;
+                    let newReward = new Reward_1.default(g.id, def, 0, new Expression_1.default("true"), new Expression_1.default(_of.objective));
                     _pthis.rewards.push(newReward);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
-                });
+                }
             });
         });
     }
@@ -306,6 +311,46 @@ class AgreementCompensationCSPModelBuilder {
             });
         });
     }
+    getMockInstance(mockSuffix) {
+        var mockBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+        mockBuilder.definitions = mockBuilder.definitions.map((def) => {
+            def.name = def.name + mockSuffix;
+            return def;
+        });
+        mockBuilder.metrics = mockBuilder.metrics.map((met) => {
+            met.name = met.name + mockSuffix;
+            return met;
+        });
+        mockBuilder.penalties = mockBuilder.penalties.map((p) => {
+            if (mockBuilder.cspModel.variables.filter((_p) => p.name === _p.id).length === 0) {
+                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(p.name, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)));
+            }
+            if (p.condition.expr !== "true" && p.condition.expr !== "false") {
+                p.condition.expr = p.condition.getMockExpression(mockSuffix);
+                p.condition.variables.forEach((v) => {
+                    if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + mockSuffix).length === 0) {
+                        mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(v + mockSuffix, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)));
+                    }
+                });
+            }
+            return p;
+        });
+        mockBuilder.rewards = mockBuilder.rewards.map((r) => {
+            if (mockBuilder.cspModel.variables.filter((_r) => r.name === _r.id).length === 0) {
+                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(r.name, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)));
+            }
+            if (r.condition.expr !== "true" && r.condition.expr !== "false") {
+                r.condition.expr = r.condition.getMockExpression(mockSuffix);
+                r.condition.variables.forEach((v) => {
+                    if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + mockSuffix).length === 0) {
+                        mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(v + mockSuffix, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)));
+                    }
+                });
+            }
+            return r;
+        });
+        return mockBuilder;
+    }
     getDefinitionByName(id) {
         var ret;
         let defs = this.definitions.filter((d) => id === d.name);
@@ -314,6 +359,11 @@ class AgreementCompensationCSPModelBuilder {
         }
         return ret;
     }
+    getPricingPenalty() {
+        return this.getDefinitionByName(this.agreement.terms.pricing.billing.penalties[0].over);
+    }
+    getPricingReward() {
+        return this.getDefinitionByName(this.agreement.terms.pricing.billing.rewards[0].over);
+    }
 }
-AgreementCompensationCSPModelBuilder.mockSuffix = "2";
 exports.default = AgreementCompensationCSPModelBuilder;

@@ -45,6 +45,7 @@ export default class AgreementCompensationCSPModelBuilder {
         this.loadDefinitions();
         this.loadPenalties();
         this.loadRewards();
+        this.equalizePenaltyReward();
     }
 
     buildConstraints(): typeof CSPModel {
@@ -83,52 +84,13 @@ export default class AgreementCompensationCSPModelBuilder {
 
     }
 
-    static mockSuffix: string = "2";
     buildCCC(): typeof CSPModel {
 
         // Create mock builder
-        var mockBuilder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
-        mockBuilder.definitions = mockBuilder.definitions.map((def) => {
-            def.name = def.name + AgreementCompensationCSPModelBuilder.mockSuffix;
-            return def;
-        });
-        mockBuilder.metrics = mockBuilder.metrics.map((met) => {
-            met.name = met.name + AgreementCompensationCSPModelBuilder.mockSuffix;
-            return met;
-        });
-        mockBuilder.penalties = mockBuilder.penalties.map((p) => {
-            if (mockBuilder.cspModel.variables.filter((_p) => p.name === _p.id).length === 0) {
-                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
-                    p.name, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)
-                ));
-            }
-            p.condition.expr = p.condition.getMockExpression(AgreementCompensationCSPModelBuilder.mockSuffix);
-            p.condition.variables.forEach((v) => {
-                if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + AgreementCompensationCSPModelBuilder.mockSuffix).length === 0) {
-                    mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
-                        v + AgreementCompensationCSPModelBuilder.mockSuffix, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)
-                    ));
-                }
-            });
-            return p;
-        });
-        mockBuilder.rewards = mockBuilder.rewards.map((r) => {
-            if (mockBuilder.cspModel.variables.filter((_r) => r.name === _r.id).length === 0) {
-                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
-                    r.name, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)
-                ));
-            }
-            r.condition.expr = r.condition.getMockExpression(AgreementCompensationCSPModelBuilder.mockSuffix);
-            r.condition.variables.forEach((v) => {
-                if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + AgreementCompensationCSPModelBuilder.mockSuffix).length === 0) {
-                    mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
-                        v + AgreementCompensationCSPModelBuilder.mockSuffix, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)
-                    ));
-                }
-            });
-            return r;
-        });
+        let mockSuffix: string = "2";
+        var mockBuilder: AgreementCompensationCSPModelBuilder = this.getMockInstance(mockSuffix);
 
+        // Create penalties OR rewards constraints
         var penaltiesORRewardsConst = ""; // (p1 > p2 OR r1 < r2)
         for (var i = 0; i < this.penalties.length; i++) {
             if (i === 0) {
@@ -141,6 +103,7 @@ export default class AgreementCompensationCSPModelBuilder {
             }
         }
 
+        // Create utility constraints
         var utilityConst = ""; // (Utility(m1) > Utility(m2))
         for (var i = 0; i < this.metrics.length; i++) {
             if (utilityConst !== "") {
@@ -154,6 +117,7 @@ export default class AgreementCompensationCSPModelBuilder {
 
         let cspModel: typeof CSPModel = new CSPModel();
         cspModel.variables = mockBuilder.cspModel.variables;
+        cspModel.parameters = mockBuilder.cspModel.parameters;
         cspModel.constraints = [new CSPTools.CSPConstraint("ccc", cfc1.constraints[0].expression + " /\\ " + cfc2.constraints[0].expression +
             " /\\ " + penaltiesORRewardsConst + " /\\ " + utilityConst)];
         cspModel.goal = "satisfy";
@@ -357,12 +321,14 @@ export default class AgreementCompensationCSPModelBuilder {
         var _pthis = this;
         this.agreement.terms.guarantees.forEach((g) => {
             g.of.forEach((ofi) => {
-                ofi.penalties.forEach((p) => {
-                    var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0]; // only considers the first "over"
-                    var newPenal = new Penalty(g.id, def, p.of[0].value, new Expression(p.of[0].condition), new Expression(ofi.objective));
-                    _pthis.penalties.push(newPenal);
-                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenal.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
-                });
+                if (ofi.penalties) {
+                    ofi.penalties.forEach((p) => {
+                        var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0]; // only considers the first "over"
+                        var newPenal = new Penalty(g.id, def, p.of[0].value, new Expression(p.of[0].condition), new Expression(ofi.objective));
+                        _pthis.penalties.push(newPenal);
+                        _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenal.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                    });
+                }
             });
         });
     }
@@ -372,14 +338,75 @@ export default class AgreementCompensationCSPModelBuilder {
         var _pthis = this;
         this.agreement.terms.guarantees.forEach((g) => {
             g.of.forEach((ofi) => {
-                ofi.rewards.forEach((p) => {
-                    var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0]; // only considers the first "over"
-                    var newReward = new Reward(g.id, def, p.of[0].value, new Expression(p.of[0].condition), new Expression(ofi.objective));
-                    _pthis.rewards.push(newReward);
-                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
-                });
+                if (ofi.rewards) {
+                    ofi.rewards.forEach((r) => {
+                        var def = _pthis.definitions.filter((d) => d.name === Object.keys(r.over)[0])[0]; // only considers the first "over"
+                        var newReward = new Reward(g.id, def, r.of[0].value, new Expression(r.of[0].condition), new Expression(ofi.objective));
+                        _pthis.rewards.push(newReward);
+                        _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                    });
+                }
             });
         });
+    }
+
+    /**
+     * Equalize the number of penalties and rewards with 0
+     */
+    private equalizePenaltyReward(): void {
+
+        var _pthis = this;
+
+        this.agreement.terms.guarantees.forEach((g, gi) => {
+            g.of.forEach((_of, ofi) => {
+
+                
+                // Update agreement
+                var of = [{
+                    over: {},
+                    of: [{
+                        value: 0,
+                        condition: "true"
+                    }]
+                }];
+
+                if (!_of.penalties) {
+
+                    let def = _pthis.getPricingPenalty();
+                    of[0].over[def.name] = null; // set def name as key
+                    // Add penalty to agreement
+                    _pthis.agreement.terms.guarantees[gi].of[ofi]["penalties"] = of;
+                    // Add penalty to property
+                    let newPenalty: Penalty = new Penalty(g.id, def, 0,
+                        new Expression("true"),
+                        new Expression(_of.objective)
+                    );
+                    _pthis.penalties.push(newPenalty);
+                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name,
+                        new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+
+                }
+
+                if (!_of.rewards) {
+
+                    let def = _pthis.getPricingReward();
+                    of[0].over[def.name] = null; // set def name as key
+                    // Add reward to agreement
+                    _pthis.agreement.terms.guarantees[gi].of[ofi]["rewards"] = of;
+                    // Add reward to property
+                    let newReward: Reward = new Reward(g.id, def, 0,
+                        new Expression("true"),
+                        new Expression(_of.objective)
+                    );
+                    _pthis.rewards.push(newReward);
+                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name,
+                        new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+
+                }
+
+            });
+        });
+
     }
 
     private loadConstraints(): void {
@@ -400,6 +427,63 @@ export default class AgreementCompensationCSPModelBuilder {
         });
     }
 
+    private getMockInstance(mockSuffix: string): AgreementCompensationCSPModelBuilder {
+
+        var mockBuilder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+
+        mockBuilder.definitions = mockBuilder.definitions.map((def) => {
+            def.name = def.name + mockSuffix;
+            return def;
+        });
+
+        mockBuilder.metrics = mockBuilder.metrics.map((met) => {
+            met.name = met.name + mockSuffix;
+            return met;
+        });
+
+        mockBuilder.penalties = mockBuilder.penalties.map((p) => {
+            if (mockBuilder.cspModel.variables.filter((_p) => p.name === _p.id).length === 0) {
+                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
+                    p.name, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)
+                ));
+            }
+            if (p.condition.expr !== "true" && p.condition.expr !== "false") {
+                // Declare reward variable only if is a different text
+                p.condition.expr = p.condition.getMockExpression(mockSuffix);
+                p.condition.variables.forEach((v) => {
+                    if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + mockSuffix).length === 0) {
+                        mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
+                            v + mockSuffix, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)
+                        ));
+                    }
+                });
+            }
+            return p;
+        });
+
+        mockBuilder.rewards = mockBuilder.rewards.map((r) => {
+            if (mockBuilder.cspModel.variables.filter((_r) => r.name === _r.id).length === 0) {
+                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
+                    r.name, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)
+                ));
+            }
+            if (r.condition.expr !== "true" && r.condition.expr !== "false") {
+                // Declare reward variable only if is a different text
+                r.condition.expr = r.condition.getMockExpression(mockSuffix);
+                r.condition.variables.forEach((v) => {
+                    if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + mockSuffix).length === 0) {
+                        mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(
+                            v + mockSuffix, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)
+                        ));
+                    }
+                });
+            }
+            return r;
+        });
+
+        return mockBuilder;
+    }
+
     /**
      * Tries to obtain definition by name.
      * @param id Definition name
@@ -411,6 +495,14 @@ export default class AgreementCompensationCSPModelBuilder {
             ret = defs[0];
         }
         return ret;
+    }
+
+    private getPricingPenalty(): Definition {
+        return this.getDefinitionByName(this.agreement.terms.pricing.billing.penalties[0].over);
+    }
+
+    private getPricingReward(): Definition {
+        return this.getDefinitionByName(this.agreement.terms.pricing.billing.rewards[0].over);
     }
 
 }
