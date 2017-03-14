@@ -117,7 +117,6 @@ export default class AgreementCompensationCSPModelBuilder {
 
         let cspModel: typeof CSPModel = new CSPModel();
         cspModel.variables = mockBuilder.cspModel.variables;
-        cspModel.parameters = mockBuilder.cspModel.parameters;
         cspModel.constraints = [new CSPTools.CSPConstraint("ccc", cfc1.constraints[0].expression + " /\\ " + cfc2.constraints[0].expression +
             " /\\ " + penaltiesORRewardsConst + " /\\ " + utilityConst)];
         cspModel.goal = "satisfy";

@@ -88,7 +88,6 @@ class AgreementCompensationCSPModelBuilder {
         let cfc2 = mockBuilder.buildCFC();
         let cspModel = new CSPModel();
         cspModel.variables = mockBuilder.cspModel.variables;
-        cspModel.parameters = mockBuilder.cspModel.parameters;
         cspModel.constraints = [new CSPTools.CSPConstraint("ccc", cfc1.constraints[0].expression + " /\\ " + cfc2.constraints[0].expression +
                 " /\\ " + penaltiesORRewardsConst + " /\\ " + utilityConst)];
         cspModel.goal = "satisfy";
