@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-13
+governify-agreement-analyzer 0.1.1, built on: 2017-03-16
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -20,17 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 export default class Expression {
 
-    private _variables: string[];
+    private _variables: Set<string>;
 
     constructor(private _expr: string) {
         this.loadVariables();
     }
 
     private loadVariables(): void {
-        this._variables = this.expr.match(/[a-z_]\w*(?!\w*\s*\()/ig);
+        this._variables = new Set(this.expr.match(/(\b(?!true)(?!false)(?!\d))\w+/ig));
     }
 
-    get variables(): string[] {
+    get variables(): Set<string> {
         return this._variables;
     }
 
@@ -45,7 +45,8 @@ export default class Expression {
     getMockExpression(suffix: string): string {
         var expr: string = this.expr;
         this.variables.forEach((v) => {
-            expr = expr.replace(v, v + suffix);
+            var re = new RegExp(v, "g");
+            expr = expr.replace(re, v + suffix);
         });
         return expr;
     }

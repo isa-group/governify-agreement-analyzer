@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-13
+governify-agreement-analyzer 0.1.1, built on: 2017-03-16
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -22,7 +22,9 @@ import Definition from "./Definition";
 import Expression from "./Expression";
 
 export default class Reward {
+
     private _name: string;
+
     constructor(public guarantee: string, public over: Definition, public value: number,
         public condition: Expression, public objective: Expression) { }
 
@@ -35,11 +37,28 @@ export default class Reward {
     }
 
     get name(): string {
-        return "Reward_" + this.guarantee + "_" + this.over.name;
+        return "Reward_" + this.guarantee.replace(/\s/g, "") + "_" + this.over.name;
     }
 
-    getCFC(): string {
-        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + ")) xor ((" +
-            this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
+    getCFC1(): string {
+        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + "))";
+    }
+
+    getCFC2(): string {
+        return "((" + this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
+    }
+
+    static getCFC1(rewards: Reward[]): string {
+        let statements = rewards.map((r) => {
+            return r.getCFC1();
+        });
+        return "(" + statements.join(" xor ") + ")";
+    }
+
+    static getCFC2(rewards: Reward[]): string {
+        let statements = rewards.map((r) => {
+            return "((" + r.toLessComparison() + ") /\\ not (" + r.condition.expr + "))";
+        });
+        return "(" + statements.join(" \\/ ") + ")";
     }
 }

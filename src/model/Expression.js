@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-13
+governify-agreement-analyzer 0.1.1, built on: 2017-03-16
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -24,7 +24,7 @@ class Expression {
         this.loadVariables();
     }
     loadVariables() {
-        this._variables = this.expr.match(/[a-z_]\w*(?!\w*\s*\()/ig);
+        this._variables = new Set(this.expr.match(/(\b(?!true)(?!false)(?!\d))\w+/ig));
     }
     get variables() {
         return this._variables;
@@ -38,7 +38,8 @@ class Expression {
     getMockExpression(suffix) {
         var expr = this.expr;
         this.variables.forEach((v) => {
-            expr = expr.replace(v, v + suffix);
+            var re = new RegExp(v, "g");
+            expr = expr.replace(re, v + suffix);
         });
         return expr;
     }

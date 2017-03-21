@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-13
+governify-agreement-analyzer 0.1.1, built on: 2017-03-16
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -37,11 +37,28 @@ export default class Penalty {
     }
 
     get name(): string {
-        return "Penalty_" + this.guarantee + "_" + this.over.name;
+        return "Penalty_" + this.guarantee.replace(/\s/g, "") + "_" + this.over.name;
     }
 
-    getCFC(): string {
-        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + ")) xor ((" +
-            this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
+    getCFC1(): string {
+        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + "))";
+    }
+
+    getCFC2(): string {
+        return "((" + this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
+    }
+
+    static getCFC1(penalties: Penalty[]): string {
+        let statements = penalties.map((p) => {
+            return p.getCFC1();
+        });
+        return "(" + statements.join(" xor ") + ")";
+    }
+
+    static getCFC2(penalties: Penalty[]): string {
+        let statements = penalties.map((p) => {
+            return "((" + p.toLessComparison() + ") /\\ not (" + p.condition.expr + "))";
+        });
+        return "(" + statements.join(" \\/ ") + ")";
     }
 }

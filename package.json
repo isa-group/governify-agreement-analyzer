@@ -26,6 +26,7 @@
     "grunt-dockerize": "0.0.1",
     "grunt-header": "^1.1.0",
     "grunt-mocha-test": "^0.13.2",
+    "grunt-notify": "^0.4.5",
     "grunt-release-github": "1.0.4",
     "grunt-ts": "^6.0.0-beta.11",
     "grunt-tslint": "^4.0.0",

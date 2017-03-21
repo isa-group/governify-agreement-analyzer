@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-13
+governify-agreement-analyzer 0.1.1, built on: 2017-03-16
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -18,10 +18,48 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const CSPTools = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools");
+const logger = require("../logger/logger");
+const CSPRange = CSPTools.CSPRange;
 class Domain {
-    constructor(min, max) {
-        this.min = min;
-        this.max = max;
+    constructor(minOrType, max) {
+        if (!isNaN(max)) {
+            this._min = minOrType;
+            this._max = max;
+        }
+        else {
+            this.type = minOrType;
+        }
+    }
+    getRangeOrType() {
+        var rangeOrType;
+        if (this.type) {
+            rangeOrType = this.type;
+        }
+        else {
+            rangeOrType = new CSPRange(this.min, this.max);
+        }
+        return rangeOrType;
+    }
+    get min() {
+        if (isNaN(this._min) && !this._min) {
+            let errorMsg = "Unable to get min value from Domain";
+            logger.error(errorMsg);
+            throw new Error(errorMsg);
+        }
+        else {
+            return this._min;
+        }
+    }
+    get max() {
+        if (isNaN(this._max) && !this._max) {
+            let errorMsg = "Unable to get max value from Domain";
+            logger.error(errorMsg);
+            throw new Error(errorMsg);
+        }
+        else {
+            return this._max;
+        }
     }
 }
 exports.default = Domain;

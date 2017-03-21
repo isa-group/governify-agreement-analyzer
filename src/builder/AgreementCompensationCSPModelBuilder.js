@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-13
+governify-agreement-analyzer 0.1.1, built on: 2017-03-16
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -24,6 +24,8 @@ const Reward_1 = require("../model/Reward");
 const Definition_1 = require("../model/Definition");
 const Expression_1 = require("../model/Expression");
 const Domain_1 = require("../model/Domain");
+const Guarantee_1 = require("../model/Guarantee");
+const Objective_1 = require("../model/Objective");
 const CSPTools = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const cspConfig = CSPTools.config;
@@ -33,10 +35,13 @@ class AgreementCompensationCSPModelBuilder {
     constructor(agreement) {
         this.agreement = agreement;
         this.cspModel = new CSPModel();
+        this.guaranteePenaltyRewardCache = {};
+        this.loadGuarantees();
+    }
+    loadGuarantees() {
         this.loadMetrics();
         this.loadDefinitions();
-        this.loadPenalties();
-        this.loadRewards();
+        this.loadPenaltiesAndRewards();
         this.equalizePenaltyReward();
     }
     buildConstraints() {
@@ -49,141 +54,200 @@ class AgreementCompensationCSPModelBuilder {
         return cspModel;
     }
     buildCFC() {
-        let cfcPenalties = this.penalties.map((p) => {
-            return p.getCFC();
+        let cfcConstraints = this.guarantees.map((g, gi) => {
+            var expr = "";
+            g.ofs.forEach((_of) => {
+                if (expr !== "") {
+                    expr += " \\/ ";
+                }
+                expr += "(" + Penalty_1.default.getCFC1(_of.penalties) + " xor " + Reward_1.default.getCFC1(_of.rewards) + " xor " +
+                    Penalty_1.default.getCFC2(_of.penalties) + " xor " + Reward_1.default.getCFC2(_of.rewards) + ")";
+            });
+            return new CSPTools.CSPConstraint("cfc_" + g.id + gi, expr);
         });
-        let cfcRewards = this.rewards.map((r) => {
-            return r.getCFC();
-        });
-        let cfc = cfcPenalties.concat(cfcRewards);
         let cspModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = [new CSPTools.CSPConstraint("cfc", cfc.join(" xor "))];
+        cspModel.constraints = cfcConstraints;
         cspModel.goal = "satisfy";
         return cspModel;
     }
     buildCCC() {
         let mockSuffix = "2";
         var mockBuilder = this.getMockInstance(mockSuffix);
-        var penaltiesORRewardsConst = "";
-        for (var i = 0; i < this.penalties.length; i++) {
-            if (i === 0) {
-                penaltiesORRewardsConst += "((" + this.penalties[i].name + " > " + mockBuilder.penalties[i].name + ") \\/ " +
-                    "(" + this.rewards[i].name + " < " + mockBuilder.rewards[i].name + ") \\/ " +
-                    "not ((" + this.penalties[i].name + ") * (" + this.rewards[i].name + ") == 0))";
-            }
-            else {
-                penaltiesORRewardsConst += " /\\ ((" + this.penalties[i].name + " > " + mockBuilder.penalties[i].name + ") \\/ " +
-                    "(" + this.rewards[i].name + " < " + mockBuilder.rewards[i].name + "))";
-            }
-        }
-        var utilityConst = "";
-        for (var i = 0; i < this.metrics.length; i++) {
-            if (utilityConst !== "") {
-                utilityConst += " /\\ ";
-            }
-            utilityConst += "(-(" + this.metrics[i].name + ") > -(" + mockBuilder.metrics[i].name + "))";
-        }
-        let cfc1 = this.buildCFC();
-        let cfc2 = mockBuilder.buildCFC();
+        var _pthis = this;
+        let cccConstraints1 = this.buildCFC().constraints;
+        let cccConstraints2 = mockBuilder.buildCFC().constraints;
+        let cccConstraints3 = this.guarantees.map((g, gi) => {
+            var expr = "";
+            g.ofs.forEach((_of, _ofi) => {
+                let penalCompareExpr = _of.penalties.map((p, pi) => {
+                    return "(" + p.name + " > " + mockBuilder.guarantees[gi].ofs[_ofi].penalties[pi].name + ")";
+                }).join(" /\\ ");
+                let rewardCompareExpr = _of.rewards.map((p, pi) => {
+                    return "(" + p.name + " < " + mockBuilder.guarantees[gi].ofs[_ofi].rewards[pi].name + ")";
+                }).join(" /\\ ");
+                let penalRewardProductExpr = "not (" + _pthis.guaranteePenaltyRewardCache[g.id].penalties
+                    .concat(_pthis.guaranteePenaltyRewardCache[g.id].rewards)
+                    .join(" * ") + " == 0)";
+                if (expr !== "") {
+                    expr += " \\/ ";
+                }
+                expr += "(" + penalCompareExpr + " \\/ " + rewardCompareExpr + " \\/ " + penalRewardProductExpr + ")";
+            });
+            return new CSPTools.CSPConstraint("ccc_3", expr);
+        });
+        var cccConstraints4 = this.guarantees.map((g, gi) => {
+            return g.ofs.map((_of, _ofi) => {
+                let var1 = new CSPTools.CSPVar("ccc_utility_" + gi + _ofi + "1", new CSPTools.CSPRange(0, 1));
+                let var2 = new CSPTools.CSPVar("ccc_utility_" + gi + _ofi + "2", new CSPTools.CSPRange(0, 1));
+                let constraint1 = new CSPTools.CSPConstraint(var1.id, "(" + var1.id + " == 1 /\\ (" + _of.objective + ")) xor (" +
+                    var1.id + " == 0 /\\ not (" + _of.objective + "))");
+                let constraint2 = new CSPTools.CSPConstraint(var2.id, "(" + var2.id + " == 1 /\\ (" + _of.objective + ")) xor (" +
+                    var2.id + " == 0 /\\ not (" + new Expression_1.default(_of.objective).getMockExpression(mockSuffix) + "))");
+                mockBuilder.cspModel.variables.push(var1, var2);
+                return new CSPTools.CSPConstraint("ccc_utility" + gi + _ofi, "(" + constraint1.expression + " /\\ " + constraint2.expression + ")");
+            });
+        });
         let cspModel = new CSPModel();
         cspModel.variables = mockBuilder.cspModel.variables;
-        cspModel.constraints = [new CSPTools.CSPConstraint("ccc", cfc1.constraints[0].expression + " /\\ " + cfc2.constraints[0].expression +
-                " /\\ " + penaltiesORRewardsConst + " /\\ " + utilityConst)];
+        cspModel.constraints = cccConstraints1.map((c, ci) => {
+            return new CSPTools.CSPConstraint("ccc_" + ci, c.expression + " /\\ " +
+                cccConstraints2[ci].expression + " /\\ " +
+                cccConstraints3[ci].expression + " /\\ " +
+                cccConstraints4[ci].map((c) => c.expression).join(" /\\ "));
+        });
         cspModel.goal = "satisfy";
         return cspModel;
     }
     buildCSC() {
         let cfc = this.buildCFC();
-        let penalties = this.penalties.map((p) => {
-            return "(" + p.name + " == " + p.over.domain.max + ")";
+        let cscPenaltyConstraints = this.guarantees.map((g, gi) => {
+            return new CSPTools.CSPConstraint("csc", g.ofs.map((_of, _ofi) => {
+                return _of.penalties.map((p) => {
+                    return "(" + p.name + " == " + p.over.domain.max + ")";
+                }).join(" /\\ ");
+            }).join(" /\\ "));
         });
-        let rewards = this.rewards.map((r) => {
-            return "(" + r.name + " == " + r.over.domain.max + ")";
+        let cscRewardConstraints = this.guarantees.map((g, gi) => {
+            return new CSPTools.CSPConstraint("csc", g.ofs.map((_of, _ofi) => {
+                return _of.rewards.map((r) => {
+                    return "(" + r.name + " == " + r.over.domain.max + ")";
+                }).join(" /\\ ");
+            }).join(" /\\ "));
         });
-        var penaltyRewardConst = "";
-        for (var i = 0; i < penalties.length; i++) {
-            if (penaltyRewardConst !== "") {
-                penaltyRewardConst += " /\\ ";
-            }
-            penaltyRewardConst += "(" + penalties[i] + " \\/ " + rewards[i] + ")";
-        }
         let cspModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = [new CSPTools.CSPConstraint("csc", cfc.constraints[0].expression + " /\\ " + penaltyRewardConst)];
+        cspModel.constraints = cfc.constraints.map((c, ci) => {
+            return new CSPTools.CSPConstraint("csc", "(" + c.expression + ") /\\ (" +
+                cscPenaltyConstraints[ci].expression + ") \\/ (" + cscRewardConstraints[ci].expression + ")");
+        });
         cspModel.goal = "satisfy";
         return cspModel;
     }
     buildGCC() {
         let cfc = this.buildCFC();
-        let penalties = this.penalties.map((p) => {
-            return "(" + p.name + " > 0 /\\ (" + p.objective.expr + "))";
+        let gccPenaltyConstraints = this.guarantees.map((g, gi) => {
+            return new CSPTools.CSPConstraint("gcc", g.ofs.map((_of, _ofi) => {
+                return _of.penalties.map((p) => {
+                    return "(" + p.name + " > 0 /\\ (" + p.objective.expr + "))";
+                }).join(" /\\ ");
+            }).join(" /\\ "));
         });
-        let rewards = this.rewards.map((r) => {
-            return "(" + r.name + " > 0 /\\ not (" + r.objective.expr + "))";
+        let gccRewardConstraints = this.guarantees.map((g, gi) => {
+            return new CSPTools.CSPConstraint("gcc", g.ofs.map((_of, _ofi) => {
+                return _of.rewards.map((r) => {
+                    return "(" + r.name + " > 0 /\\ not (" + r.objective.expr + "))";
+                }).join(" /\\ ");
+            }).join(" /\\ "));
         });
-        var penaltyRewardConst = "";
-        for (var i = 0; i < penalties.length; i++) {
-            if (penaltyRewardConst !== "") {
-                penaltyRewardConst += " /\\ ";
-            }
-            penaltyRewardConst += "(" + penalties[i] + " /\\ " + rewards[i] + ")";
-        }
         let cspModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = [new CSPTools.CSPConstraint("gcc", cfc.constraints[0].expression + " /\\ " + penaltyRewardConst)];
+        cspModel.constraints = cfc.constraints.map((c, ci) => {
+            return new CSPTools.CSPConstraint("gcc_" + ci, "(" + c.expression + ") /\\ (" +
+                gccPenaltyConstraints[ci].expression + ") /\\ (" + gccRewardConstraints[ci].expression + ")");
+        });
         cspModel.goal = "satisfy";
         return cspModel;
     }
     buildOGT() {
+        var _pthis = this;
+        this.guarantees.forEach((g, gi) => {
+            g.ofs.forEach((_of, _ofi) => {
+                let varUtil = new CSPTools.CSPVar("ccc_utility" + gi + _ofi, new CSPTools.CSPRange(0, 1));
+                let constraintUtil = new CSPTools.CSPConstraint(varUtil.id, "(" + varUtil.id + " == 1 /\\ (" + _of.objective + ")) xor (" +
+                    varUtil.id + " == 0 /\\ not (" + _of.objective + "))");
+                _pthis.cspModel.variables.push(varUtil);
+                _pthis.cspModel.constraints.push(constraintUtil);
+            });
+        });
         let cfc = this.buildCFC();
-        let penalties = this.penalties.map((p) => {
-            return "(" + p.name + " == 0)";
+        let ogtPenaltyConstraints = this.guarantees.map((g, gi) => {
+            return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
+                return _of.penalties.map((p) => {
+                    return "(" + p.name + " == 0)";
+                }).join(" /\\ ");
+            }).join(" /\\ "));
         });
-        let rewards = this.rewards.map((r) => {
-            return "(" + r.name + " == 0)";
+        let ogtRewardConstraints = this.guarantees.map((g, gi) => {
+            return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
+                return _of.rewards.map((r) => {
+                    return "(" + r.name + " == 0)";
+                }).join(" /\\ ");
+            }).join(" /\\ "));
         });
-        var penaltyRewardConst = "";
-        for (var i = 0; i < penalties.length; i++) {
-            if (penaltyRewardConst !== "") {
-                penaltyRewardConst += " /\\ ";
-            }
-            penaltyRewardConst += "(" + penalties[i] + " /\\ " + rewards[i] + ")";
-        }
         let cspModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = [new CSPTools.CSPConstraint("ogt", cfc.constraints[0].expression + " /\\ " + penaltyRewardConst)];
+        cspModel.constraints = cfc.constraints.map((c, ci) => {
+            return new CSPTools.CSPConstraint("ogt_" + ci, "(" + c.expression + ") /\\ (" +
+                ogtPenaltyConstraints[ci].expression + ") /\\ (" + ogtRewardConstraints[ci].expression + ")");
+        });
+        cspModel.goal = "satisfy";
         if (this.metrics.length === 0) {
             throw "Unable to find a metric to minimize";
         }
         else {
-            cspModel.goal = "minimize " + this.metrics[0].name;
+            cspModel.goal = "minimize ccc_utility00";
         }
         return cspModel;
     }
     buildOBT() {
+        var _pthis = this;
+        this.guarantees.forEach((g, gi) => {
+            g.ofs.forEach((_of, _ofi) => {
+                let varUtil = new CSPTools.CSPVar("ccc_utility" + gi + _ofi, new CSPTools.CSPRange(0, 1));
+                let constraintUtil = new CSPTools.CSPConstraint(varUtil.id, "(" + varUtil.id + " == 1 /\\ (" + _of.objective + ")) xor (" +
+                    varUtil.id + " == 0 /\\ not (" + _of.objective + "))");
+                _pthis.cspModel.variables.push(varUtil);
+                _pthis.cspModel.constraints.push(constraintUtil);
+            });
+        });
         let cfc = this.buildCFC();
-        let penalties = this.penalties.map((p) => {
-            return "(" + p.name + " == 0)";
+        let ogtPenaltyConstraints = this.guarantees.map((g, gi) => {
+            return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
+                return _of.penalties.map((p) => {
+                    return "(" + p.name + " == 0)";
+                }).join(" /\\ ");
+            }).join(" /\\ "));
         });
-        let rewards = this.rewards.map((r) => {
-            return "(" + r.name + " == 0)";
+        let ogtRewardConstraints = this.guarantees.map((g, gi) => {
+            return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
+                return _of.rewards.map((r) => {
+                    return "(" + r.name + " == 0)";
+                }).join(" /\\ ");
+            }).join(" /\\ "));
         });
-        var penaltyRewardConst = "";
-        for (var i = 0; i < penalties.length; i++) {
-            if (penaltyRewardConst !== "") {
-                penaltyRewardConst += " /\\ ";
-            }
-            penaltyRewardConst += "(" + penalties[i] + " /\\ " + rewards[i] + ")";
-        }
         let cspModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = [new CSPTools.CSPConstraint("obt", cfc.constraints[0].expression + " /\\ " + penaltyRewardConst)];
+        cspModel.constraints = cfc.constraints.map((c, ci) => {
+            return new CSPTools.CSPConstraint("ogt_" + ci, "(" + c.expression + ") /\\ (" +
+                ogtPenaltyConstraints[ci].expression + ") /\\ (" + ogtRewardConstraints[ci].expression + ")");
+        });
+        cspModel.goal = "satisfy";
         if (this.metrics.length === 0) {
             throw "Unable to find a metric to maximize";
         }
         else {
-            cspModel.goal = "maximize " + this.metrics[0].name;
+            cspModel.goal = "maximize ccc_utility00";
         }
         return cspModel;
     }
@@ -195,18 +259,9 @@ class AgreementCompensationCSPModelBuilder {
             var min = _pthis.agreement.terms.metrics[metricName].schema.minimum;
             var max = _pthis.agreement.terms.metrics[metricName].schema.maximum;
             var type = _pthis.agreement.terms.metrics[metricName].schema.type;
-            if (isNaN(min) || isNaN(max)) {
-                if (!(type in cspConfig.translator.typeMap)) {
-                    throw "Unable to find type \"" + type + "\" of metric \"" + metricName + "\"";
-                }
-                else {
-                    let cspType = cspConfig.translator.typeMap[type];
-                    min = minMaxMap[cspType].min;
-                    max = minMaxMap[cspType].max;
-                }
-            }
-            _pthis.metrics.push(new Metric_1.default(metricName, new Domain_1.default(min, max)));
-            _pthis.cspModel.variables.push(new CSPTools.CSPVar(metricName, new CSPTools.CSPRange(min, max)));
+            var domain = (isNaN(min) || isNaN(max)) ? new Domain_1.default(type) : new Domain_1.default(min, max);
+            _pthis.metrics.push(new Metric_1.default(metricName, domain));
+            _pthis.cspModel.variables.push(new CSPTools.CSPVar(metricName, domain.getRangeOrType()));
         });
     }
     loadDefinitions() {
@@ -217,78 +272,75 @@ class AgreementCompensationCSPModelBuilder {
             var min = _pthis.agreement.context.definitions.schemas[defName].minimum;
             var max = _pthis.agreement.context.definitions.schemas[defName].maximum;
             var type = _pthis.agreement.context.definitions.schemas[defName].type;
-            if (isNaN(min) || isNaN(max)) {
-                if (!(type in cspConfig.translator.typeMap)) {
-                    throw "Unable to find type \"" + type + "\" of definition \"" + defName + "\"";
-                }
-                else {
-                    let cspType = cspConfig.translator.typeMap[type];
-                    min = minMaxMap[cspType].min;
-                    max = minMaxMap[cspType].max;
-                }
-            }
-            _pthis.definitions.push(new Definition_1.default(defName, new Domain_1.default(min, max)));
-            _pthis.cspModel.variables.push(new CSPTools.CSPVar(defName, new CSPTools.CSPRange(min, max)));
+            var domain = (isNaN(min) || isNaN(max)) ? new Domain_1.default(type) : new Domain_1.default(min, max);
+            _pthis.definitions.push(new Definition_1.default(defName, domain));
+            _pthis.cspModel.variables.push(new CSPTools.CSPVar(defName, domain.getRangeOrType()));
         });
     }
-    loadPenalties() {
-        this.penalties = [];
+    addPenaltyToCache(guarantee, penalty) {
+        var _id = guarantee.id;
+        if (!(_id in this.guaranteePenaltyRewardCache)) {
+            this.guaranteePenaltyRewardCache[_id] = { penalties: [], rewards: [] };
+        }
+        this.guaranteePenaltyRewardCache[_id].penalties.push(penalty.name);
+    }
+    addRewardToCache(guarantee, reward) {
+        var _id = guarantee.id;
+        if (!(_id in this.guaranteePenaltyRewardCache)) {
+            this.guaranteePenaltyRewardCache[_id] = { penalties: [], rewards: [] };
+        }
+        this.guaranteePenaltyRewardCache[_id].rewards.push(reward.name);
+    }
+    loadPenaltiesAndRewards() {
         var _pthis = this;
+        this.guarantees = [];
         this.agreement.terms.guarantees.forEach((g) => {
+            var objectives = [];
             g.of.forEach((ofi) => {
+                var penalties = [];
+                var rewards = [];
                 if (ofi.penalties) {
-                    ofi.penalties.forEach((p) => {
+                    ofi.penalties.forEach((p, index) => {
                         var def = _pthis.definitions.filter((d) => d.name === Object.keys(p.over)[0])[0];
-                        var newPenal = new Penalty_1.default(g.id, def, p.of[0].value, new Expression_1.default(p.of[0].condition), new Expression_1.default(ofi.objective));
-                        _pthis.penalties.push(newPenal);
-                        _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenal.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                        p.of.forEach((pofi, ofindex) => {
+                            var newPenalty = new Penalty_1.default(g.id + index + ofindex, def, pofi.value, new Expression_1.default(pofi.condition), new Expression_1.default(ofi.objective));
+                            penalties.push(newPenalty);
+                            _pthis.addPenaltyToCache(g, newPenalty);
+                            _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
+                        });
                     });
                 }
-            });
-        });
-    }
-    loadRewards() {
-        this.rewards = [];
-        var _pthis = this;
-        this.agreement.terms.guarantees.forEach((g) => {
-            g.of.forEach((ofi) => {
                 if (ofi.rewards) {
-                    ofi.rewards.forEach((r) => {
+                    ofi.rewards.forEach((r, index) => {
                         var def = _pthis.definitions.filter((d) => d.name === Object.keys(r.over)[0])[0];
-                        var newReward = new Reward_1.default(g.id, def, r.of[0].value, new Expression_1.default(r.of[0].condition), new Expression_1.default(ofi.objective));
-                        _pthis.rewards.push(newReward);
-                        _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                        r.of.forEach((rofi, ofindex) => {
+                            var newReward = new Reward_1.default(g.id + index + ofindex, def, rofi.value, new Expression_1.default(rofi.condition), new Expression_1.default(ofi.objective));
+                            rewards.push(newReward);
+                            _pthis.addRewardToCache(g, newReward);
+                            _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
+                        });
                     });
                 }
+                objectives.push(new Objective_1.default(ofi.objective, penalties, rewards));
             });
+            _pthis.guarantees.push(new Guarantee_1.default(g.id, objectives));
         });
     }
     equalizePenaltyReward() {
         var _pthis = this;
-        this.agreement.terms.guarantees.forEach((g, gi) => {
-            g.of.forEach((_of, ofi) => {
-                var of = [{
-                        over: {},
-                        of: [{
-                                value: 0,
-                                condition: "true"
-                            }]
-                    }];
-                if (!_of.penalties) {
+        this.guarantees.forEach((g, gi) => {
+            g.ofs.forEach((_of, _ofi) => {
+                if (_of.penalties.length === 0) {
                     let def = _pthis.getPricingPenalty();
-                    of[0].over[def.name] = null;
-                    _pthis.agreement.terms.guarantees[gi].of[ofi]["penalties"] = of;
-                    let newPenalty = new Penalty_1.default(g.id, def, 0, new Expression_1.default("true"), new Expression_1.default(_of.objective));
-                    _pthis.penalties.push(newPenalty);
-                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                    let newPenalty = new Penalty_1.default(g.id + gi + _ofi, def, 0, new Expression_1.default("true"), new Expression_1.default(_of.objective));
+                    _of.penalties.push(newPenalty);
+                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
                 }
-                if (!_of.rewards) {
+                if (_of.rewards.length === 0) {
                     let def = _pthis.getPricingReward();
-                    of[0].over[def.name] = null;
-                    _pthis.agreement.terms.guarantees[gi].of[ofi]["rewards"] = of;
-                    let newReward = new Reward_1.default(g.id, def, 0, new Expression_1.default("true"), new Expression_1.default(_of.objective));
-                    _pthis.rewards.push(newReward);
-                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, new CSPTools.CSPRange(def.domain.min, def.domain.max)));
+                    let newReward = new Reward_1.default(g.id + gi + _ofi, def, 0, new Expression_1.default("true"), new Expression_1.default(_of.objective));
+                    _of.rewards.push(newReward);
+                    _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
                 }
             });
         });
@@ -320,49 +372,73 @@ class AgreementCompensationCSPModelBuilder {
             met.name = met.name + mockSuffix;
             return met;
         });
-        mockBuilder.penalties = mockBuilder.penalties.map((p) => {
-            if (mockBuilder.cspModel.variables.filter((_p) => p.name === _p.id).length === 0) {
-                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(p.name, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)));
-            }
-            if (p.condition.expr !== "true" && p.condition.expr !== "false") {
-                p.condition.expr = p.condition.getMockExpression(mockSuffix);
-                p.condition.variables.forEach((v) => {
-                    if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + mockSuffix).length === 0) {
-                        mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(v + mockSuffix, new CSPTools.CSPRange(p.over.domain.min, p.over.domain.max)));
+        mockBuilder.guarantees = mockBuilder.guarantees.map((g) => {
+            var objectives = [];
+            g.ofs.forEach((ofi) => {
+                var penalties = ofi.penalties.map((p) => {
+                    if (!mockBuilder.existVariable(p.name)) {
+                        mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(p.name, p.over.domain.getRangeOrType()));
                     }
+                    p.condition.expr = p.condition.getMockExpression(mockSuffix);
+                    p.condition.variables.forEach((v) => {
+                        if (!mockBuilder.existVariable(v + mockSuffix)) {
+                            let met = mockBuilder.getMetricByName(v + mockSuffix);
+                            mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(v + mockSuffix, met.domain.getRangeOrType()));
+                        }
+                    });
+                    return p;
                 });
-            }
-            return p;
-        });
-        mockBuilder.rewards = mockBuilder.rewards.map((r) => {
-            if (mockBuilder.cspModel.variables.filter((_r) => r.name === _r.id).length === 0) {
-                mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(r.name, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)));
-            }
-            if (r.condition.expr !== "true" && r.condition.expr !== "false") {
-                r.condition.expr = r.condition.getMockExpression(mockSuffix);
-                r.condition.variables.forEach((v) => {
-                    if (mockBuilder.cspModel.variables.filter((_v) => _v.id === v + mockSuffix).length === 0) {
-                        mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(v + mockSuffix, new CSPTools.CSPRange(r.over.domain.min, r.over.domain.max)));
+                var rewards = ofi.rewards.map((r) => {
+                    if (!mockBuilder.existVariable(r.name)) {
+                        mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(r.name, r.over.domain.getRangeOrType()));
                     }
+                    r.condition.expr = r.condition.getMockExpression(mockSuffix);
+                    r.condition.variables.forEach((v) => {
+                        if (!mockBuilder.existVariable(v + mockSuffix)) {
+                            let met = mockBuilder.getMetricByName(v + mockSuffix);
+                            mockBuilder.cspModel.variables.push(new CSPTools.CSPVar(v + mockSuffix, met.domain.getRangeOrType()));
+                        }
+                    });
+                    return r;
                 });
-            }
-            return r;
+                objectives.push(new Objective_1.default(ofi.objective, penalties, rewards));
+            });
+            return new Guarantee_1.default(g.id, objectives);
         });
         return mockBuilder;
     }
-    getDefinitionByName(id) {
+    existVariable(name) {
+        return this.cspModel.variables.filter((_v) => _v.id === name).length > 0;
+    }
+    getDefinitionByName(name) {
         var ret;
-        let defs = this.definitions.filter((d) => id === d.name);
+        let defs = this.definitions.filter((d) => name === d.name);
         if (defs.length > 0) {
             ret = defs[0];
         }
         return ret;
     }
+    getMetricByName(name) {
+        var ret;
+        let mets = this.metrics.filter((d) => name === d.name);
+        if (mets.length > 0) {
+            ret = mets[0];
+        }
+        return ret;
+    }
     getPricingPenalty() {
-        return this.getDefinitionByName(this.agreement.terms.pricing.billing.penalties[0].over);
+        return this.getDefinitionByName(Object.keys(this.agreement.terms.pricing.billing.penalties[0].over)[0]);
     }
     getPricingReward() {
-        return this.getDefinitionByName(this.agreement.terms.pricing.billing.rewards[0].over);
+        var rewards = this.agreement.terms.pricing.billing.rewards;
+        var def;
+        if (!rewards) {
+            def = this.getPricingPenalty();
+        }
+        else {
+            def = this.getDefinitionByName(Object.keys(this.agreement.terms.pricing.billing.rewards[0].over)[0]);
+        }
+        return def;
     }
 }
 exports.default = AgreementCompensationCSPModelBuilder;

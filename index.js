@@ -1,5 +1,6 @@
 'use strict';
 
+var AgreementModel = require('./src/model/AgreementModel').default;
 var AgreementAnalyzer = require('./src/operators/Analyzer').default;
 var AgreementCompensationCSPModelBuilder = require('./src/builder/AgreementCompensationCSPModelBuilder').default
 
@@ -51,6 +52,7 @@ SwaggerServer.prototype.initialize = (app) => {
 };
 
 AgreementAnalyzer.api = SwaggerServer;
+AgreementAnalyzer.AgreementModel = AgreementModel;
 AgreementAnalyzer.AgreementCompensationCSPModelBuilder = AgreementCompensationCSPModelBuilder;
 
 module.exports = AgreementAnalyzer;

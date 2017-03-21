@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-13
+governify-agreement-analyzer 0.1.1, built on: 2017-03-16
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -37,6 +37,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-ts");
 
     grunt.loadNpmTasks("grunt-tslint");
+
+    grunt.loadNpmTasks('grunt-notify');
 
     // Project configuration.
     grunt.initConfig({
@@ -123,6 +125,16 @@ module.exports = function (grunt) {
                     noFail: false // Optionally set to not fail on failed tests (will still fail on other errors)
                 },
                 src: ['tests/remote/**/*.js']
+            },
+            compensations: {
+                options: {
+                    reporter: 'spec',
+                    //captureFile: 'test.results<%= grunt.template.today("yyyy-mm-dd:HH:mm:ss") %>.txt', // Optionally capture the reporter output to a file
+                    quiet: false, // Optionally suppress output to standard out (defaults to false)
+                    clearRequireCache: false, // Optionally clear the require cache before running tests (defaults to false)
+                    noFail: false // Optionally set to not fail on failed tests (will still fail on other errors)
+                },
+                src: ['tests/**/compensations.test.js']
             }
         },
 
@@ -150,7 +162,7 @@ module.exports = function (grunt) {
         watch: {
             scripts: {
                 files: ['src/**/*.ts'],
-                tasks: ['ts', 'tslint']
+                tasks: ['ts', 'tslint', 'notify_hooks']
             }
         },
 
@@ -207,6 +219,16 @@ module.exports = function (grunt) {
             },
             files: {
                 src: ["src/**/*.ts"]
+            }
+        },
+
+        notify_hooks: {
+            options: {
+                enabled: true,
+                max_jshint_notifications: 5, // maximum number of notifications from jshint output
+                title: "Project Name", // defaults to the name in package.json, or will use project directory's name
+                success: false, // whether successful grunt executions should be notified automatically
+                duration: 3 // the duration of notification in seconds, for `notify-send only
             }
         }
     });
