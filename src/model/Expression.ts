@@ -38,6 +38,10 @@ export default class Expression {
         return this._expr;
     }
 
+    set variables(variables: Set<string>) {
+        this._variables = variables;
+    }
+
     set expr(expr: string) {
         this._expr = expr;
     }

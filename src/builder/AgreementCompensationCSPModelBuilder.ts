@@ -69,6 +69,9 @@ export default class AgreementCompensationCSPModelBuilder {
 
     }
 
+    /**
+     * Obtain a CSP model for CFC execution.
+     */
     buildCFC(): typeof CSPModel {
 
         let cfcConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
@@ -92,6 +95,9 @@ export default class AgreementCompensationCSPModelBuilder {
 
     }
 
+    /**
+     * Obtain a CSP model for CCC execution.
+     */
     buildCCC(): typeof CSPModel {
 
         // Create mock builder
@@ -132,35 +138,41 @@ export default class AgreementCompensationCSPModelBuilder {
         });
 
         // Store all utility function constraints for each "objective" inside a guarantee
-        var cccConstraints4: typeof CSPTools.CSPConstraint[][] = this.guarantees.map((g, gi) => {
-            // Store it by using guarantee index
+        let cccConstraints4 = this.guarantees.map((g, gi) => {
             return g.ofs.map((_of, _ofi) => {
-                //TODO: check which kind of utility function to use.
+
                 // Create utility variables
-                let var1: typeof CSPTools.CSPVar = new CSPTools.CSPVar("ccc_utility_" + gi + _ofi + "1", new CSPTools.CSPRange(0, 1));
-                let var2: typeof CSPTools.CSPVar = new CSPTools.CSPVar("ccc_utility_" + gi + _ofi + "2", new CSPTools.CSPRange(0, 1));
-                // Create utility functions
-                let constraint1: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
-                    var1.id, "(" + var1.id + " == 1 /\\ (" + _of.objective + ")) xor (" +
-                    var1.id + " == 0 /\\ not (" + _of.objective + "))");
-                let constraint2: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
-                    var2.id, "(" + var2.id + " == 1 /\\ (" + _of.objective + ")) xor (" +
-                    var2.id + " == 0 /\\ not (" + new Expression(_of.objective).getMockExpression(mockSuffix) + "))");
-                // Update model with new variables
-                mockBuilder.cspModel.variables.push(var1, var2);
-                // Store utility functions for each objective
-                return new CSPTools.CSPConstraint("ccc_utility" + gi + _ofi, "(" + constraint1.expression + " /\\ " + constraint2.expression + ")");
+                let utility: UtilityFunction = _pthis.getUtilityFunction("ccc_objectives_utility" + gi + _ofi, new Expression(_of.objective));
+                let mockUtility: UtilityFunction = mockBuilder.getUtilityFunction("ccc_objectives_utility" + gi + _ofi, new Expression(_of.objective));
+
+                // Declare mock constraint and variables
+                mockUtility.var.id = mockUtility.var.id + mockSuffix;
+                let expression: Expression = new Expression(mockUtility.constraint.expression);
+                expression.variables = new Set([...expression.variables].map((_v) => _pthis.cspModel.variables.push(_v + mockSuffix)));
+                mockUtility.constraint = expression.getMockExpression(mockSuffix);
+
+                // _pthis.cspModel.variables.push(utility.var);
+                // _pthis.cspModel.constraints.push(utility.constraint);
+                mockBuilder.cspModel.variables.push(utility.var);
+                mockBuilder.cspModel.constraints.push(utility.constraint);
+                mockBuilder.cspModel.variables.push(mockUtility.var);
+                mockBuilder.cspModel.constraints.push(mockUtility.constraint);
+
+                return utility.var.id + " > " + mockUtility.var.id;
+
             });
+
         });
 
         let cspModel: typeof CSPModel = new CSPModel();
         cspModel.variables = mockBuilder.cspModel.variables;
         cspModel.constraints = cccConstraints1.map((c, ci) => {
-            return new CSPTools.CSPConstraint("ccc_" + ci, c.expression + " /\\ " +
+            return new CSPTools.CSPConstraint("ccc_" + ci,
+                c.expression + " /\\ " +
                 cccConstraints2[ci].expression + " /\\ " +
                 cccConstraints3[ci].expression + " /\\ " +
                 // Get all constraints for this index
-                cccConstraints4[ci].map((c: typeof CSPTools.CSPConstraint) => c.expression).join(" /\\ "));
+                cccConstraints4[ci].join(" /\\ "));
         });
         cspModel.goal = "satisfy";
 
@@ -168,6 +180,9 @@ export default class AgreementCompensationCSPModelBuilder {
 
     }
 
+    /**
+     * Obtain a CSP model for CSC execution.
+     */
     buildCSC(): typeof CSPModel {
 
         let cfc = this.buildCFC(); // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
@@ -200,6 +215,9 @@ export default class AgreementCompensationCSPModelBuilder {
 
     }
 
+    /**
+     * Obtain a CSP model for GCC execution.
+     */
     buildGCC(): typeof CSPModel {
 
         let cfc = this.buildCFC();
@@ -232,28 +250,71 @@ export default class AgreementCompensationCSPModelBuilder {
 
     }
 
+    /**
+     * Obtain a CSP model for OBT.
+     */
     buildOGT(): typeof CSPModel {
 
-        var _pthis = this;
-        // Store all utility function constraints for each "objective" inside a guarantee
-        // FIXME: 
-        this.guarantees.forEach((g, gi) => {
-            // Store it by using guarantee index
-            g.ofs.forEach((_of, _ofi) => {
-                //TODO: check which kind of utility function to use.
-                // Create utility variables
-                let varUtil: typeof CSPTools.CSPVar = new CSPTools.CSPVar("ccc_utility" + gi + _ofi, new CSPTools.CSPRange(0, 1));
-                // Create utility functions
-                let constraintUtil: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
-                    varUtil.id, "(" + varUtil.id + " == 1 /\\ (" + _of.objective + ")) xor (" +
-                    varUtil.id + " == 0 /\\ not (" + _of.objective + "))");
-                // Update model with new variables
-                _pthis.cspModel.variables.push(varUtil);
-                _pthis.cspModel.constraints.push(constraintUtil);
-            });
-        });
+        return this.buildOptimalThreshold("minimize");
 
-        let cfc = this.buildCFC(); // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
+    }
+
+    /**
+     * Obtain a CSP model for OBT.
+     */
+    buildOBT(): typeof CSPModel {
+
+        return this.buildOptimalThreshold("maximize");
+
+    }
+
+    /**
+     * Loads the utility function variable and constraint statements and returns a UtilityFunction object.
+     */
+    private loadUtilityFunction(): UtilityFunction {
+
+        var _pthis = this;
+
+        // Store all utility function constraints for each "objective" inside of each guarantee
+        let aggregatedUtilityFunction: string = "(" + this.guarantees.map((g, gi) => {
+            // Obtain objectives 
+            return "(" + g.ofs.map((_of, _ofi) => {
+                let utility: UtilityFunction = _pthis.getUtilityFunction("ccc_objectives_utility" + gi + _ofi, new Expression(_of.objective));
+                _pthis.cspModel.variables.push(utility.var);
+                _pthis.cspModel.constraints.push(utility.constraint);
+                return utility.var.id;
+            }).join(" + ") + ")";
+
+            // if (aggregatedObjectives.length > 1) {
+            //     let utility: UtilityFunction = {};
+            //     utility.var = new CSPTools.CSPVar("ccc_utility" + gi, new Domain(0, 1).getRangeOrType());
+            //     utility.constraint = new CSPTools.CSPConstraint("ccc_utility" + gi, aggregatedObjectives);
+            //     _pthis.cspModel.variables.push(utility.var);
+            //     _pthis.cspModel.constraints.push(utility.constraint);
+            // }
+
+            // return utility.var.id;
+        }).join(" + ") + ")";
+
+        let utility: UtilityFunction = {};
+        utility.var = new CSPTools.CSPVar("ccc_aggregated_utility", new Domain(0, 1).getRangeOrType());
+        utility.constraint = new CSPTools.CSPConstraint("ccc_aggregated_utility", utility.var.id + " == " + aggregatedUtilityFunction);
+        this.cspModel.variables.push(utility.var);
+        this.cspModel.constraints.push(utility.constraint);
+
+        return utility;
+    }
+
+    /**
+     * Obtain a CSP model for OGT or OBT execution.
+     * @param solveType "minimize" or "maximize" for OGT or OBT
+     */
+    private buildOptimalThreshold(solveType: string): typeof CSPModel {
+
+        var _pthis = this;
+
+        let utility: UtilityFunction = this.loadUtilityFunction();
+        let cfc: typeof CSPModel = this.buildCFC(); // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
 
         let ogtPenaltyConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
             return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
@@ -273,78 +334,51 @@ export default class AgreementCompensationCSPModelBuilder {
 
         let cspModel: typeof CSPModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = cfc.constraints.map((c, ci) => {
+
+        cspModel.constraints = this.cspModel.constraints.concat(cfc.constraints.map((c, ci) => {
             return new CSPTools.CSPConstraint("ogt_" + ci, "(" + c.expression + ") /\\ (" +
                 ogtPenaltyConstraints[ci].expression + ") /\\ (" + ogtRewardConstraints[ci].expression + ")");
-        });
-        cspModel.goal = "satisfy";
+        }));
 
         // Get first metric to minimize
         if (this.metrics.length === 0) {
             throw "Unable to find a metric to minimize";
         } else {
-            cspModel.goal = "minimize ccc_utility00";
+            cspModel.goal = solveType + " " + utility.var.id;
         }
 
         return cspModel;
 
     }
 
-    buildOBT(): typeof CSPModel {
+    /**
+     * Obtain an utility function from a guarantee objective expression and considering which kind of expression it is.
+     * @param name Name of utility function
+     * @param expression Guarantee objective expression
+     */
+    private getUtilityFunction(name: string, expression: Expression): UtilityFunction {
 
-        var _pthis = this;
-        // Store all utility function constraints for each "objective" inside a guarantee
-        // FIXME: 
-        this.guarantees.forEach((g, gi) => {
-            // Store it by using guarantee index
-            g.ofs.forEach((_of, _ofi) => {
-                //TODO: check which kind of utility function to use.
-                // Create utility variables
-                let varUtil: typeof CSPTools.CSPVar = new CSPTools.CSPVar("ccc_utility" + gi + _ofi, new CSPTools.CSPRange(0, 1));
-                // Create utility functions
-                let constraintUtil: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
-                    varUtil.id, "(" + varUtil.id + " == 1 /\\ (" + _of.objective + ")) xor (" +
-                    varUtil.id + " == 0 /\\ not (" + _of.objective + "))");
-                // Update model with new variables
-                _pthis.cspModel.variables.push(varUtil);
-                _pthis.cspModel.constraints.push(constraintUtil);
-            });
-        });
+        var utility: UtilityFunction = {};
+        var variables = expression.variables;
 
-        let cfc = this.buildCFC(); // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
+        // Decide which utility function to define
+        // if (variables.size > 1 || (variables.size == 1 && !expression.expr.match(/[<>]/))) {
+        utility.var = new CSPTools.CSPVar(name, new CSPTools.CSPRange(0, 1));
+        utility.constraint = new CSPTools.CSPConstraint(utility.var.id,
+            "(" + utility.var.id + " == 1 /\\ (" + expression.expr + ")) xor (" +
+            utility.var.id + " == 0 /\\ not (" + expression.expr + "))");
+        // } else {
+        //     // There is only a number variable in objective expression
+        //     let expressionVar: string = variables.values().next().value;
+        //     let metricUtil: Metric = this.getMetricByName(expressionVar);
+        //     _var = new CSPTools.CSPVar(name, metricUtil.domain.getRangeOrType());
+        //     if (expression.expr.match(/</)) {
+        //         expressionVar = "-" + expressionVar;
+        //     }
+        //     _constraint = new CSPTools.CSPConstraint(_var.id, name + " == " + expressionVar);
+        // }
 
-        let ogtPenaltyConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
-            return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
-                return _of.penalties.map((p) => {
-                    return "(" + p.name + " == 0)";
-                }).join(" /\\ ");
-            }).join(" /\\ "));
-        });
-
-        let ogtRewardConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
-            return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
-                return _of.rewards.map((r) => {
-                    return "(" + r.name + " == 0)";
-                }).join(" /\\ ");
-            }).join(" /\\ "));
-        });
-
-        let cspModel: typeof CSPModel = new CSPModel();
-        cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = cfc.constraints.map((c, ci) => {
-            return new CSPTools.CSPConstraint("ogt_" + ci, "(" + c.expression + ") /\\ (" +
-                ogtPenaltyConstraints[ci].expression + ") /\\ (" + ogtRewardConstraints[ci].expression + ")");
-        });
-        cspModel.goal = "satisfy";
-
-        // Get first metric to maximize
-        if (this.metrics.length === 0) {
-            throw "Unable to find a metric to maximize";
-        } else {
-            cspModel.goal = "maximize ccc_utility00";
-        }
-
-        return cspModel;
+        return utility;
 
     }
 
@@ -624,4 +658,9 @@ export default class AgreementCompensationCSPModelBuilder {
         return def;
     }
 
+}
+
+interface UtilityFunction {
+    var?: typeof CSPTools.CSPVar;
+    constraint?: typeof CSPTools.CSPConstraint;
 }

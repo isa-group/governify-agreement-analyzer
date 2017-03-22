@@ -32,6 +32,9 @@ class Expression {
     get expr() {
         return this._expr;
     }
+    set variables(variables) {
+        this._variables = variables;
+    }
     set expr(expr) {
         this._expr = expr;
     }
