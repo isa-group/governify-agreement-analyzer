@@ -1,0 +1,161 @@
+---
+id: GNWT
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: Government of the Northwest Territories
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      invoicePenalty:
+        description: Percentage to decrease the amount invoiced for the project
+        type: integer
+        unit: '%'
+      invoiceReward:
+        description: Percentage to increase the amount invoiced for the project
+        type: integer
+        unit: '%'
+      feePenalty:
+        description: Percentage to decrease the next monthly fee
+        type: integer
+        unit: '%'
+      feeReward:
+        description: Percentage to increase the next monthly fee
+        type: integer
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            invoicePenalty:
+              $ref: '#/context/definitions/schemas/InvoicePenalty'
+        - over:
+            feePenalty:
+              $ref: '#/context/definitions/schemas/FeePenalty'
+      rewards:
+        - over:
+            feeReward:
+              $ref: '#/context/definitions/schemas/FeePenalty'
+  metrics:
+    daysBeforeMeetingDay:
+      schema:
+        description: Number of days before the meeting day
+        type: integer
+        unit: 'day'
+      computer: >-
+        http://GNWT/GNWT_DaysBeforeMeetingDay/
+    resolutionHours:
+      schema:
+        description: Hours to solve a problem
+        type: integer
+        unit: 'hour'
+      computer: >-
+        http://GNWT/GNWT_ResolutionHours/
+    maxResolutionDays:
+      schema:
+        description: Maximum number of days to solve a problem
+        type: integer
+        unit: 'day'
+      computer: >-
+        http://GNWT/GNWT_MaxResolutionDays/
+    elapseDaysUntilDelivery:
+      schema:
+        description: Percentage of the actual number of days to delivery versus planned
+        type: integer
+        unit: 'day'
+      computer: >-
+        http://GNWT/GNWT_elapsedDaysUntilDelivery/
+  guarantees:
+    - id: GNWT-GNWT_QUARTERLY_STATUS_REPORT
+      scope: {}
+      of:
+        - objective: "How to express 'No SLO'?"
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          with: {}
+          penalties:
+            - over:
+                invoicePenalty:
+                  $ref: '#/context/definitions/schemas/InvoicePenalty'
+              of:
+                - value: '-5'
+                  condition: daysBeforeMeetingDay < 5
+    - id: GNWT_RESOLUTION_WITH_SEVERITY_CODE_1
+      scope: {}
+      of:
+        - objective: resolutionHours <= 4
+          comment: "How to express 'OnlyIf SeverityCode = 1'?"
+          with:
+            resolutionHours: {}
+          scope: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                feePenalty:
+                  $ref: '#/context/definitions/schemas/FeePenalty'
+              of:
+                - value: '-10'
+                  condition: resolutionHours > 4
+                  comment: "How to express 'exists'?"
+          rewards:
+            - over:
+                feeReward:
+                  $ref: '#/context/definitions/schemas/FeeReward'
+              of:
+                - value: '10'
+                  condition: resolutionHours <= 2
+                  comment: "How to express 'all'?"
+    - id: GNWT_MAX_PROBLEM_AGING
+      scope: {}
+      of:
+        - objective: ""
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          with: {}
+          rewards:
+            - over:
+                feeReward:
+                  $ref: '#/context/definitions/schemas/FeeReward'
+              of:
+                - value: '5'
+                  condition: maxResolutionDays <= 60
+    - id: GNWT_PROJECT_DELIVERY
+      scope: {}
+      of:
+        - objective: ""
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          with: {}
+          penalties:
+            - over:
+                invoicePenalty:
+                  $ref: '#/context/definitions/schemas/InvoicePenalty'
+              of:
+                - value: '-10'
+                  condition: elapsedDaysUntilDelivery > 20
+          rewards:
+            - over:
+                invoicePenalty:
+                  $ref: '#/context/definitions/schemas/InvoiceReward'
+              of:
+                - value: '5'
+                  condition: elapsedDaysUntilDelivery < 20

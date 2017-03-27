@@ -1,0 +1,61 @@
+---
+id: CLOUD_LOCK_CYBER_SECURITY
+version: "1.0"
+type: agreement
+context:
+  provider: CLOUD_LOCK
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      DaysOfService:
+        description: Days of Service as credits in a calendar month
+        type: integer
+        minimum: 0
+        maximum: 100
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            DaysOfService:
+              $ref: '#/context/definitions/schemas/DaysOfService'
+  metrics:
+    MUP:
+      schema:
+        description: Monthly Uptime Percentage
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: '%'
+      computer: >-
+        http://CloudLock/CyberSecurity/MUP/
+  guarantees:
+    - id: CLOUD_LOCK_CYBER_SECURITY
+      scope: {}
+      of:
+        - objective: 'MUP <= 99'
+          with:
+            MUP: {}
+          scope: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                DaysOfService:
+                  $ref: '#/context/definitions/schemas/DaysOfService'
+              of:
+                - value: '2'		
+                  condition: 'MUP >= 97.5 && MUP < 99'
+                - value: '5'		
+                  condition: 'MUP >= 95 && MUP < 97.5'
+                - value: '10'		
+                  condition: 'MUP < 95'
+              upTo: 10

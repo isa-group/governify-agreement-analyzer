@@ -1,0 +1,108 @@
+---
+id: RACKSPACE CLOUD SERVER
+version: "1.0"
+type: agreement
+context:
+  provider: Rackspace
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Credits:
+        description: Credits 
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Credits:
+              $ref: '#/context/definitions/schemas/Credits'
+  metrics:
+    Monthly_Availability:
+      schema:
+        description: Availability percentage in a month
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: '%'
+      computer: >-
+        http://Rackspace/Cloud_Server/Monthly_Availability/
+    Restoration:
+      schema:
+        description: Restoration to recover the system
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: 'hour'
+      computer: >-
+        http://Rackspace/Cloud_Server/Restoration/		
+    Unavailability:
+      schema:
+        description: Duration of unavailability
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: 'hour'
+      computer: >-
+        http://Rackspace/Cloud_Server/Unavailability/	
+    ServiceFee:
+      schema:
+        description: Service fee for a month
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: '$'
+      computer: >-
+        http://Rackspace/Cloud_Server/ServiceFee/			
+  guarantees:
+    - id: CONTROL_PLANE
+      scope: {}
+      of:
+        - objective: 'Monthly_Availability >= 99.9'
+          with: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Credits:
+                  $ref: '#/context/definitions/schemas/Credits'
+              of:
+                - value: '-10'		
+                  condition: 'Monthly_Availability >= 99.5 && Monthly_Availability < 99.9'
+                - value: '-20'		
+                  condition: 'Monthly_Availability >= 99 && Monthly_Availability < 99.5'
+                - value: '-30'		
+                  condition: 'Monthly_Availability < 99'
+    - id: DATA_PLANE_HOSTING
+      scope: {}
+      of:
+        - objective: 'Restoration <= 1'
+          with: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Credits:
+                  $ref: '#/context/definitions/schemas/Credits'
+              of:
+                - value: '-5 * ServiceFee * Unavailability'
+                  with: 
+                    ServiceFee: {}
+                    Unavailability: {}
+                  condition: 'Restoration > 1'
+              upTo: 100

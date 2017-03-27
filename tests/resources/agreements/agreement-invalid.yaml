@@ -12,18 +12,26 @@ context:
       invoicePenalty:
         description: Percentage to decrease the amount invoiced for the project
         type: integer
+        minimum: 0
+        maximum: 100
         unit: '%'
       invoiceReward:
         description: Percentage to increase the amount invoiced for the project
         type: integer
+        minimum: 0
+        maximum: 100
         unit: '%'
       feePenalty:
         description: Percentage to decrease the next monthly fee
         type: integer
+        minimum: 0
+        maximum: 100
         unit: '%'
       feeReward:
         description: Percentage to increase the next monthly fee
         type: integer
+        minimum: 0
+        maximum: 100
         unit: '%'
 terms:
   pricing:
@@ -46,6 +54,8 @@ terms:
       schema:
         description: Number of days before the meeting day
         type: integer
+        minimum: 0
+        maximum: 100
         unit: 'day'
       computer: >-
         http://GNWT/GNWT_DaysBeforeMeetingDay/
@@ -53,6 +63,8 @@ terms:
       schema:
         description: Hours to solve a problem
         type: integer
+        minimum: 0
+        maximum: 100
         unit: 'hour'
       computer: >-
         http://GNWT/GNWT_ResolutionHours/
@@ -60,6 +72,8 @@ terms:
       schema:
         description: Maximum number of days to solve a problem
         type: integer
+        minimum: 0
+        maximum: 100
         unit: 'day'
       computer: >-
         http://GNWT/GNWT_MaxResolutionDays/
@@ -67,6 +81,8 @@ terms:
       schema:
         description: Percentage of the actual number of days to delivery versus planned
         type: integer
+        minimum: 0
+        maximum: 100
         unit: 'day'
       computer: >-
         http://GNWT/GNWT_elapsedDaysUntilDelivery/

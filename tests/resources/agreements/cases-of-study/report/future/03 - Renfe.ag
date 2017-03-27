@@ -1,0 +1,197 @@
+---
+id: RENFE
+version: "1.0"
+type: agreement
+context:
+  provider: Renfe
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Compensation:
+        description: Percentage of ticket to be compensated in case of penalty. 
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+      TicketPrice:
+        description: Price of a trip
+        type: float
+        minimum: 0.0
+        maximum: 100.0
+        unit: 'euro'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: PayPerService # by service or similar
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Compensation:
+              $ref: '#/context/definitions/schemas/Compensation'
+  metrics:			  
+    Service_Ok:
+      schema:
+        description: The service was not delayed && conditions were fulfilled
+        type: boolean
+      computer: >-
+        http://Movistar/Service_Ok/
+    Cancellation:
+      schema:
+        description: The service was cancelled
+        type: boolean
+      computer: >-
+        http://Movistar/Cancelation/
+    Service_Alternate:
+      schema:
+        description: The client has selected an alternate service as compensation
+        type: boolean
+      computer: >-
+        http://Movistar/Service_Alternate/
+    Service_Alternate_Plus:
+      schema:
+        description: The client has selected an alternate service as compensation as well as payments due to support && lodging
+        type: boolean
+      computer: >-
+        http://Movistar/Service_Alternate_Plus/
+    Cancellation_48_Hours:
+      schema:
+        description: The service was cancelled before 48 hours of service
+        type: boolean
+      computer: >-
+        http://Movistar/Cancelation_48_Hours/
+    Cancellation_4_Hours:
+      schema:
+        description: The service was cancelled before 4 hours of service
+        type: boolean
+      computer: >-
+        http://Movistar/Cancelation_4_Hours/
+    Interruption_1_Hour:
+      schema:
+        description: The service was interrupted for an hour or less
+        type: boolean
+      computer: >-
+        http://Movistar/Interruption_1_Hour/
+    Interruption_More_Than_1_Hour:
+      schema:
+        description: The service was interrupted for more than an hour
+        type: boolean
+      computer: >-
+        http://Movistar/Interruption_More_Than_1_Hour/
+    Delay:
+      schema:
+        description: Delay on arrival to destination
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: 'minute'
+      computer: >-
+        http://Movistar/Delay/
+    MD:
+      schema:
+        description: The service is medium range [a kind of regional scope]
+        type: boolean
+      computer: >-
+        http://Movistar/MD/
+    AVE:
+      schema:
+        description: The service is AVE [very-high-speed train]
+        type: boolean
+      computer: >-
+        http://Movistar/AVE/
+  guarantees:
+    - id: Cancellation
+      scope: {}
+      of:
+        - objective: 'Service_Ok == true'
+          with:
+            Service_Ok: {}
+          window:
+            type: static
+            period: "How to model 'per-service?'"
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Compensation:
+                  $ref: '#/context/definitions/schemas/Compensation'
+              of:
+                - value: '100' 
+                  with:
+                    PriceTicket: {}
+                  condition: 'Cancellation == true'
+                - value: 'Service_Alternate == true' 
+                  with:
+                    Service_Alternate: {}
+                  condition: 'Cancellation_48_Hours == true'					  
+                - value: 'PriceTicket*2' 
+                  with:
+                    PriceTicket: {}
+                  condition: 'Cancellation_4_Hours == true'
+    - id: Interruption
+      scope: {}
+      of:
+        - objective: 'Service_Ok == true'
+          with:
+            Service_Ok: {}
+          window:
+            type: static
+            period: "How to model 'per-service?'"
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Compensation:
+                  $ref: '#/context/definitions/schemas/Compensation'
+              of:
+                - value: 'Service_Alternate == true' 
+                  with:  
+                    Service_Alternate: {}
+                  condition: 'Interruption_1_Hour == true'
+                - value: 'Service_Alternate_Plus == true' 
+                  with:
+                    Service_Alternate_Plus: {}
+                  condition: 'Interruption_More_1_Hour == true'	  
+    - id: Delay_MD
+      scope: {}
+      of:
+        - objective: 'Service_Ok == true'
+          precondition: 'MD == true'
+          with:
+            Service_Ok: {}
+          window:
+            type: static
+            period: "How to model 'per-service?'"
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Compensation:
+                  $ref: '#/context/definitions/schemas/Compensation'
+              of:
+                - value: '50' 
+                  condition: 'Delay < 90 && Delay >= 60'
+                - value: '100'
+                  condition: 'Delay >= 90'
+    - id: Delay_AVE
+      scope: {}
+      of:
+        - objective: 'Service_Ok == true'
+          precondition: 'AVE == true'
+          with:
+            Service_Ok: {}
+          window:
+            type: static
+            period: "How to model 'per-service?'"
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Compensation:
+                  $ref: '#/context/definitions/schemas/Compensation'
+              of:
+                - value: '100' 
+                  condition: 'Delay >= 10'

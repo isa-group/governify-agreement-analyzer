@@ -1,0 +1,91 @@
+---
+id: Bank of Baroda SLA
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: Bank of Baroda
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Deduction:
+        description: Deduction from monthly fee
+        type: integer
+        unit: '%'
+      EarnedBack:
+        description: Earned back from previous deduction
+        type: integer
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Deduction:
+              $ref: '#/context/definitions/schemas/Deduction'
+      rewards:
+        - over:
+            EarnedBack:
+              $ref: '#/context/definitions/schemas/EarnedBack'			  
+  metrics:
+    SLA_Parameters_Ok:
+      schema:
+        description: All levels (regarding SLA parameters) are met
+        type: bool
+      computer: >-
+        http://KeralaUniversity/Examinations/SLA_Parameters_Ok/
+    SLA_Parameters_Ok_For_2_Months:
+      schema:
+        description: All levels (regarding SLA parameters) have been met 2 months 
+        type: bool
+      computer: >-
+        http://KeralaUniversity/Examinations/SLA_Parameters_Ok/
+      parameters:
+        offset:
+          type: number
+          description: Offset over the current month
+    SLA_Parameters_Ok_For_4_Months:
+      schema:
+        description: All levels (regarding SLA parameters) have been met 4 months 
+        type: bool
+      computer: >-
+        http://KeralaUniversity/Examinations/SLA_Parameters_Ok/
+      parameters:
+        offset:
+          type: number
+          description: Offset over the current month
+  guarantees:
+    - id: Bank of Baroda SLA
+      scope: {}
+      of:
+        - objective: 'SLA_Parameters_Ok == true'
+          with:
+               SLA_Parameters_Ok: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Deduction:
+                  $ref: '#/context/definitions/schemas/Deduction'
+              of:
+                - value: '-15'
+                  condition: 'SLA_Parameters_Ok == false'
+          rewards:
+            - over:
+                EarnedBack:
+                  $ref: '#/context/definitions/schemas/EarnedBack'
+              of:
+                - value: '50'
+                  condition: 'SLA_Parameters_Ok_For_2_Months == true'   
+                  with: 'SLA_Parameters_Ok_For_2_Months: offset: -2'
+                - value: '50'
+                  condition: 'SLA_Parameters_Ok_For_4_Months == true'   
+                  with: 'SLA_Parameters_Ok_For_2_Months: offset: -4'

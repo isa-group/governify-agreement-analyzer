@@ -1,0 +1,131 @@
+---
+id: GEHRONTE
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: Public Health Andalusian Service 
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      MonthlyBillPenaltyPercentage:
+        description: Percentage of the fee to pay for a month of the service 
+        type: integer
+        unit: '%'
+      TotalBudget:
+        description: Total budget to pay to the provider for the service 
+        type: double
+        unit: 'euro'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            MonthlyBillPenaltyPercentage:
+              $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
+  metrics:
+    IEMC_01:
+      schema:
+        description: Strategy-based metric, it is a pre-warning deadine for laboral sustitution which can be ascribed to the provider
+        type: integer
+        unit: 'laboral days'
+        computer: >- 
+          http://Sandetel/IEMC_01/
+    ID_01:
+      schema:
+        description: Design service line-based metric, it is a percentage of service requests with negative deviation of delivery deadlines
+        type: float
+        unit: '%'
+      computer: >-
+        http://Sandetel/ID_01/
+    ID_04:
+      schema:
+        description: Design service line-based metric, it is a percentage to denote a deviation of planned costs
+        type: float
+        unit: '%'
+      computer: >-
+        http://Sandetel/ID_04/
+    TPH:
+      schema:
+        description: Hourly rate by laboral profile  
+        type: integer
+        unit: '%'
+      computer: >-
+        http://Sandetel/TPH/
+    CDI:
+      schema:
+        description: Incurred monthly cost
+        type: integer
+        unit: 'euro'
+      computer: >-
+        http://Sandetel/CDI/
+    CDP:
+      schema:
+        description: Planned monthly cost
+        type: integer
+        unit: 'euro'
+      computer: >-
+        http://Sandetel/CDP/
+    PMAXCD:
+      schema:	
+        description: Maximum penalisation, 25% of CDI
+        type: integer
+        unit: 'euro'
+      computer: >-
+        http://Sandetel/PMAXCD/
+  guarantees:
+    - id: GEHRONTE_STRATEGY_01
+      scope: {}
+      of:
+        - objective: 'IEMC_01 >= 15'
+          with:
+            IEMC_01: {}
+          scope: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                MonthlyBillPenaltyPercentage:
+                  $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
+              of:
+                - value: '(15-IEMC_01) * TPH * 4'
+                  with:
+                    TPH: {}
+                  condition: 'IEMC_01 < 15'
+                  upTo:
+                    - value: 'MonthlyBill * 0.25'
+                    - value: 'TotalBudget * 0.10'
+    - id: GEHRONTE_DESIGN_SERVICE_LINE_01
+      scope: {}
+      of:
+        - objective: 'ID_01 <= 10'
+          with:
+            ID_01: {}
+          scope: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+            penalties:
+            - over:
+                MonthlyBillPenaltyPercentage:
+                  $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
+              of:
+                - value: 'LET ID_04 > 10 => CDI = 1,10 * CDP, PMAXCD = 0,25 * CDI IN ((ID_01 - 10) / 90) * PMAXCD' 
+                  with:
+                    ID_01: {}
+                    ID_04: {}
+                    CDI: {}
+                    CDP: {}
+                    PMAXCD: {}
+                  condition: 'ID_01 > 10'
+                  upTo:
+                    - value: 'MonthlyBill * 0.25'
+                    - value: 'TotalBudget * 0.10'				

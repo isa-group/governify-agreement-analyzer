@@ -1,0 +1,54 @@
+---
+id: Joyent_Cloud_Hosting
+version: "1.0"
+type: agreement
+context:
+  provider: Joyent
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Credit:
+        description: Percentage to decrease the next monthly bill
+        type: integer
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Credit:
+              $ref: '#/context/definitions/schemas/Credit'
+  metrics:
+    Downtime:
+      schema:
+        description: Time in which the service is not available
+        type: double
+        unit: 'sec'
+      computer: >-
+        http://Joyent/Joyent_Downtime/
+  guarantees:
+    - id: Joyent_GT
+      scope: {}
+      of:
+        - objective: Downtime = 0.00
+          with:
+            Downtime: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Credit:
+                  $ref: '#/context/definitions/schemas/Credit'
+              of:
+                - value: '-(Math.floor(Downtime/30) * 5)' 
+                  condition: Downtime > 0.00  
+              upTo: -100

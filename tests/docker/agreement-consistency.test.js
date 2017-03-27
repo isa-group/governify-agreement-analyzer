@@ -48,8 +48,8 @@ describe('Docker reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, sol) {
-                expect(sol).to.be.equal(true);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(true);
                 done();
             });
 
@@ -68,8 +68,8 @@ describe('Docker reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, sol) {
-                expect(sol).to.be.equal(false);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(false);
                 done();
             });
 
@@ -89,7 +89,7 @@ describe('Docker reasoner consistency tests', function () {
             });
 
             analyzer.isConsistent(function (err) {
-                expect(JSON.stringify(err[0])).to.be.equal('{"keyword":"type","dataPath":".version","schemaPath":"#/properties/version/type","params":{"type":"string"},"message":"should be string"}');
+                expect(!!err).to.be.equal(true);
                 done();
             });
 
@@ -114,8 +114,8 @@ describe('Docker reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, sol) {
-                expect(sol).to.be.equal(true);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(true);
                 done();
             });
 
@@ -134,8 +134,8 @@ describe('Docker reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, sol) {
-                expect(sol).to.be.equal(false);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(false);
                 done();
             });
 
@@ -155,7 +155,7 @@ describe('Docker reasoner consistency tests', function () {
             });
 
             analyzer.isConsistent(function (err) {
-                expect(JSON.stringify(err[0])).to.be.equal('{"keyword":"type","dataPath":".version","schemaPath":"#/properties/version/type","params":{"type":"string"},"message":"should be string"}');
+                expect(!!err).to.be.equal(true);
                 done();
             });
 

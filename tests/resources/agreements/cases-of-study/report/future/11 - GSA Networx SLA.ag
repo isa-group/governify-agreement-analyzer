@@ -1,0 +1,98 @@
+---
+id: GSA Networx
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: GSA Networx
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      MRC:
+        description: Montly recurring charge
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            MRC:
+              $ref: '#/context/definitions/schemas/MRC'
+  metrics:
+    KPI_Failure:
+      schema:
+        description: There is currently no failing KPI 
+        type: bool
+      computer: >-
+        http://KeralaUniversity/Examinations/KPI_Failure/
+    KPI_Failure_For_1_Month:
+      schema:
+        description: There is no failing KPI for 1 month (the current month)
+        type: bool
+      computer: >-
+        http://KeralaUniversity/Examinations/KPI_Failure/
+      parameters:
+        offset:
+          type: number
+          description: Offset over the current month
+    KPI_Failure_For_2_Months:
+      schema:
+        description: There is no failing KPI for 2 months
+        type: bool
+      computer: >-
+        http://KeralaUniversity/Examinations/KPI_Failure/
+      parameters:
+        offset:
+          type: number
+          description: Offset over the current month		  
+    KPI_Failure_For_3_Months_Or_More:
+      schema:
+        description: There is no failing KPI for 3 or more months
+        type: bool
+      computer: >-
+        http://KeralaUniversity/Examinations/KPI_Failure/
+      parameters:
+        offset:
+          type: number
+          description: Offset over the current month
+  guarantees:
+    - id: GSA Networx
+      scope: {}
+      of:
+        - objective: 'KPI_Failure == false'
+          with:
+            KPI_Failure: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                MRC:
+                  $ref: '#/context/definitions/schemas/MRC'
+              of:
+                - value: '-12.5'
+                  condition: 'KPI_Failure_For_1_Month == true' 
+                  with: 
+                    KPI_Failure_For_1_Month: 
+                      offset: -1
+                - value: '-25'
+                  condition: 'KPI_Failure_For_2_Months == true'   
+                  with: 
+                    KPI_Failure_For_1_Month: 
+                      offset: -2
+                - value: '-50'
+                  condition: 'KPI_Failure_For_3_Months_Or_More == true'   
+                  with:
+                    KPI_Failure_For_1_Month: 
+                      offset: <-2
+              upTo: -50

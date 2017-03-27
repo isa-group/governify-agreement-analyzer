@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-16
+governify-agreement-analyzer 0.1.1, built on: 2017-03-27
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -29,20 +29,20 @@ const fs = require("fs");
 const yaml = require("js-yaml");
 const logger = require("../logger/logger");
 const exception = require("../util/exceptions/IllegalArgumentException");
-const CSPTools = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools");
+const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const Reasoner = CSPTools.Reasoner;
 var Promise = require("bluebird");
 
 interface AnalyzerInterface {
-    isConsistent(callback: (error: any, solution?: Boolean, stdout?: string) => void);
-    isSatisfiableCFC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
-    isSatisfiableCFC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
-    isSatisfiableCCC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
-    isSatisfiableCSC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
-    isSatisfiableGCC(callback: (error: any, solution?: Boolean, stdout?: string) => void);
-    isSatisfiableOGT(callback: (error: any, solution?: Boolean, stdout?: string) => void);
-    isSatisfiableOBT(callback: (error: any, solution?: Boolean, stdout?: string) => void);
+    isConsistent(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
+    isSatisfiableCFC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
+    isSatisfiableCFC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
+    isSatisfiableCCC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
+    isSatisfiableCSC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
+    isSatisfiableGCC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
+    isSatisfiableOGT(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
+    isSatisfiableOBT(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
 }
 
 export default class Analyzer implements AnalyzerInterface {
@@ -169,22 +169,14 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableConstraints(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+    isSatisfiableConstraints(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
             let mznDocument: string = new AgreementCompensationCSPModelBuilder(agreement).buildConstraints();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-
-            reasoner.solve(mznDocument, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                } else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(mznDocument, callback);
 
         }, function (error: any) {
             callback(error);
@@ -192,12 +184,10 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isConsistent(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+    isConsistent(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
-
-            logger.info("Executing \"isConsistent\" analysis operation on Reasoner...");
 
             // Translate agreement object to CSPModel
             var translator: Translator = new Translator(new CSPBuilder());
@@ -206,23 +196,7 @@ export default class Analyzer implements AnalyzerInterface {
 
             // Call Reasoner solver
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(model, (err, sol) => {
-
-                if (err) {
-
-                    logger.info("Reasoner returned an error:", err);
-                    callback(err, sol, sol);
-
-                } else {
-
-                    let condition = (typeof sol === "string" && sol.indexOf("----------") !== -1) ||
-                        (typeof sol === "object" && sol.status === "OK" && sol.message.indexOf("----------") !== -1);
-                    logger.info("Reasoner result:", condition);
-                    callback(err, condition, sol);
-
-                }
-
-            });
+            reasoner.solve(model, callback);
 
         }, function (error: any) {
             callback(error);
@@ -230,26 +204,15 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableCFC(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+    isSatisfiableCFC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
-
-            logger.info("Executing \"isSatisfiableCFC\" analysis operation on Reasoner...");
 
             let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
             let model: typeof CSPModel = builder.buildCFC();
-
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                } else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
 
         }, function (error: any) {
             callback(error);
@@ -257,26 +220,15 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableCCC(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+    isSatisfiableCCC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
-
-            logger.info("Executing \"isSatisfiableCCC\" analysis operation on Reasoner...");
 
             let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
             let model: typeof CSPModel = builder.buildCCC();
-
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                } else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
 
         }, function (error: any) {
             callback(error);
@@ -284,26 +236,15 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableCSC(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+    isSatisfiableCSC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
-
-            logger.info("Executing \"isSatisfiableCSC\" analysis operation on Reasoner...");
 
             let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
             let model: typeof CSPModel = builder.buildCSC();
-
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                } else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
 
         }, function (error: any) {
             callback(error);
@@ -311,26 +252,15 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableGCC(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+    isSatisfiableGCC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
-
-            logger.info("Executing \"isSatisfiableGCC\" analysis operation on Reasoner...");
 
             let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
             let model: typeof CSPModel = builder.buildGCC();
-
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                } else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
 
         }, function (error: any) {
             callback(error);
@@ -338,26 +268,15 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableOGT(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+    isSatisfiableOGT(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
-
-            logger.info("Executing \"isSatisfiableOGT\" analysis operation on Reasoner...");
 
             let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
             let model: typeof CSPModel = builder.buildOGT();
-
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                } else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
 
         }, function (error: any) {
             callback(error);
@@ -365,26 +284,15 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableOBT(callback: (error: any, solution?: Boolean, stdout?: string) => void) {
+    isSatisfiableOBT(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            logger.info("Executing \"isSatisfiableOBT\" analysis operation on Reasoner...");
-
             let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
             let model: typeof CSPModel = builder.buildOBT();
-
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                } else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
 
         }, function (error: any) {
             callback(error);

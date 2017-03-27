@@ -1,0 +1,26 @@
+  guarantees:
+    - id: GNWT-4
+      scope: {}
+      of:
+        - objective: elapsedDaysPercent < 120
+          with:
+            elapsedDaysPercent : {}
+          scope: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                AmountInvoiced:
+                  $ref: '#/context/definitions/schemas/AmountInvoiced'
+              of:
+                - value: '-10'
+                  condition: elapsedDaysPercent >= 120
+          rewards:
+            - over:
+                AmountInvoiced:
+                  $ref: '#/context/definitions/schemas/AmountInvoiced'
+              of:
+                - value: '5'
+                  condition: elapsedDaysPercent == 80  

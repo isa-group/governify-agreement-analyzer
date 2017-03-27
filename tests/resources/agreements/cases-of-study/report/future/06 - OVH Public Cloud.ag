@@ -1,0 +1,61 @@
+---
+id: OVH_PUBLIC_CLOUD_INSTANCE
+version: "1.0"
+type: agreement
+context:
+  provider: OVH
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      MonthlyFeePercentage:
+        description: percentage of the fee to pay for a month of the service. 
+        type: integer
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            MonthlyFeePercentage:
+              $ref: '#/context/definitions/schemas/MonthlyFeePercentage'
+  metrics:
+    Availability:
+      schema:
+        description: Availability of the service
+        type: double
+        unit: '%'
+      computer: >-
+        http://OVH/Availability/
+    NumberOfDownIntervals:
+      schema:
+        description: one-minute-duration intervals of unanavailability
+        type: integer
+        unit: 'minutes'
+      computer: >-
+        http://OVH/NumberOfDownIntervals/	
+  guarantees:
+    - id: Availability_GT
+      scope: {}
+      of:
+        - objective: 'Availability >= 99.9999'
+          with:
+            Availability: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                MonthlyFeePercentage:
+                  $ref: '#/context/definitions/schemas/MonthlyFeePercentage'
+              of:
+                - value: '-(0.5 * NumberOfDownIntervals)' 
+                  condition: '(Availability < 99.9999) AND (NumberOfDownIntervals >= 3)' 
+              upTo: 100

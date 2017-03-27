@@ -1,0 +1,65 @@
+--- 
+id: FACTO_BYTE
+version: "1.0"
+type: agreement
+context:
+  provider: FactoByte
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Bonus_Credit:
+        description: Amount to be used in future renovations
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Bonus_Credit:
+              $ref: '#/context/definitions/schemas/Bonus_Credit'
+  metrics:
+    Availability:
+      schema:
+        description: Availability of service
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: '%'
+      computer: >-
+        http://FactoByte/Availability/
+  guarantees:
+    - id: HOSTING
+      scope: {}
+      of:
+        - objective: 'Availability <= 99.9'
+          with:
+            Availability: {}
+          scope: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                Bonus_Credit:
+                  $ref: '#/context/definitions/schemas/Bonus_Credit'
+              of:
+                - value: '0'	
+                  condition: 'Availability >= 99.9 && Availability <= 100'
+                - value: '10'	
+                  condition: 'Availability >= 90 && Availability < 99.8'
+                - value: '25'	
+                  condition: 'Availability >= 80 && Availability < 89.9'
+                - value: '50'	
+                  condition: 'Availability >= 70 && Availability < 79.9'				  
+                - value: '100'
+                  condition: 'Availability < 69.9'

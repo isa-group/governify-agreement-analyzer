@@ -1,0 +1,91 @@
+---
+id: DHL
+version: "1.0"
+type: agreement
+context:
+  provider: DHL
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Responsibility:
+        description: Percentage of the package actual price if it is lost or damaged. 
+        type: integer
+        unit: '%'
+      PackageWeight:
+        description: Package kgs. 
+        type: double
+        unit: ''
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: Pay-per-service
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Responsibility:
+              $ref: '#/context/definitions/schemas/Responsibility'
+  metrics:
+    SLA_Parameters_Ok:
+      schema:
+        description: All levels (regarding SLA parameters) are met
+        type: bool
+      computer: >-
+        http://DHL/SLA_Parameters_Ok/
+    TransportType:
+      schema:
+        description: either terrestrial or aerial
+        type: string
+        unit: ''
+      computer: >-
+        http://DHL/DHL_TransportType/
+    LostOrDamaged:
+      schema:
+        description: The package was loosen or damaged in the transportation
+        type: bool
+      computer: >-
+        http://DHL/LostOrDamaged/
+  guarantees:
+    - id: Terrestrial_GT
+      scope: {}
+      of:
+        - objective: 'SLA_Parameters_Ok == true'
+          precodition: 'TransportType == terrestrial && LostOrDamaged == true' 
+          with:
+            SLA_Parameters_Ok: {}
+          scope: {}
+          window:
+            type: static
+            period: Pay-per-service
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                Responsibility:
+                  $ref: '#/context/definitions/schemas/Responsibility'
+              of:
+                - value: '-100' 
+                  condition: 'SLA_Parameters_Ok == false' 
+              upTo:
+                - value: '12*PackageWeight'
+    - id: Aerial_GT
+      of:
+        - objective: 'SLA_Parameters_Ok == true'
+          precodition: 'TransportType == aerial && LostOrDamaged == true' 
+          with:
+            SLA_Parameters_Ok: {}
+          window:
+            type: static
+            period: Pay-per-service
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                Responsibility:
+                  $ref: '#/context/definitions/schemas/Responsibility'
+              of:
+                - value: '-100' 
+                  condition: 'SLA_Parameters_Ok == false' 
+              upTo:
+                - value: '25 * PackageWeight'

@@ -1,0 +1,60 @@
+---
+id: MICROSOFT_AZURE_CLOUD_SERVICES
+version: "1.0"
+type: agreement
+context:
+  provider: Microsoft
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      ServiceCredit:
+        description: Percentage to decrease the next monthly bill
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            ServiceCredit:
+              $ref: '#/context/definitions/schemas/ServiceCredit'
+  metrics:
+    MUP:
+      schema:
+        description: Monthly Uptime Percentage
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: '%'
+      computer: >-
+        http://azure/Microsoft_Azure_MUP/
+  guarantees:
+    - id: Azure_GT
+      scope: {}
+      of:
+        - objective: MUP >= 99.95
+          with:
+            MUP: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                ServiceCredit:
+                  $ref: '#/context/definitions/schemas/ServiceCredit'
+              of:
+                - value: '-10'
+                  condition: MUP >= 99.00 && MUP < 99.95
+                - value: '-25'
+                  condition: MUP < 99.00
+              upTo: 100

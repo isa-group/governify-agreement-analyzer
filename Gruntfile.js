@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-16
+governify-agreement-analyzer 0.1.1, built on: 2017-03-27
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -134,7 +134,7 @@ module.exports = function (grunt) {
                     clearRequireCache: false, // Optionally clear the require cache before running tests (defaults to false)
                     noFail: false // Optionally set to not fail on failed tests (will still fail on other errors)
                 },
-                src: ['tests/**/compensations.test.js']
+                src: ['tests/**/compensations**.test.js']
             }
         },
 

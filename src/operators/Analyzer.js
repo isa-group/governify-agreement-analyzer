@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-16
+governify-agreement-analyzer 0.1.1, built on: 2017-03-24
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -17,7 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 const CSPBuilder_1 = require("../builder/csp/CSPBuilder");
 const Translator_1 = require("../translator/Translator");
 const AgreementModel_1 = require("../model/AgreementModel");
@@ -28,7 +30,7 @@ const fs = require("fs");
 const yaml = require("js-yaml");
 const logger = require("../logger/logger");
 const exception = require("../util/exceptions/IllegalArgumentException");
-const CSPTools = require("E:\\Documents\\Coding\\CSP\\governify-csp-tools");
+const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const Reasoner = CSPTools.Reasoner;
 var Promise = require("bluebird");
@@ -81,8 +83,7 @@ class Analyzer {
                     fs.readFile(filePath, "utf8", function (error, data) {
                         if (error) {
                             throw new Error("Cannot find local agreement in: " + _pthis.configuration.agreement.url + "\n" + error);
-                        }
-                        else {
+                        } else {
                             let agreementObj = yaml.safeLoad(data);
                             if (!_pthis.notValidable) {
                                 let agreement = new AgreementModel_1.default(agreementObj);
@@ -90,26 +91,22 @@ class Analyzer {
                                 if (isValid) {
                                     _pthis.agreement = agreementObj;
                                     resolve(agreementObj);
-                                }
-                                else {
+                                } else {
                                     logger.error(filePath.split("/").slice(-1).pop() + " file: ");
                                     logger.error(agreement.validationErrors);
                                     reject(agreement.validationErrors);
                                 }
-                            }
-                            else {
+                            } else {
                                 resolve(agreementObj);
                             }
                         }
                     });
-                }
-                else if (_pthis.configuration.agreement.url && _pthis.configuration.agreement.url !== "") {
+                } else if (_pthis.configuration.agreement.url && _pthis.configuration.agreement.url !== "") {
                     var url = _pthis.configuration.agreement.url;
                     request(url, function (error, response, data) {
                         if (error) {
                             throw new Error("Cannot find remote agreement in: " + url + "\n" + error);
-                        }
-                        else {
+                        } else {
                             let agreementObj = yaml.safeLoad(data);
                             if (!_pthis.notValidable) {
                                 let agreement = new AgreementModel_1.default(agreementObj);
@@ -117,22 +114,18 @@ class Analyzer {
                                 if (isValid) {
                                     _pthis.agreement = agreementObj;
                                     resolve(agreementObj);
-                                }
-                                else {
+                                } else {
                                     reject("Invalid agreement on " + url + ": " + agreement.validationErrors);
                                 }
-                            }
-                            else {
+                            } else {
                                 resolve(agreementObj);
                             }
                         }
                     });
-                }
-                else {
+                } else {
                     throw new Error("Missing parameter: file, url or content (agreement)");
                 }
-            }
-            else {
+            } else {
                 resolve(_pthis.agreement);
             }
         });
@@ -142,15 +135,7 @@ class Analyzer {
         this.agreementPromise.then(function (agreement) {
             let mznDocument = new AgreementCompensationCSPModelBuilder_1.default(agreement).buildConstraints();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(mznDocument, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                }
-                else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(mznDocument, callback);
         }, function (error) {
             callback(error);
         });
@@ -158,23 +143,11 @@ class Analyzer {
     isConsistent(callback) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            logger.info("Executing \"isConsistent\" analysis operation on Reasoner...");
             var translator = new Translator_1.default(new CSPBuilder_1.default());
             var model = translator.translate(agreement);
             model.goal = "satisfy";
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                    callback(err, sol, sol);
-                }
-                else {
-                    let condition = (typeof sol === "string" && sol.indexOf("----------") !== -1) ||
-                        (typeof sol === "object" && sol.status === "OK" && sol.message.indexOf("----------") !== -1);
-                    logger.info("Reasoner result:", condition);
-                    callback(err, condition, sol);
-                }
-            });
+            reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
         });
@@ -182,19 +155,10 @@ class Analyzer {
     isSatisfiableCFC(callback) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            logger.info("Executing \"isSatisfiableCFC\" analysis operation on Reasoner...");
             let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
             let model = builder.buildCFC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                }
-                else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
         });
@@ -202,19 +166,10 @@ class Analyzer {
     isSatisfiableCCC(callback) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            logger.info("Executing \"isSatisfiableCCC\" analysis operation on Reasoner...");
             let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
             let model = builder.buildCCC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                }
-                else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
         });
@@ -222,19 +177,10 @@ class Analyzer {
     isSatisfiableCSC(callback) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            logger.info("Executing \"isSatisfiableCSC\" analysis operation on Reasoner...");
             let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
             let model = builder.buildCSC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                }
-                else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
         });
@@ -242,19 +188,10 @@ class Analyzer {
     isSatisfiableGCC(callback) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            logger.info("Executing \"isSatisfiableGCC\" analysis operation on Reasoner...");
             let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
             let model = builder.buildGCC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                }
-                else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
         });
@@ -262,19 +199,10 @@ class Analyzer {
     isSatisfiableOGT(callback) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            logger.info("Executing \"isSatisfiableOGT\" analysis operation on Reasoner...");
             let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
             let model = builder.buildOGT();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                }
-                else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
         });
@@ -282,19 +210,10 @@ class Analyzer {
     isSatisfiableOBT(callback) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            logger.info("Executing \"isSatisfiableOBT\" analysis operation on Reasoner...");
             let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
             let model = builder.buildOBT();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
-            reasoner.solve(model, (err, sol) => {
-                if (err) {
-                    logger.info("Reasoner returned an error:", err);
-                }
-                else {
-                    logger.info("Reasoner result:", sol);
-                }
-                callback(err, sol);
-            });
+            reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
         });

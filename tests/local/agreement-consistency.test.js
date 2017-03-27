@@ -35,9 +35,9 @@ describe('Local reasoner consistency tests', function () {
 
     describe('Local agreement files', function () {
 
-        it('Consistent agreement returns true', function (done) {
+        it('Satisfiable agreement returns true', function (done) {
 
-            // Create local analyzer for local consistent agreement
+            // Create local analyzer for local satisfiable agreement
             var analyzer = new Analyzer({
                 agreement: {
                     file: "./tests/resources/agreements/agreement-valid.yaml"
@@ -48,14 +48,14 @@ describe('Local reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, sol) {
-                expect(sol).to.be.equal(true);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(true);
                 done();
             });
 
         });
 
-        it('Inconsistent agreement returns unsatisfiable message', function (done) {
+        it('Inconsistent agreement returns unsatisfied message', function (done) {
 
             // Create local analyzer for local inconsistent agreement
             var analyzer = new Analyzer({
@@ -68,8 +68,9 @@ describe('Local reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, sol, stdout) {
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
                 expect(stdout.indexOf("=====UNSATISFIABLE=====") !== -1).to.be.equal(true);
+                expect(stderr.indexOf("model inconsistency detected") !== -1).to.be.equal(true);
                 done();
             });
 
@@ -88,8 +89,8 @@ describe('Local reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err) {
-                expect(JSON.stringify(err[0])).to.be.equal('{"keyword":"type","dataPath":".version","schemaPath":"#/properties/version/type","params":{"type":"string"},"message":"should be string"}');
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(!!err).to.be.equal(true);
                 done();
             });
 
@@ -101,9 +102,9 @@ describe('Local reasoner consistency tests', function () {
 
     describe('Remote agreement files', function () {
 
-        it('Consistent agreement returns true', function (done) {
+        it('Satisfiable agreement returns true', function (done) {
 
-            // Create local analyzer for Remote consistent agreement
+            // Create local analyzer for Remote satisfiable agreement
             var analyzer = new Analyzer({
                 agreement: {
                     url: "https://gist.github.com/feserafim/eaba5c2ad4eb82245c2eca154a64c264/raw/732706de8e1b12e6b8c4e75bb02802b165779b17/agreement-valid.yaml"
@@ -114,14 +115,14 @@ describe('Local reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, sol) {
-                expect(sol).to.be.equal(true);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(true);
                 done();
             });
 
         });
 
-        it('Inconsistent agreement returns unsatisfiable message', function (done) {
+        it('Inconsistent agreement returns unsatisfied message', function (done) {
 
             // Create local analyzer for Remote inconsistent agreement
             var analyzer = new Analyzer({
@@ -134,8 +135,9 @@ describe('Local reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, sol, stdout) {
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
                 expect(stdout.indexOf("=====UNSATISFIABLE=====") !== -1).to.be.equal(true);
+                expect(stderr.indexOf("model inconsistency detected") !== -1).to.be.equal(true);
                 done();
             });
 
@@ -155,7 +157,7 @@ describe('Local reasoner consistency tests', function () {
             });
 
             analyzer.isConsistent(function (err) {
-                expect(JSON.stringify(err[0])).to.be.equal('{"keyword":"type","dataPath":".version","schemaPath":"#/properties/version/type","params":{"type":"string"},"message":"should be string"}');
+                expect(!!err).to.equal(true);
                 done();
             });
 

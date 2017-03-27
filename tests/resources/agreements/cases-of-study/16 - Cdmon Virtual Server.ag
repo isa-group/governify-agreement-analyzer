@@ -1,0 +1,61 @@
+---
+id: CDMON VIRTUAL SERVER
+version: "1.0"
+type: agreement
+context:
+  provider: Cdmon
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Compensation:
+        description: Percentage to be deduced from yearly quota
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Compensation:
+              $ref: '#/context/definitions/schemas/Compensation'
+  metrics:
+    Availability:
+      schema:
+        description: Availability of service
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: '%'
+      computer: >-
+        http://Cdmon/Availability/
+  guarantees:
+    - id: Virtual_Server_SLA
+      scope: {}
+      of:
+        - objective: 'Availability <= 99.95'
+          with:
+            Availability: {}
+          scope: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                Compensation:
+                  $ref: '#/context/definitions/schemas/Compensation'
+              of:
+                - value: '-2'	
+                  condition: 'Availability >= 99 && Availability < 99.95'
+                - value: '-4'	
+                  condition: 'Availability >= 95 && Availability < 99'
+                - value: '-5'	
+                  condition: 'Availability < 95'

@@ -1,0 +1,71 @@
+---
+id: Google_ALL_S
+version: "1.0"
+type: agreement
+context:
+  provider: Google
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      FinancialCredit:
+        description: Percentage to decrease the next monthly bill (UpTo 50% of the monthly bill)
+        type: integer
+        unit: '%'
+    scopes:
+      GoogleC:
+        service:
+          name: Service
+          description: Google cloud services
+          type: 
+            enum: [ "CE", "..."]
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            ServiceCredit:
+              $ref: '#/context/definitions/schemas/FinancialCredit'
+          aggegatedBy: sum
+  metrics:
+    MUP:
+      schema:
+        description: Monthly Uptime Percentage
+        type: double
+        unit: '%'
+      computer: >-
+        http://google/Google_MUP/
+      scope: 
+         $ref: '#/context/definitions/scopes/GoogleC/service'
+  guarantees:
+    - id: Google_GT
+      scope: 
+        service: 
+          $ref: '#/context/definitions/scopes/GoogleC/service'
+      of:
+        - scope: 
+            service: '*'  
+          objective: 'MUP >= 99.95'
+          with:
+            MUP: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                FinancialCredit:
+                  $ref: '#/context/definitions/schemas/FinancialCredit'
+              of:
+                - value: '-10'
+                  condition: 'MUP >= 99.00 && MUP < 99.95'
+                - value: '-25'
+                  condition: 'MUP >= 95.00 && MUP < 99'
+                - value: '-30'
+                  condition: 'MUP < 95'
+              upTo:
+                - value: '-50'

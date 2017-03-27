@@ -1,0 +1,79 @@
+---
+id: GoGrid
+version: "1.0"
+type: agreement
+context:
+  provider: GoGrid
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      ServiceCredit_10000:
+        description: 100 times the duration of failure multiplied by the customer fee 
+        type: double
+        unit: USD
+      CustomerFee: 
+        description: Customer fee for using a service
+        type: double
+        unit: USD
+      MonthlyServiceFee: 
+        description: Monthly service fee of a customer
+        type: double
+        unit: USD
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            MonthlyServiceFee:
+              $ref: '#/context/definitions/schemas/MonthlyServiceFee'
+          aggegatedBy: sum	  
+          groupBy:		  
+  metrics:
+    ServerUptime:
+      schema:
+        description: Percentage of time during which the service is working
+        type: double
+        unit: '%'
+      computer: >-
+        http://gogrid/serverUptime
+    DurationFailure:
+      schema:
+        description: Time during which the service is not working
+        type: integer
+        unit: 'minute'
+      computer: >-
+        http://gogrid/durationFailure
+  guarantees:
+    - id: GoGrid_GT
+      scope: {}
+      of:
+        - objective: ServerUptime == 100.0
+          scope: {}
+          with:
+            ServerUptime: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                ServicesCredit_10000:
+                  $ref: '#/context/definitions/schemas/ServiceCredit_10000'
+              of:
+                - value: '100 * DurationFailure * CustomerFee'
+                  with:
+                    DurationFailure: {}
+                    CustomerFee: {}
+                  condition: ServerUptime < 100.0
+              upTo:			
+                - value: 'MonthlyServiceFee'
+                  with:
+                    MonthlyServiceFee: {}
+                  #comment: "How to specify local saturation for a year?"
+                  #comment: "And how about a global saturation?"

@@ -1,0 +1,170 @@
+---
+id: INDIA_GOV_MCA_21
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: India Government
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Credits:
+        description: Credits to be used in future payments
+        type: integer
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: quarterly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Credits:
+              $ref: '#/context/definitions/schemas/Credits'
+          aggegatedBy: sum			  
+      rewards:
+        - over:
+            Credits:
+              $ref: '#/context/definitions/schemas/Credits'			  
+          aggegatedBy: sum			  
+  metrics:
+    Availability:
+      schema:
+        description: Availability of services
+        type: double
+        unit: '%'
+      computer: >-
+        http://India.Government/Projects/MCA21/Availability/
+    Payment_guaranteed:
+      schema:
+        description: Percentage of quarterly payment which is to be paid for sure
+        type: double
+        unit: '%'
+      computer: >-
+        http://India.Government/Projects/MCA21/Payment_guaranteed/
+    Payment_conditioned_of_remaining:
+      schema:
+        description: Percentage of remaining payment to be paid depending upon SLA fulfillment
+        type: double
+        unit: '%'
+      computer: >-
+        http://India.Government/Projects/MCA21/Payment_conditioned_of_remaining/
+    Baseline_Complied:
+      schema:
+        description: Baseline performance metrics are complied
+        type: bool
+      computer: >-
+        http://India.Government/Projects/MCA21/Baseline_complied/
+    Lower_Performance:
+      schema:
+        description: All metrics have lower performance
+        type: bool
+      computer: >-
+        http://India.Government/Projects/MCA21/Lower_Performance/
+    Breach_Status:
+      schema:
+        description: Breach of all metrics
+        type: bool
+      computer: >-
+        http://India.Government/Projects/MCA21/Breach_Status/
+    Breach_on_SLA:
+      schema:
+        description: Breach on (any) SLA (of the) list
+        type: bool
+      computer: >-
+        http://India.Government/Projects/MCA21/Breach_on_SLA/
+  guarantees:
+    - id: AVAILABILITY
+      scope: {}
+      of:
+        - objective: 'Availability >= 99.99'
+          with:
+            Availability: {}
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Credits:
+                  $ref: '#/context/definitions/schemas/Credits'
+              of:
+                - value: '-14'
+                  condition: 'Availability < 99'
+                  comment: "Breach"
+          rewards:
+            - over:
+                Credits:
+                  $ref: '#/context/definitions/schemas/Credits'
+              of:
+                - value: '11'			
+                  condition: 'Availability >= 99.99'
+                  comment: "Baseline"
+                - value: '7'			
+                  condition: 'Availability >= 99.95 && Availability < 99.99'
+                  comment: "Lower Performance"
+    - id: PAYMENT
+      scope: {}
+      of:
+        - objective: 'Payment_guaranteed == 60'
+          with:
+            Payment_guaranteed: {}
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+        - objective: 'Payment_conditioned_of_remaining == 100'
+          precondition: 'Baseline_Complied == true'
+          with:
+            Baseline_Complied: {}
+            Payment_conditioned: {}
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'	
+          scope: {}
+        - objective: 'Payment_conditioned_of_remaining == 38'
+          precondition: 'Lower_Performance == true'
+          with:
+            Lower_Performance: {}
+            Payment_conditioned: {}
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'	
+          scope: {}
+        - objective: 'Payment_conditioned_of_remaining == 0'
+          precondition: 'Breach_Status == true'
+          with:
+            Breach_Status: {}
+            Payment_conditioned: {}
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Credits:
+                  $ref: '#/context/definitions/schemas/Credits'
+              of:
+                - value: '-72'
+                  condition: 'Breach_Status == true'			
+    - id: MATERIAL_BREACH
+      scope: {}
+      of:
+        - objective: 'Breach_Status == true'
+          precondition: '(Breach_on_SLA == true || Credits >= 20)'
+          with:
+            Breach_on_SLA: {}
+            Credits: {}			   
+            Breach_Status: {}
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}

@@ -1,0 +1,64 @@
+---
+id: Verizon_Terramark_Cloud_Backing
+version: "1.0"
+type: agreement
+context:
+  provider: Verizon
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      ServiceCredits: 
+        description: Number of service credits to be decreased in the next monthly fee, so that each service credit corresponds to 1/30 of monthly fee.
+        type: integer
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            ServiceCredits:
+              $ref: '#/context/definitions/schemas/ServiceCredits'
+  metrics:
+    AvailabilityCommitment:
+      schema:
+        description: Availability percentage of backup service being committed to the consumer
+        type: double
+        unit: '%'
+      computer: >-
+        http://verizon/terramark/availability
+    Unavailability:
+      schema:
+        description: Unavailability of the backup service, which is measured in minutes
+        type: integer
+        unit: 'minute'
+      computer: >-
+        http://verizon/terramark/unavailability	
+  guarantees:
+    - id: VerizonTerramark_GT
+      scope: {}
+      of:
+        - objective: AvailabilityCommitment >= 99.9
+          with:
+            AvailabilityCommitment: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                ServicesCredits:
+                  $ref: '#/context/definitions/schemas/ServiceCredits'
+              of:
+                - value: '- ( 1 + Math.floor(Unavailability / 100) )'
+                  with:
+                    Unavailability : {}
+                  condition: AvailabilityCommitment < 99.9
+              upTo:
+                - value: '-15'
+                  comment: "ServiceCredits * (MonthlyFee / 30) <= MonthlyFee * 0.5"

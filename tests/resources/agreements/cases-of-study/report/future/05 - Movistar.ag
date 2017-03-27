@@ -1,0 +1,133 @@
+---
+id: Movistar
+version: "1.0"
+type: agreement
+context:
+  provider: Movistar
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Penalty:
+        description: Penalty amount to pay to the consumer 
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: 'euros'
+      MonthsForFree:
+        description: Months in which the consumer does not have to pay for the movistar service 
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: 'months'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Penalty:
+              $ref: '#/context/definitions/schemas/Penalty'
+  metrics:  
+    Availability:
+      schema:
+        description: availability of the movistar sevice
+        type: integer
+        unit: '%'
+      computer: >-
+        http://Movistar/Availability/
+    MovistarResponsible:
+      schema:
+        description: true if movistar is responsible for the lack of sevice
+        type: bool
+        unit: ''
+      computer: >-
+        http://Movistar/MovistarResponsible/
+    Amount_A:
+      schema:
+        description: average of invoiced amount of the last three months, prorated by the lack of service time 
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: 'euros'
+      computer: >-
+        http://Movistar/Amount_A/
+    Amount_B:
+      schema:
+        description: five * monthly fare, prorated by the lack of service time 
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: 'euros'
+      computer: >-
+        http://Movistar/Amount_B/
+    Amount_C:
+      schema:
+        description: monthly fare, prorated by the lack of service time 
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: 'euros'
+      computer: >-
+        http://Movistar/Amount_C/
+    DaysToBeConnected:
+      schema:
+        description: natural days in which a new consumer is connected to movistar net  
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: 'days'
+      computer: >-
+        http://Movistar/DaysToBeConnected/
+    MonthsToRefund:
+      schema:
+        description: months to refund the consumer  
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: 'months'
+      computer: >-
+        http://Movistar/MonthsToRefund/	
+  guarantees:
+    - id: LackOfService_GT
+      scope: {}
+      of:
+        - objective: 'Availability = 100'
+          with:
+            Availability: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                Penalty:
+                  $ref: '#/context/definitions/schemas/Penalty'
+              of:
+                - value: '-max(Amount_A,Amount_B)' 
+                  condition: '(Availability < 100) AND (MovistarResponsible == true)'
+                - value: '-Amount_C' 
+                  condition: '(Availability < 100) AND (MovistarResponsible == false)'
+    - id: InitialConnection_GT
+      scope: {}
+      of:
+        - objective: 'DaysToBeConnected <= 60'
+          with:
+            DaysToBeConnected: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                MonthsForFree:
+                  $ref: '#/context/definitions/schemas/MonthsForFree'
+              of:
+                - value: 'MonthsToRefund' 
+                  condition: 'DaysToBeConnected > 60'

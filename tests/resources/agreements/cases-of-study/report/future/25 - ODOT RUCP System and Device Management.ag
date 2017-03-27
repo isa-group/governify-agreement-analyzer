@@ -1,0 +1,177 @@
+---
+id: ODOT RUCP SLA
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: ODOT
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      AgencyCredit:
+        description: A kind of credit points
+        type: integer
+        minimum: 0
+        maximum: 100
+      Deduction:
+        description: Deduction to be applied on payments
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            AgencyCredit:
+              $ref: '#/context/definitions/schemas/AgencyCredit'
+  metrics:
+    KPI_10_Compliance:
+      schema:
+        description: KPI 10 is compliant
+        type: boolean
+      computer: >-
+        http://ODOT/RUCP/KPI_10_Compliance/ 
+    KPI_One_Or_More_Compliance:
+      schema:
+        description: One or more KPI are compliant, except for KPI 10
+        type: boolean
+      computer: >-
+        http://ODOT/RUCP/KPI_One_Or_More_Compliance/
+    KPI_Non_Compliance_For_1_Month:
+      schema:
+        description: KPI compliance indicator
+        type: boolean
+      computer: >-
+        http://ODOT/RUCP/KPI_Non_Compliance/	
+    KPI_Non_Compliance_For_2_Month:
+      schema:
+        description: KPI compliance indicator
+        type: boolean
+      computer: >-
+        http://ODOT/RUCP/KPI_Non_Compliance/	
+    KPI_Non_Compliance_For_3_Month:
+      schema:
+        description: KPI compliance indicator
+        type: boolean
+      computer: >-
+        http://ODOT/RUCP/KPI_Non_Compliance/			
+    Warning_Letter:
+      schema:
+        description: A warning letter is issued
+        type: boolean
+      computer: >-
+        http://ODOT/RUCP/Warning_Letter/					
+    KPI_Compliant_For_3_Months:
+      schema:
+        description: KPI have been compliant for 3 months
+        type: boolean
+      computer: >-
+        http://ODOT/RUCP/KPI_Compliant_For_3_Months/
+  guarantees:
+    - id: SYSTEM_AND_DEVICE_MANAGEMENT_PENALTY_EXCEPT_KPI_10
+      scope: {}
+      of:
+        - objective: 'KPI_One_Or_More_Compliance == true'
+          with:
+            KPI_One_Or_More_Compliance: {}			   
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                AgencyCredit:
+                  $ref: '#/context/definitions/schemas/AgencyCredit'
+              of:
+                - value: '1'			
+                  condition: 'KPI_Non_Compliance_For_1_Month == true'		
+                - value: '2'			
+                  condition: 'KPI_Non_Compliance_For_2_Month == true'	
+                - value: '3'			
+                  condition: 'KPI_Non_Compliance_For_3_Month == true'
+    - id: SYSTEM_AND_DEVICE_MANAGEMENT_PENALTY_KPI_10
+      scope: {}
+      of:
+        - objective: 'KPI_10_Compliance == true'
+          with:
+            KPI_10_Compliance: {}			   
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+          penalties:
+            - over:
+                AgencyCredit:
+                  $ref: '#/context/definitions/schemas/AgencyCredit'
+              of:
+                - value: '2'			
+                  condition: 'KPI_Non_Compliance_For_1_Month == true'		
+                - value: '4'			
+                  condition: 'KPI_Non_Compliance_For_2_Month == true'	
+                - value: '6'			
+                  condition: 'KPI_Non_Compliance_For_3_Month == true'
+    - id: SYSTEM_AND_DEVICE_MANAGEMENT_APPLY_PENALTY
+      scope: {}
+      of:
+        - objective: 'Warning_Letter == true'
+          precondition: 'AgencyCredit <= 9 and AgencyCredit >= 3'
+          with:
+            Warning_Letter: {}
+            AgencyCredit: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+        - objective: 'Warning_Letter == true and Deduction == 5'
+          precondition: 'AgencyCredit <= 18 and AgencyCredit >= 10'
+          with:
+            Warning_Letter: {}
+            AgencyCredit: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'			
+          scope: {}
+        - objective: 'Warning_Letter == true and Deduction == 10'
+          precondition: 'AgencyCredit <= 24 and AgencyCredit >= 19'
+          with:
+            Warning_Letter: {}
+            AgencyCredit: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'			
+          scope: {}
+        - objective: 'Warning_Letter == true and Deduction == 20'
+          precondition: 'AgencyCredit <= 30 and AgencyCredit >= 19'
+          with:
+            Warning_Letter: {}
+            AgencyCredit: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
+    - id: SYSTEM_AND_DEVICE_MANAGEMENT_SET_CREDITS_TO_ZERO
+      scope: {}
+      of:
+        - objective: 'AgencyCredits == 0'
+          precondition: 'KPI_Compliant_For_3_Months == true'
+          with:
+            Warning_Letter: {}
+            KPI_Compliant_For_3_Months: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          scope: {}

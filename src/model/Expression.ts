@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-16
+governify-agreement-analyzer 0.1.1, built on: 2017-03-27
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -27,7 +27,7 @@ export default class Expression {
     }
 
     private loadVariables(): void {
-        this._variables = new Set(this.expr.match(/(\b(?!true)(?!false)(?!\d))\w+/ig));
+        this._variables = new Set(this.expr.match(/(\b(?!true)(?!false)(?!xor)(?!not)(?!\d))\w+/ig));
     }
 
     get variables(): Set<string> {

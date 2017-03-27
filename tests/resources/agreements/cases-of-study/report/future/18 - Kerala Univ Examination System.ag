@@ -1,0 +1,169 @@
+---
+id: Examination System IT
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: Kerala University
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      Penalty:
+        description: Percentage to decrease the next quarterly payment
+        type: double
+        unit: '%'
+    scopes:
+      ExaminationSystemIT:
+        service:
+          name: ServiceLevel
+          description: Service level availability
+          type: 
+              enum: [ "VERY_CRITICAL", "CRITICAL", "HIGH"]		
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            Penalty:
+              $ref: '#/context/definitions/schemas/Penalty'
+  metrics:
+    Availability:
+      schema:
+        description: Monthly availability
+        type: double
+        unit: '%'
+      computer: >-
+        http://KeralaUniversity/Examinations/Availability/
+    DowntimeInQuarter:
+      schema:
+        description: System downtime during a quarter
+        type: double
+        unit: 'hours'
+      computer: >-
+        http://KeralaUniversity/Examinations/DowntimeInQuarter/		
+    DowntimeInstance:
+      schema:
+        description: Instance downtime 
+        type: integer
+        unit: 'minutes'
+      computer: >-
+        http://KeralaUniversity/Examinations/DowntimeInstance/		
+    ResponseTime:
+      schema:
+        description: Response time
+        type: integer
+        unit: 'minutes'
+      computer: >-
+        http://KeralaUniversity/Examinations/ResponseTime/		
+  guarantees:
+    - id: Service_Level_Availability
+      scope:
+        ServiceLevel:
+          $ref: '#/context/definitions/scopes/ExaminationSystemIT/ServiceLevel'
+      of:
+        - scope:
+            ServiceLevel: VERY_CRITICAL	  
+          objective: Availability >= 99.75
+          with:
+            Availability: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+        - scope:
+            ServiceLevel: CRITICAL	  
+          objective: Availability >= 97.75 && Availability <= 99.74%
+          with:
+            Availability: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+        - scope:
+            ServiceLevel: HIGH	  
+          objective: Availability >= 97 && Availability <= 97.74%
+          with:
+            Availability: {}		  
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+    - id: Service_Level_Downtime
+      scope:
+        ServiceLevel:
+          $ref: '#/context/definitions/scopes/ExaminationSystemIT/ServiceLevel'   
+      of:
+        - scope:
+            ServiceLevel: VERY_CRITICAL	  
+          objective: DowntimeInQuarter <= 5.4 && DowntimeInstance <= 30
+          with:
+            DowtimeInQuarter: {}		
+            DowntimeInstance: {}		
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                Penalty:
+                  $ref: '#/context/definitions/schemas/Penalty'
+              of:
+                - value: '-0.05 * Violations'
+                  with:
+                    Violations: = 3 * base_int(DowntimeInstance / 30)
+                  condition: DowntimeInQuarter > 5.4 && DowntimeInstance > 30
+                  comment: "This is a questionable solution"
+              upTo:
+                - value: '20' 
+                  comment: "of semester payment, as a global saturation ?" 
+        - scope:
+            ServiceLevel: CRITICAL	  
+            objective: DowntimeInQuarter <= 48.6 && DowntimeInstance <= 60 && ResponseTime <= 15
+          with:
+            DowtimeInQuarter: {}		
+            DowntimeInstance: {}		
+            ResponseTime: {}			
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                Penalty:
+                  $ref: '#/context/definitions/schemas/Penalty'
+              of:
+                - value: '-0.05 * Violations'
+                  with:		
+                    Violations: = 4 * base_int(DowntimeInstance / 60)
+                  condition: Level = 2 && DowntimeInQuarter > 48.6 && DowntimeInstance > 60
+                  comment: "This is a questionable solution"
+              upTo:
+                - value: '20' 
+                  comment: "of semester payment, as a global saturation ?" 
+        - scope:
+            ServiceLevel: HIGH 
+          objective: DowntimeInQuarter <= 64.8 && DowntimeInstance <= 480 && ResponseTime <= 60
+          with:
+            DowtimeInQuarter: {}
+            DowntimeInstance: {}
+            ResponseTime: {}	
+          window:
+            type: static
+            period: quarterly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                Penalty:
+                  $ref: '#/context/definitions/schemas/Penalty'
+              of:
+                - value: '-0.05 * Violations'
+                  with:
+                    Violations: = 5 * base_int(DowntimeInstance / 480)
+                  condition: Level = 3 && DowntimeInQuarter > 64.8 && DowntimeInstance > 480
+                  comment: "This is a questionable solution"
+              upTo: 20
+              #comment: "of semester payment, as a global saturation ?" 
