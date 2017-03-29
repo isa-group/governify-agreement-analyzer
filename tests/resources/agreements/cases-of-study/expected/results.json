@@ -1,4 +1,4 @@
-module.exports = {
+{
     "00 - GNWT-article.ag": {
         "CFC": true,
         "CCC": true,
@@ -9,7 +9,15 @@ module.exports = {
     },
     "01 - Amazon EC2.ag": {
         "CFC": true,
-        "CCC": false,
+        "CCC": true,
+        "CSC": false,
+        "GCC": false,
+        "OGT": true,
+        "OBT": true
+    },
+    "05 - Movistar.ag": {
+        "CFC": true,
+        "CCC": true,
         "CSC": false,
         "GCC": false,
         "OGT": true,
@@ -17,7 +25,7 @@ module.exports = {
     },
     "07 - Microsoft Azure Cloud Services.ag": {
         "CFC": true,
-        "CCC": false,
+        "CCC": true,
         "CSC": false,
         "GCC": false,
         "OGT": true,
@@ -25,7 +33,7 @@ module.exports = {
     },
     "10 - Host Europe.ag": {
         "CFC": true,
-        "CCC": false,
+        "CCC": true,
         "CSC": true,
         "GCC": false,
         "OGT": true,
@@ -35,7 +43,7 @@ module.exports = {
         "CFC": true,
         "CCC": true,
         "CSC": true,
-        "GCC": true,
+        "GCC": false,
         "OGT": true,
         "OBT": true
     },
@@ -43,13 +51,13 @@ module.exports = {
         "CFC": true,
         "CCC": true,
         "CSC": false,
-        "GCC": true,
+        "GCC": false,
         "OGT": true,
         "OBT": true
     },
     "15 - Cisco Meraki Hosted Software.ag": {
         "CFC": true,
-        "CCC": false,
+        "CCC": true,
         "CSC": false,
         "GCC": false,
         "OGT": true,
@@ -59,24 +67,8 @@ module.exports = {
         "CFC": true,
         "CCC": true,
         "CSC": false,
-        "GCC": true,
-        "OGT": true,
-        "OBT": true
-    },
-    "22 - Sandetel (partial).ag": {
-        "CFC": true,
-        "CCC": false,
-        "CSC": false,
-        "GCC": true,
-        "OGT": true,
-        "OBT": true
-    },
-    "22 - Sandetel.ag": {
-        "CFC": true,
-        "CCC": false,
-        "CSC": false,
         "GCC": false,
         "OGT": true,
         "OBT": true
     }
-};
+}

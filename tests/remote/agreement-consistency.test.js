@@ -48,7 +48,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'test_csp_files',
+                    folder: 'csp_files_test',
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -57,8 +57,8 @@ describe('Remote reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
-                expect(isSatisfiable).to.be.equal(true);
+            analyzer.isConsistent(function (err, stdout) {
+                expect(isSatisfiable(err, stdout)).to.be.equal(true);
                 done();
             });
 
@@ -73,7 +73,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'test_csp_files',
+                    folder: 'csp_files_test',
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -82,8 +82,8 @@ describe('Remote reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
-                expect(isSatisfiable).to.be.equal(false);
+            analyzer.isConsistent(function (err, stdout) {
+                expect(isSatisfiable(err, stdout)).to.be.equal(false);
                 done();
             });
 
@@ -98,7 +98,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'test_csp_files',
+                    folder: 'csp_files_test',
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -129,7 +129,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'test_csp_files',
+                    folder: 'csp_files_test',
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -138,8 +138,8 @@ describe('Remote reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
-                expect(isSatisfiable).to.be.equal(true);
+            analyzer.isConsistent(function (err, stdout) {
+                expect(isSatisfiable(err, stdout)).to.be.equal(true);
                 done();
             });
 
@@ -154,7 +154,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'test_csp_files',
+                    folder: 'csp_files_test',
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -163,8 +163,8 @@ describe('Remote reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
-                expect(isSatisfiable).to.be.equal(false);
+            analyzer.isConsistent(function (err, stdout) {
+                expect(isSatisfiable(err, stdout)).to.be.equal(false);
                 done();
             });
 
@@ -179,7 +179,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'test_csp_files',
+                    folder: 'csp_files_test',
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -198,3 +198,11 @@ describe('Remote reasoner consistency tests', function () {
     });
 
 });
+
+function isSatisfiable(err, sol) {
+    if (err) {
+        logger.info("Reasoner returned an error:", err);
+    }
+    return (typeof sol === "string" && sol.indexOf("----------") !== -1) ||
+        (typeof sol === "object" && sol.status === "OK" && sol.message.indexOf("----------") !== -1);
+}

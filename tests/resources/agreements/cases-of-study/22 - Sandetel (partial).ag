@@ -1,0 +1,85 @@
+---
+id: SANDETEL
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: Sandetel - Andalusian administration
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    scopes: {}
+    schemas:
+      MonthlyBillPenaltyPercentage:
+        description: percentage of the fee to pay for a month of the service. 
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+      TotalBudget:
+        description: total budget to pay to the provider for the service. 
+        type: double
+        minimum: 0.0
+        maximum: 100.0
+        unit: 'euros'
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            MonthlyBillPenaltyPercentage:
+              $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
+  metrics:
+    NormalInterventionsSolved:
+      schema:
+        description: Percentage of non-urgent interventions solved in a month
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+      computer: >-
+        http://Sandetel/NormalInterventionsSolved/
+    UrgentInterventionsSolved:
+      schema:
+        description: Percentage of urgent interventions solved in a month
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+      computer: >-
+        http://Sandetel/UrgentInterventionsSolved/
+  guarantees:
+    - id: NormalInterventions_GT
+      scope: {}
+      of:
+        - objective: 'NormalInterventionsSolved > 90'
+          scope: {}
+          with:
+            NormalInterventionsSolved: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                MonthlyBillPenaltyPercentage:
+                  $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
+              of:
+                - value: '-1' 
+                  condition: '(NormalInterventionsSolved >= 94) /\ (NormalInterventionsSolved < 95)'
+                - value: '-2' 
+                  condition: '(NormalInterventionsSolved >= 93) /\ (NormalInterventionsSolved < 94)'
+                - value: '-3' 
+                  condition: '(NormalInterventionsSolved >= 92) /\ (NormalInterventionsSolved < 93)' 
+                - value: '-4' 
+                  condition: '(NormalInterventionsSolved >= 91) /\ (NormalInterventionsSolved < 92)' 
+                - value: '-5' 
+                  condition: '(NormalInterventionsSolved >= 90) /\ (NormalInterventionsSolved < 91)' 
+                - value: '-10' 
+                  condition: 'NormalInterventionsSolved < 90' 
+              #upTo:
+              #  - value: 'MonthlyBill * 0.25'
+              #  - value: 'TotalBudget * 0.10'

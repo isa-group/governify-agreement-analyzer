@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.1.1, built on: 2017-03-24
+governify-agreement-analyzer 0.2.0, built on: 2017-03-27
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -19,39 +19,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Penalty {
-    constructor(guarantee, over, value, condition, objective) {
-        this.guarantee = guarantee;
+    constructor(name, over, valueCondition, objective) {
+        this.name = name;
         this.over = over;
-        this.value = value;
-        this.condition = condition;
+        this.valueCondition = valueCondition;
         this.objective = objective;
     }
-    toComparison() {
-        return this.name + " == " + Math.abs(this.value);
+    toComparison(index) {
+        return this.name + " == " + Math.abs(this.valueCondition[index].value);
     }
     toLessComparison() {
         return this.name + " == 0";
     }
-    get name() {
-        return "Penalty_" + this.guarantee.replace(/\s/g, "") + "_" + this.over.name;
-    }
     getCFC1() {
-        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + "))";
+        return this.valueCondition.map((valueCondition, index) => {
+            return "((" + this.toComparison(index) + ") /\\ (" + valueCondition.condition.expr + "))";
+        }).join(" xor ");
     }
     getCFC2() {
-        return "((" + this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
+        return "((" + this.toLessComparison() + ") /\\ not (" + this.valueCondition.map((valueCondition, index) => {
+            return "(" + this.valueCondition[index].condition.expr + ")";
+        }).join(" \\/ ") + "))";
     }
     static getCFC1(penalties) {
-        let statements = penalties.map((p) => {
+        return penalties.map((p) => {
             return p.getCFC1();
-        });
-        return "(" + statements.join(" xor ") + ")";
+        }).join(" xor ");
     }
     static getCFC2(penalties) {
-        let statements = penalties.map((p) => {
-            return "((" + p.toLessComparison() + ") /\\ not (" + p.condition.expr + "))";
-        });
-        return "(" + statements.join(" \\/ ") + ")";
+        return penalties.map((p) => {
+            return p.getCFC2();
+        }).join(" /\\ ");
     }
 }
 exports.default = Penalty;

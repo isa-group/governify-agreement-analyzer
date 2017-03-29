@@ -25,40 +25,43 @@ export default class Reward {
 
     private _name: string;
 
-    constructor(public guarantee: string, public over: Definition, public value: number,
-        public condition: Expression, public objective: Expression) { }
+    constructor(public name: string, public over: Definition,
+        public valueCondition: ValueCondition[], public objective: Expression) { }
 
-    toComparison(): string {
-        return this.name + " == " + Math.abs(this.value);
+    toComparison(index: number): string {
+        return this.name + " == " + Math.abs(this.valueCondition[index].value);
     }
 
     toLessComparison(): string {
         return this.name + " == 0";
     }
 
-    get name(): string {
-        return "Reward_" + this.guarantee.replace(/\s/g, "") + "_" + this.over.name;
-    }
-
     getCFC1(): string {
-        return "((" + this.toComparison() + ") /\\ (" + this.condition.expr + "))";
+        return this.valueCondition.map((valueCondition: ValueCondition, index) => {
+            return "((" + this.toComparison(index) + ") /\\ (" + valueCondition.condition.expr + "))";
+        }).join(" xor ");
     }
 
     getCFC2(): string {
-        return "((" + this.toLessComparison() + ") /\\ not (" + this.condition.expr + "))";
+        return "((" + this.toLessComparison() + ") /\\ not (" + this.valueCondition.map((valueCondition: ValueCondition, index) => {
+            return "(" + this.valueCondition[index].condition.expr + ")";
+        }).join(" \\/ ") + "))";
     }
 
     static getCFC1(rewards: Reward[]): string {
-        let statements = rewards.map((r) => {
+        return rewards.map((r) => {
             return r.getCFC1();
-        });
-        return "(" + statements.join(" xor ") + ")";
+        }).join(" xor ");
     }
 
     static getCFC2(rewards: Reward[]): string {
-        let statements = rewards.map((r) => {
-            return "((" + r.toLessComparison() + ") /\\ not (" + r.condition.expr + "))";
-        });
-        return "(" + statements.join(" \\/ ") + ")";
+        return rewards.map((r) => {
+            return r.getCFC2();
+        }).join(" /\\ ");
     }
+}
+
+interface ValueCondition {
+    value?: number;
+    condition?: Expression;
 }
