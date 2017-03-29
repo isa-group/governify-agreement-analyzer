@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.2.0, built on: 2017-03-27
+governify-agreement-analyzer 0.2.0, built on: 2017-03-29
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -78,24 +78,38 @@ export default class AgreementCompensationCSPModelBuilder {
      */
     buildCFC(): typeof CSPModel {
 
-        let cfcConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
-            var expr: string = "";
-            g.ofs.forEach((_of) => {
-                if (expr !== "") {
-                    expr += " /\\ ";
-                }
-                expr += "(((" + Penalty.getCFC1(_of.penalties) + ") xor (" + Penalty.getCFC2(_of.penalties) + ")) /\\ ((" +
-                    Reward.getCFC1(_of.rewards) + ") xor (" + Reward.getCFC2(_of.rewards) + ")))";
-            });
-            return new CSPTools.CSPConstraint("cfc_" + g.id + gi, expr);
-        });
+        var _pthis = this;
+        let cfcConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "cfc", this.guarantees.map((g, gi) => _pthis.getCFCExpressionFromGuarantee(g)).join(" \\/ "));
 
         let cspModel: typeof CSPModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = cfcConstraints;
+        cspModel.constraints = [cfcConstraints];
         cspModel.goal = "satisfy";
 
         return cspModel;
+
+    }
+
+    /**
+     * Get CFC transformation expression from a Guarantee.
+     * @param guarantee Guarantee
+     */
+    private getCFCExpressionFromGuarantee(guarantee: Guarantee): string {
+
+        var _pthis = this;
+        return guarantee.ofs.map((_of: Objective) => _pthis.getCFCExpressionFromObjective(_of)).join(" \\/ ");
+
+    }
+
+    /**
+     * Get CFC transformation expression from an Objective.
+     * @param guarantee Objective
+     */
+    private getCFCExpressionFromObjective(_of: Objective): string {
+
+        return "(((" + Penalty.getCFC1(_of.penalties) + ") xor (" + Penalty.getCFC2(_of.penalties) + ")) /\\ ((" +
+            Reward.getCFC1(_of.rewards) + ") xor (" + Reward.getCFC2(_of.rewards) + ")))";
 
     }
 
@@ -108,86 +122,53 @@ export default class AgreementCompensationCSPModelBuilder {
         var mockBuilder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement, "2");
         var _pthis = this;
 
-        let cccConstraints1: typeof CSPTools.CSPConstraint[] = this.buildCFC().constraints; // CFC(m1,p1,r1,{CondP},{AsigP},{CondR},{AsigR})
-        let cccConstraints2: typeof CSPTools.CSPConstraint[] = mockBuilder.buildCFC().constraints; // CFC(m2,p2,r2,{CondP},{AsigP},{CondR},{AsigR})
-        let cccConstraints3: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
-
-            var expr: string = "";
-
-            g.ofs.forEach((_of, _ofi) => {
-
-                let penalCompareExpr: string = _of.penalties.map((p, pi) => {
-                    return "(" + p.name + " > " + mockBuilder.guarantees[gi].ofs[_ofi].penalties[pi].name + ")";
-                }).join(" /\\ ");
-
-                let rewardCompareExpr: string = _of.rewards.map((p, pi) => {
-                    return "(" + p.name + " < " + mockBuilder.guarantees[gi].ofs[_ofi].rewards[pi].name + ")";
-                }).join(" /\\ ");
-
-                // let penalRewardProductExpr: string = "not (" + _pthis.guaranteePenaltyRewardCache[g.id].penalties
-                //     .concat(_pthis.guaranteePenaltyRewardCache[g.id].rewards)
-                //     .join(" * ") + " == 0)";
-
-                if (expr !== "") {
-                    expr += " /\\ ";
-                }
-
-                // expr += "(" + penalCompareExpr + " \\/ " + rewardCompareExpr + " \\/ " + penalRewardProductExpr + ")";
-                expr += "(" + penalCompareExpr + " \\/ " + rewardCompareExpr + ")";
-
-            });
-
-            return new CSPTools.CSPConstraint("ccc_3", expr);
-
-        });
-
-        // Store all utility function constraints for each "objective" inside a guarantee
-        let cccConstraints4 = this.guarantees.map((g, gi) => {
-            return g.ofs.map((_of, _ofi) => {
-
-                // Create utility variables
-                let utility: UtilityFunction = _pthis.getUtilityFunction(
-                    "ccc_objectives_utility" + gi + _ofi, new Expression(_of.objective));
-                let mockUtility: UtilityFunction = mockBuilder.getUtilityFunction(
-                    "ccc_objectives_utility" + gi + _ofi,
-                    _pthis.getMockValue(new Expression(_of.objective)));
-
-                // Declare mock constraint and variables
-                mockUtility.var.id = mockBuilder.getMockValue(utility.var.id);
-                let expression: Expression = new Expression(utility.constraint.expression);
-                // expression.variables = new Set([...expression.variables].map((_v) => {
-                //     _pthis.cspModel.variables.push(_v + mockSuffix);
-                //     return _v + mockSuffix;
-                // }));
-                mockUtility.constraint.expression = mockBuilder.getMockValue(new Expression(utility.constraint.expression)).expr;
-
-                // _pthis.cspModel.variables.push(utility.var);
-                // _pthis.cspModel.constraints.push(utility.constraint);
-                mockBuilder.cspModel.variables.push(utility.var);
-                mockBuilder.cspModel.constraints.push(utility.constraint);
-                mockBuilder.cspModel.variables.push(mockUtility.var);
-                mockBuilder.cspModel.constraints.push(mockUtility.constraint);
-
-                return utility.var.id + " > " + mockUtility.var.id;
-
-            });
-
-        });
+        let cccConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "ccc", this.guarantees.map((g, gi) => _pthis.getCCCExpressionFromGuarantee(mockBuilder, g, gi)).join(" \\/ "));
 
         let cspModel: typeof CSPModel = new CSPModel();
         cspModel.variables = [...this.cspModel.variables, ...mockBuilder.cspModel.variables];
-        cspModel.constraints = [...mockBuilder.cspModel.constraints, ...cccConstraints1.map((c, ci) => {
-            return new CSPTools.CSPConstraint("ccc_" + ci,
-                c.expression + " /\\ " +
-                cccConstraints2[ci].expression + " /\\ " +
-                cccConstraints3[ci].expression + " /\\ " +
-                // Get all constraints for this index
-                cccConstraints4[ci].join(" /\\ "));
-        })];
+        cspModel.constraints = [...mockBuilder.cspModel.constraints, cccConstraints];
         cspModel.goal = "satisfy";
 
         return cspModel;
 
+    }
+
+    private getCCCExpressionFromGuarantee(mockBuilder: AgreementCompensationCSPModelBuilder, guarantee: Guarantee, guaranteeIndex: number): string {
+
+        var _pthis = this;
+        return guarantee.ofs.map((_of: Objective, _ofi: number) => _pthis.getCCCExpressionFromObjective(mockBuilder, guarantee, guaranteeIndex, _of, _ofi)).join(" \\/ ");
+
+    }
+
+    private getCCCExpressionFromObjective(mockBuilder: AgreementCompensationCSPModelBuilder, guarantee: Guarantee, guaranteeIndex: number, _of: Objective, _ofi: number): string {
+
+        // CFC(m1,p1,r1,{CondP},{AsigP},{CondR},{AsigR})
+        let cfc1: string = this.getCFCExpressionFromObjective(_of);
+
+        // CFC(m2,p2,r2,{CondP},{AsigP},{CondR},{AsigR})
+        let cfc2: string = mockBuilder.getCFCExpressionFromObjective(mockBuilder.guarantees[guaranteeIndex].ofs[_ofi]);
+
+        // (p1 > p2 OR r1 < r2)
+        let penalCompareExpr: string = "(" + _of.penalties.map((p, pi) => {
+            return "(" + p.name + " > " + mockBuilder.getMockValue(p.name) + ")";
+        }).join(" /\\ ") + ")";
+        let rewardCompareExpr: string = "(" + _of.rewards.map((p, pi) => {
+            return "(" + p.name + " < " + mockBuilder.getMockValue(p.name) + ")";
+        }).join(" /\\ ") + ")";
+
+        // (Utility(m1) > Utility(m2))
+        let objectiveExpression: Expression = new Expression(_of.objective);
+        let utilityName: string = "ccc_utility_" + [...objectiveExpression.variables].join("") + "_" + _ofi;
+        let utility: UtilityFunction = this.getUtilityFunction(utilityName, objectiveExpression);
+        let mockUtility: UtilityFunction = mockBuilder.getUtilityFunction(utilityName, objectiveExpression);
+        // Declare utility constraint and variable
+        mockBuilder.cspModel.variables.push(utility.var);
+        mockBuilder.cspModel.constraints.push(utility.constraint);
+        mockBuilder.cspModel.variables.push(mockUtility.var);
+        mockBuilder.cspModel.constraints.push(mockUtility.constraint);
+
+        return "(" + cfc1 + " /\\ " + cfc2 + " /\\ (" + penalCompareExpr + " \\/ " + rewardCompareExpr + ") /\\ (" + utility.var.id + " > " + mockUtility.var.id + "))";
     }
 
     /**
@@ -195,33 +176,41 @@ export default class AgreementCompensationCSPModelBuilder {
      */
     buildCSC(): typeof CSPModel {
 
-        let cfc = this.buildCFC(); // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
-
-        let cscPenaltyConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
-            return new CSPTools.CSPConstraint("csc", g.ofs.map((_of, _ofi) => {
-                return _of.penalties.map((p) => {
-                    return "(" + p.name + " == " + p.over.domain.max + ")";
-                }).join(" /\\ ");
-            }).join(" /\\ "));
-        });
-
-        let cscRewardConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
-            return new CSPTools.CSPConstraint("csc", g.ofs.map((_of, _ofi) => {
-                return _of.rewards.map((r) => {
-                    return "(" + r.name + " == " + r.over.domain.max + ")";
-                }).join(" /\\ ");
-            }).join(" /\\ "));
-        });
+        var _pthis = this;
+        let cfcConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "csc", this.guarantees.map((g, gi) => _pthis.getCSCExpressionFromGuarantee(g)).join(" \\/ "));
 
         let cspModel: typeof CSPModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = cfc.constraints.map((c, ci) => {
-            return new CSPTools.CSPConstraint("csc", "(" + c.expression + ") /\\ ((" +
-                cscPenaltyConstraints[ci].expression + ") \\/ (" + cscRewardConstraints[ci].expression + "))");
-        });
+        cspModel.constraints = [cfcConstraints];
         cspModel.goal = "satisfy";
 
         return cspModel;
+
+    }
+
+    private getCSCExpressionFromGuarantee(guarantee: Guarantee): string {
+
+        var _pthis = this;
+        return guarantee.ofs.map((_of: Objective) => _pthis.getCSCExpressionFromObjective(_of)).join(" \\/ ");
+
+    }
+
+    private getCSCExpressionFromObjective(_of: Objective): string {
+
+        // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
+        let cfc: string = this.getCFCExpressionFromObjective(_of);
+
+        // (p = max(domain(p))
+        let cscPenalties: string = "(" + _of.penalties.map((p) => {
+            return "(" + p.name + " == " + p.over.domain.max + ")";
+        }).join(" /\\ ") + ")";
+
+        let cscRewards: string = "(" + _of.rewards.map((r) => {
+            return "(" + r.name + " == " + r.over.domain.max + ")";
+        }).join(" /\\ ") + ")";
+
+        return "(" + cfc + " /\\ (" + cscPenalties + " \\/ " + cscRewards + "))";
 
     }
 
@@ -230,33 +219,41 @@ export default class AgreementCompensationCSPModelBuilder {
      */
     buildGCC(): typeof CSPModel {
 
-        let cfc = this.buildCFC();
-
-        let gccPenaltyConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
-            return new CSPTools.CSPConstraint("gcc", g.ofs.map((_of, _ofi) => {
-                return _of.penalties.map((p) => {
-                    return "(" + p.name + " > 0 /\\ (" + p.objective.expr + "))";
-                }).join(" /\\ ");
-            }).join(" /\\ "));
-        });
-
-        let gccRewardConstraints: typeof CSPTools.CSPConstraint[] = this.guarantees.map((g, gi) => {
-            return new CSPTools.CSPConstraint("gcc", g.ofs.map((_of, _ofi) => {
-                return _of.rewards.map((r) => {
-                    return "(" + r.name + " > 0 /\\ not (" + r.objective.expr + "))";
-                }).join(" /\\ ");
-            }).join(" /\\ "));
-        });
+        var _pthis = this;
+        let cfcConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "gcc", this.guarantees.map((g, gi) => _pthis.getGCCExpressionFromGuarantee(g)).join(" \\/ "));
 
         let cspModel: typeof CSPModel = new CSPModel();
         cspModel.variables = this.cspModel.variables;
-        cspModel.constraints = cfc.constraints.map((c, ci) => {
-            return new CSPTools.CSPConstraint("gcc_" + ci, "(" + c.expression + ") /\\ ((" +
-                gccPenaltyConstraints[ci].expression + ") \\/ (" + gccRewardConstraints[ci].expression + "))");
-        });
+        cspModel.constraints = [cfcConstraints];
         cspModel.goal = "satisfy";
 
         return cspModel;
+
+    }
+
+    private getGCCExpressionFromGuarantee(guarantee: Guarantee): string {
+
+        var _pthis = this;
+        return guarantee.ofs.map((_of: Objective) => _pthis.getGCCExpressionFromObjective(_of)).join(" \\/ ");
+
+    }
+
+    private getGCCExpressionFromObjective(_of: Objective): string {
+
+        // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
+        let cfc: string = this.getCFCExpressionFromObjective(_of);
+
+        // (p = max(domain(p))
+        let gccPenalties: string = "(" + _of.penalties.map((p) => {
+            return "(" + p.name + " > 0 /\\ (" + p.objective.expr + "))";
+        }).join(" /\\ ") + ")";
+
+        let gccRewards: string = "(" + _of.rewards.map((r) => {
+            return "(" + r.name + " > 0 /\\ not (" + r.objective.expr + "))";
+        }).join(" /\\ ") + ")";
+
+        return "(" + cfc + " /\\ (" + gccPenalties + " \\/ " + gccRewards + "))";
 
     }
 
@@ -279,9 +276,42 @@ export default class AgreementCompensationCSPModelBuilder {
     }
 
     /**
+     * Obtain a CSP model for OGT or OBT execution.
+     * @param solveType "minimize" or "maximize" for OGT or OBT
+     */
+    private buildOptimalThreshold(operationName: string, solveType: string): typeof CSPModel {
+
+        var _pthis = this;
+
+        operationName = operationName.toLowerCase();
+
+        // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
+        let cfc: typeof CSPModel = this.buildCFC();
+
+        let constraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            operationName, this.guarantees.map((g) => _pthis.getOptimalThresholdFromGuarantee(g, operationName)).join(" \\/ "));
+
+        let utility: UtilityFunction = this.loadAggregatedUtilityFunction();
+
+        let cspModel: typeof CSPModel = new CSPModel();
+        cspModel.variables = this.cspModel.variables;
+        cspModel.constraints = [...this.cspModel.constraints, constraints];
+
+        // Get first metric to minimize
+        if (this.metrics.length === 0) {
+            throw "Unable to find any metric to minimize or maximize";
+        } else {
+            cspModel.goal = solveType + " " + utility.var.id;
+        }
+
+        return cspModel;
+
+    }
+
+    /**
      * Loads the utility function variable and constraint statements and returns a UtilityFunction object.
      */
-    private loadUtilityFunction(): UtilityFunction {
+    private loadAggregatedUtilityFunction(): UtilityFunction {
 
         var _pthis = this;
 
@@ -313,57 +343,36 @@ export default class AgreementCompensationCSPModelBuilder {
         this.cspModel.constraints.push(utility.constraint);
 
         return utility;
+
     }
 
-    /**
-     * Obtain a CSP model for OGT or OBT execution.
-     * @param solveType "minimize" or "maximize" for OGT or OBT
-     */
-    private buildOptimalThreshold(operationName: string, solveType: string): typeof CSPModel {
+    private getOptimalThresholdFromGuarantee(guarantee: Guarantee, operationName: string): string {
 
         var _pthis = this;
+        return guarantee.ofs.map((_of: Objective) => _pthis.getOptimalThresholdFromObjective(_of, operationName)).join(" \\/ ");
 
-        let utility: UtilityFunction = this.loadUtilityFunction();
-        let cfc: typeof CSPModel = this.buildCFC(); // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
+    }
 
-        var penaltyOrRewardsConstraints: typeof CSPTools.CSPConstraint[];
-        operationName = operationName.toLowerCase();
+    private getOptimalThresholdFromObjective(_of: Objective, operationName: string): string {
+
+        // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
+        let cfc: string = this.getCFCExpressionFromObjective(_of);
+
+        // p = 0 or r = 0
+        var constraints: string = "";
         if (operationName === "ogt") {
-            penaltyOrRewardsConstraints = this.guarantees.map((g, gi) => {
-                return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
-                    return _of.penalties.map((p) => {
-                        return "(" + p.name + " == 0)";
-                    }).join(" /\\ ");
-                }).join(" /\\ "));
-            });
+            constraints = "(" + _of.penalties.map((p) => {
+                return "(" + p.name + " == 0)";
+            }).join(" /\\ ") + ")";
         } else if (operationName === "obt") {
-            penaltyOrRewardsConstraints = this.guarantees.map((g, gi) => {
-                return new CSPTools.CSPConstraint("ogt", g.ofs.map((_of, _ofi) => {
-                    return _of.rewards.map((r) => {
-                        return "(" + r.name + " == 0)";
-                    }).join(" /\\ ");
-                }).join(" /\\ "));
-            });
+            constraints = "(" + _of.rewards.map((r) => {
+                return "(" + r.name + " == 0)";
+            }).join(" /\\ ") + ")";
         } else {
             throw new Error("Agreement compensation internal error, operation type should be set \"OGT\" or \"OBT\"");
         }
 
-        let cspModel: typeof CSPModel = new CSPModel();
-        cspModel.variables = this.cspModel.variables;
-
-        cspModel.constraints = this.cspModel.constraints.concat(cfc.constraints.map((c, ci) => {
-            return new CSPTools.CSPConstraint("ogt_" + ci, "(" + c.expression + ") /\\ (" +
-                penaltyOrRewardsConstraints[ci].expression + ")");
-        }));
-
-        // Get first metric to minimize
-        if (this.metrics.length === 0) {
-            throw "Unable to find a metric to minimize";
-        } else {
-            cspModel.goal = solveType + " " + utility.var.id;
-        }
-
-        return cspModel;
+        return "(" + cfc + " /\\ " + constraints + ")";
 
     }
 
@@ -373,6 +382,9 @@ export default class AgreementCompensationCSPModelBuilder {
      * @param expression Guarantee objective expression
      */
     private getUtilityFunction(name: string, expression: Expression): UtilityFunction {
+
+        name = this.getMockValue(name);
+        expression = this.getMockValue(expression);
 
         var utility: UtilityFunction = {};
         var variables = expression.variables;
@@ -560,8 +572,8 @@ export default class AgreementCompensationCSPModelBuilder {
 
     private loadConstraints(): void {
         var _pthis = this;
-        this.agreement.terms.guarantees.forEach(function (g: any, gi: number) {
-            g.of.forEach(function (of: any, ofi: number) {
+        this.agreement.terms.guarantees.forEach(function(g: any, gi: number) {
+            g.of.forEach(function(of: any, ofi: number) {
                 var _id: string = "C" + gi + "_" + ofi;
                 if (of.precondition && of.precondition !== "") {
                     // Use "precondition->objective" to define constraint
@@ -660,7 +672,6 @@ export default class AgreementCompensationCSPModelBuilder {
      * @param name Definition name
      */
     private getDefinitionByName(name: string): Definition {
-        name = this.getMockValue(name);
         var ret: Definition;
         let defs: Definition[] = this.definitions.filter((d) => name === d.name);
         if (defs.length > 0) {
@@ -674,7 +685,6 @@ export default class AgreementCompensationCSPModelBuilder {
      * @param name Definition name
      */
     private getMetricByName(name: string): Metric {
-        name = this.getMockValue(name);
         var ret: Metric;
         let mets: Metric[] = this.metrics.filter((d) => name === d.name);
         if (mets.length > 0) {
@@ -684,7 +694,7 @@ export default class AgreementCompensationCSPModelBuilder {
     }
 
     private getPricingPenalty(): Definition {
-        return this.getDefinitionByName(Object.keys(this.agreement.terms.pricing.billing.penalties[0].over)[0]);
+        return this.getDefinitionByName(this.getMockValue(Object.keys(this.agreement.terms.pricing.billing.penalties[0].over)[0]));
     }
 
     private getPricingReward(): Definition {
@@ -693,7 +703,7 @@ export default class AgreementCompensationCSPModelBuilder {
         if (!rewards) {
             def = this.getPricingPenalty();
         } else {
-            def = this.getDefinitionByName(Object.keys(this.agreement.terms.pricing.billing.rewards[0].over)[0]);
+            def = this.getDefinitionByName(this.getMockValue(Object.keys(this.agreement.terms.pricing.billing.rewards[0].over)[0]));
         }
         return def;
     }

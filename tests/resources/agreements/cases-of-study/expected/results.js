@@ -75,7 +75,7 @@ module.exports = {
         "CFC": true,
         "CCC": false,
         "CSC": false,
-        "GCC": false,
+        "GCC": true,
         "OGT": true,
         "OBT": true
     }
