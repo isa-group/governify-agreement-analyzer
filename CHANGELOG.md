@@ -1,4 +1,4 @@
-### v0.2.0 - 2017-21-27
+There is not milestone for this version### v0.2.0 - 2017-21-27
 
 - [#5](https://github.com/isa-group/governify-agreement-analyzer/issues/5) - Implement compensation operations
 
