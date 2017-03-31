@@ -17,7 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 const Metric_1 = require("../model/Metric");
 const Penalty_1 = require("../model/Penalty");
 const Reward_1 = require("../model/Reward");
@@ -170,8 +172,7 @@ class AgreementCompensationCSPModelBuilder {
         cspModel.constraints = [...this.cspModel.constraints, constraints];
         if (this.metrics.length === 0) {
             throw "Unable to find any metric to minimize or maximize";
-        }
-        else {
+        } else {
             cspModel.goal = solveType + " " + utility.var.id;
         }
         return cspModel;
@@ -204,13 +205,11 @@ class AgreementCompensationCSPModelBuilder {
             constraints = "(" + _of.penalties.map((p) => {
                 return "(" + p.name + " == 0)";
             }).join(" /\\ ") + ")";
-        }
-        else if (operationName === "obt") {
+        } else if (operationName === "obt") {
             constraints = "(" + _of.rewards.map((r) => {
                 return "(" + r.name + " == 0)";
             }).join(" /\\ ") + ")";
-        }
-        else {
+        } else {
             throw new Error("Agreement compensation internal error, operation type should be set \"OGT\" or \"OBT\"");
         }
         return "(" + cfc + " /\\ " + constraints + ")";
@@ -229,8 +228,7 @@ class AgreementCompensationCSPModelBuilder {
                 if (parserTree.operator === "<" || parserTree.operator === "<=") {
                     expressionVar = "-" + expressionVar;
                 }
-            }
-            else {
+            } else {
                 if (parserTree.operator === ">" || parserTree.operator === ">=") {
                     expressionVar = "-" + expressionVar;
                 }
@@ -242,8 +240,7 @@ class AgreementCompensationCSPModelBuilder {
     getMockValue(v) {
         if (typeof v === "string") {
             return this.mock ? v + this.mockSuffix : v;
-        }
-        else {
+        } else {
             let expr = v;
             return this.mock ? new Expression_1.default(expr.getMockExpression(this.mockSuffix)) : v;
         }
@@ -299,10 +296,12 @@ class AgreementCompensationCSPModelBuilder {
                         penalties.push(newPenalty);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
                     });
-                }
-                else {
+                } else {
                     let def = _pthis.getPricingPenalty();
-                    let newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty0"), def, [{ value: 0, condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofi.objective)));
+                    let newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty0"), def, [{
+                        value: 0,
+                        condition: new Expression_1.default("true")
+                    }], _pthis.getMockValue(new Expression_1.default(ofi.objective)));
                     penalties.push(newPenalty);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
                 }
@@ -321,10 +320,12 @@ class AgreementCompensationCSPModelBuilder {
                         rewards.push(newReward);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
                     });
-                }
-                else {
+                } else {
                     let def = _pthis.getPricingReward();
-                    let newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward0"), def, [{ value: 0, condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofi.objective)));
+                    let newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward0"), def, [{
+                        value: 0,
+                        condition: new Expression_1.default("true")
+                    }], _pthis.getMockValue(new Expression_1.default(ofi.objective)));
                     rewards.push(newReward);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
                 }
@@ -336,15 +337,13 @@ class AgreementCompensationCSPModelBuilder {
     loadConstraints() {
         var _pthis = this;
         this.agreement.terms.guarantees.forEach(function (g, gi) {
-            g.of.forEach(function (of, ofi) {
+            g.of.forEach(function ( of , ofi) {
                 var _id = "C" + gi + "_" + ofi;
-                if (of.precondition && of.precondition !== "") {
-                    _pthis.cspModel.constraints.push(new CSPTools.CSPConstraint(_id, "(" + of.precondition + ") -> (" + of.objective + ")"));
-                }
-                else if (of.objective && of.objective !== "") {
-                    _pthis.cspModel.constraints.push(new CSPTools.CSPConstraint(_id, of.objective));
-                }
-                else {
+                if ( of .precondition && of .precondition !== "") {
+                    _pthis.cspModel.constraints.push(new CSPTools.CSPConstraint(_id, "(" + of .precondition + ") -> (" + of .objective + ")"));
+                } else if ( of .objective && of .objective !== "") {
+                    _pthis.cspModel.constraints.push(new CSPTools.CSPConstraint(_id, of .objective));
+                } else {
                     logger.info("Unable to load constraint: " + _id);
                 }
             });
@@ -431,8 +430,7 @@ class AgreementCompensationCSPModelBuilder {
         var def;
         if (!rewards) {
             def = this.getPricingPenalty();
-        }
-        else {
+        } else {
             def = this.getDefinitionByName(this.getMockValue(Object.keys(this.agreement.terms.pricing.billing.rewards[0].over)[0]));
         }
         return def;

@@ -17,7 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 const CSPBuilder_1 = require("../builder/csp/CSPBuilder");
 const Translator_1 = require("../translator/Translator");
 const AgreementModel_1 = require("../model/AgreementModel");
@@ -81,8 +83,7 @@ class Analyzer {
                     fs.readFile(filePath, "utf8", function (error, data) {
                         if (error) {
                             throw new Error("Cannot find local agreement in: " + _pthis.configuration.agreement.url + "\n" + error);
-                        }
-                        else {
+                        } else {
                             let agreementObj = yaml.safeLoad(data);
                             if (!_pthis.notValidable) {
                                 let agreement = new AgreementModel_1.default(agreementObj);
@@ -90,26 +91,22 @@ class Analyzer {
                                 if (isValid) {
                                     _pthis.agreement = agreementObj;
                                     resolve(agreementObj);
-                                }
-                                else {
+                                } else {
                                     logger.error(filePath.split("/").slice(-1).pop() + " file: ");
                                     logger.error(agreement.validationErrors);
                                     reject(agreement.validationErrors);
                                 }
-                            }
-                            else {
+                            } else {
                                 resolve(agreementObj);
                             }
                         }
                     });
-                }
-                else if (_pthis.configuration.agreement.url && _pthis.configuration.agreement.url !== "") {
+                } else if (_pthis.configuration.agreement.url && _pthis.configuration.agreement.url !== "") {
                     var url = _pthis.configuration.agreement.url;
                     request(url, function (error, response, data) {
                         if (error) {
                             throw new Error("Cannot find remote agreement in: " + url + "\n" + error);
-                        }
-                        else {
+                        } else {
                             let agreementObj = yaml.safeLoad(data);
                             if (!_pthis.notValidable) {
                                 let agreement = new AgreementModel_1.default(agreementObj);
@@ -117,22 +114,18 @@ class Analyzer {
                                 if (isValid) {
                                     _pthis.agreement = agreementObj;
                                     resolve(agreementObj);
-                                }
-                                else {
+                                } else {
                                     reject("Invalid agreement on " + url + ": " + agreement.validationErrors);
                                 }
-                            }
-                            else {
+                            } else {
                                 resolve(agreementObj);
                             }
                         }
                     });
-                }
-                else {
+                } else {
                     throw new Error("Missing parameter: file, url or content (agreement)");
                 }
-            }
-            else {
+            } else {
                 resolve(_pthis.agreement);
             }
         });

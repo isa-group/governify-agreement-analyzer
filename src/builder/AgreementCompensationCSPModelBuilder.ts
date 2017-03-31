@@ -572,8 +572,8 @@ export default class AgreementCompensationCSPModelBuilder {
 
     private loadConstraints(): void {
         var _pthis = this;
-        this.agreement.terms.guarantees.forEach(function(g: any, gi: number) {
-            g.of.forEach(function(of: any, ofi: number) {
+        this.agreement.terms.guarantees.forEach(function (g: any, gi: number) {
+            g.of.forEach(function (of: any, ofi: number) {
                 var _id: string = "C" + gi + "_" + ofi;
                 if (of.precondition && of.precondition !== "") {
                     // Use "precondition->objective" to define constraint
