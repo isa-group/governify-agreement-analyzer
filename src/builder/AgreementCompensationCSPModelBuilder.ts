@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.3.0, built on: 2017-03-30
+governify-agreement-analyzer 0.3.0, built on: 2017-04-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -110,6 +110,43 @@ export default class AgreementCompensationCSPModelBuilder {
 
         return "(((" + Penalty.getCFC1(_of.penalties) + ") xor (" + Penalty.getCFC2(_of.penalties) + ")) /\\ ((" +
             Reward.getCFC1(_of.rewards) + ") xor (" + Reward.getCFC2(_of.rewards) + ")))";
+
+    }
+
+    /**
+     * Obtain a CSP model for CCC execution.
+     */
+    buildVFC(): typeof CSPModel {
+
+        var _pthis = this;
+        let vfcConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "vfc", this.guarantees.map(g => _pthis.getVFCExpressionFromGuarantee(g)).join(" \\/ "));
+
+        let cspModel: typeof CSPModel = new CSPModel();
+        cspModel.variables = this.cspModel.variables;
+        cspModel.constraints = [vfcConstraints];
+        cspModel.goal = "satisfy";
+
+        return cspModel;
+
+    }
+    private getVFCExpressionFromGuarantee(guarantee: Guarantee): string {
+
+        var _pthis = this;
+        return guarantee.ofs.map((_of: Objective) => _pthis.getVFCExpressionFromObjective(_of)).join(" \\/ ");
+
+    }
+    private getVFCExpressionFromObjective(_of: Objective): string {
+
+        // CFC(m,p,r,{CondP},{AsigP},{CondR},{AsigR})
+        let cfc: string = this.getCFCExpressionFromObjective(_of);
+
+        // (p x r > 0)
+        var penalties: string[] = _of.penalties.map(p => p.name);
+        var rewards: string[] = _of.rewards.map(r => r.name);
+        var constraints: string = "(" + [...penalties, ...rewards].join(" * ") + " > 0)";
+
+        return "(" + cfc + " /\\ " + constraints + ")";
 
     }
 

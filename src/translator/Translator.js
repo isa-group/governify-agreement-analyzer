@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.3.0, built on: 2017-03-30
+governify-agreement-analyzer 0.3.0, built on: 2017-04-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -17,9 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 "use strict";
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+Object.defineProperty(exports, "__esModule", { value: true });
 const CSPBuilder_1 = require("../builder/csp/CSPBuilder");
 const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
@@ -44,13 +42,14 @@ class Translator {
         });
         var guarantees = agModel["terms"]["guarantees"];
         guarantees.forEach(function (guarantee) {
-            guarantee.of.forEach(function ( of , index) {
+            guarantee.of.forEach(function (of, index) {
                 var constraint;
                 var constId = guarantee.id + "_" + index;
-                if ( of .precondition && of .precondition !== "") {
-                    constraint = new CSPConstraint(constId, "(" + of .precondition + ") -> (" + of .objective + ")");
-                } else if ( of .objective && of .objective !== "") {
-                    constraint = new CSPConstraint(constId, of .objective);
+                if (of.precondition && of.precondition !== "") {
+                    constraint = new CSPConstraint(constId, "(" + of.precondition + ") -> (" + of.objective + ")");
+                }
+                else if (of.objective && of.objective !== "") {
+                    constraint = new CSPConstraint(constId, of.objective);
                 }
                 constraints.push(constraint);
             });

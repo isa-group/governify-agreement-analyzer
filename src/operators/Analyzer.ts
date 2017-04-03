@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.3.0, built on: 2017-03-30
+governify-agreement-analyzer 0.3.0, built on: 2017-04-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -211,6 +211,22 @@ export default class Analyzer implements AnalyzerInterface {
 
             let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
             let model: typeof CSPModel = builder.buildCFC();
+            var reasoner = new Reasoner(_pthis.configuration.reasoner);
+            reasoner.solve(model, callback);
+
+        }, function (error: any) {
+            callback(error);
+        });
+
+    }
+
+    isSatisfiableVFC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+
+        var _pthis = this;
+        this.agreementPromise.then(function (agreement: any) {
+
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let model: typeof CSPModel = builder.buildVFC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
 

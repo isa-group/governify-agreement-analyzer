@@ -72,6 +72,7 @@ describe("Local compensation execution", function () {
 
                 var allCompensationPromises = [];
                 var cfcPromises = [];
+                var vfcPromises = [];
                 var cccPromises = [];
                 var cscPromises = [];
                 var gccPromises = [];
@@ -89,6 +90,17 @@ describe("Local compensation execution", function () {
                                     data: sol,
                                     file: file,
                                     type: "CFC"
+                                });
+                            });
+                        }));
+                        // Create a promise for VFC executions
+                        vfcPromises.push(new Promise(function (resolve, reject) {
+                            analyzer.isSatisfiableVFC(function (err, stdout, stderr, sol) {
+                                manageResolveReject(resolve, reject, {
+                                    error: err,
+                                    data: sol,
+                                    file: file,
+                                    type: "VFC"
                                 });
                             });
                         }));
@@ -149,7 +161,7 @@ describe("Local compensation execution", function () {
                         }));
                     });
 
-                    allCompensationPromises = cfcPromises.concat(cccPromises).concat(cscPromises).concat(gccPromises).concat(ogtPromises).concat(obtPromises);
+                    allCompensationPromises = cfcPromises.concat(vfcPromises).concat(cccPromises).concat(cscPromises).concat(gccPromises).concat(ogtPromises).concat(obtPromises);
 
                     Promise.all(allCompensationPromises).then(function (values) {
                         values.forEach(function (obj) {
