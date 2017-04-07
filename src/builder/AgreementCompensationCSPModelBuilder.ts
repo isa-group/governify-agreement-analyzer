@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.3.1, built on: 2017-04-03
+governify-agreement-analyzer 0.3.1, built on: 2017-04-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -26,10 +26,13 @@ import Expression from "../model/Expression";
 import Domain from "../model/Domain";
 import Guarantee from "../model/Guarantee";
 import Objective from "../model/Objective";
+import Util from "../util/Util";
 
 const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
+const CSPVar = CSPTools.CSPVar;
 const cspConfig = CSPTools.config;
+const cspTypeMap = cspConfig.translator.typeMap;
 const minMaxMap = require("../configurations/config").minMaxMap;
 const logger = require("../logger/logger");
 const jsep = require("jsep");
@@ -200,9 +203,9 @@ export default class AgreementCompensationCSPModelBuilder {
         let utility: UtilityFunction = this.getUtilityFunction(utilityName, objectiveExpression);
         let mockUtility: UtilityFunction = mockBuilder.getUtilityFunction(utilityName, objectiveExpression);
         // Declare utility constraint and variable
-        mockBuilder.cspModel.variables.push(utility.var);
+        mockBuilder.cspModel.variables.push(new CSPVar(utility.var.id, utility.var.range.getRangeOrType()));
         mockBuilder.cspModel.constraints.push(utility.constraint);
-        mockBuilder.cspModel.variables.push(mockUtility.var);
+        mockBuilder.cspModel.variables.push(new CSPVar(mockUtility.var.id, mockUtility.var.range.getRangeOrType()));
         mockBuilder.cspModel.constraints.push(mockUtility.constraint);
 
         return "(" + cfc1 + " /\\ " + cfc2 + " /\\ (" + penalCompareExpr + " \\/ " + rewardCompareExpr + ") /\\ (" + utility.var.id + " > " + mockUtility.var.id + "))";
@@ -357,7 +360,7 @@ export default class AgreementCompensationCSPModelBuilder {
             // Obtain objectives
             return "(" + g.ofs.map((_of, _ofi) => {
                 let utility: UtilityFunction = _pthis.getUtilityFunction("ccc_objectives_utility" + gi + _ofi, new Expression(_of.objective));
-                _pthis.cspModel.variables.push(utility.var);
+                _pthis.cspModel.variables.push(new CSPVar(utility.var.id, utility.var.range.getRangeOrType()));
                 _pthis.cspModel.constraints.push(utility.constraint);
                 return utility.var.id;
             }).join(" + ") + ")";
@@ -376,7 +379,7 @@ export default class AgreementCompensationCSPModelBuilder {
         let utility: UtilityFunction = {};
         utility.var = new CSPTools.CSPVar("ccc_aggregated_utility", "int");
         utility.constraint = new CSPTools.CSPConstraint("ccc_aggregated_utility", utility.var.id + " == " + aggregatedUtilityFunction);
-        this.cspModel.variables.push(utility.var);
+        this.cspModel.variables.push(new CSPVar(utility.var.id, utility.var.type));
         this.cspModel.constraints.push(utility.constraint);
 
         return utility;
@@ -436,7 +439,7 @@ export default class AgreementCompensationCSPModelBuilder {
         // There is only a number variable in objective expression
         var expressionVar: string = [...variables][0];
         let metricUtil: Metric = this.getMetricByName(expressionVar);
-        utility.var = new CSPTools.CSPVar(name, new Domain("-" + metricUtil.domain.max, metricUtil.domain.max));
+        utility.var = new CSPTools.CSPVar(name, new Domain("-" + metricUtil.domain.getRangeOrType().max, metricUtil.domain.getRangeOrType().max));
         // Set expression signal
         var parserTree = jsep(expression.expr);
         if (parserTree.type === "BinaryExpression") {
@@ -475,10 +478,22 @@ export default class AgreementCompensationCSPModelBuilder {
 
         metricNames.forEach((metricName) => {
 
-            var min: number = _pthis.agreement.terms.metrics[metricName].schema.minimum;
-            var max: number = _pthis.agreement.terms.metrics[metricName].schema.maximum;
             var type: string = _pthis.agreement.terms.metrics[metricName].schema.type;
-            var domain: Domain = (isNaN(min) || isNaN(max)) ? new Domain(type) : new Domain(min, max);
+
+            let _min: number = _pthis.agreement.terms.metrics[metricName].schema.minimum;
+            let _max: number = _pthis.agreement.terms.metrics[metricName].schema.maximum;
+            var min: string;
+            var max: string;
+
+            if (cspTypeMap[type] === "float") {
+                min = Util.toStringFloat(_min);
+                max = Util.toStringFloat(_max);
+            } else {
+                min = _min.toString();
+                max = _max.toString();
+            }
+
+            var domain: Domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain(type) : new Domain(min, max);
 
             metricName = _pthis.getMockValue(metricName);
             _pthis.metrics.push(new Metric(metricName, domain)); // _pthis.agreement.terms.metrics[metricName].schema.type
@@ -496,10 +511,22 @@ export default class AgreementCompensationCSPModelBuilder {
 
         definitionNames.forEach((defName) => {
 
-            var min: number = _pthis.agreement.context.definitions.schemas[defName].minimum;
-            var max: number = _pthis.agreement.context.definitions.schemas[defName].maximum;
-            var type: number = _pthis.agreement.context.definitions.schemas[defName].type;
-            var domain: Domain = (isNaN(min) || isNaN(max)) ? new Domain(type) : new Domain(min, max);
+            var type: string = _pthis.agreement.context.definitions.schemas[defName].type;
+
+            let _min: number = _pthis.agreement.context.definitions.schemas[defName].minimum;
+            let _max: number = _pthis.agreement.context.definitions.schemas[defName].maximum;
+            var min: string;
+            var max: string;
+
+            if (cspTypeMap[type] === "float") {
+                min = Util.toStringFloat(_min);
+                max = Util.toStringFloat(_max);
+            } else {
+                min = _min.toString();
+                max = _max.toString();
+            }
+
+            var domain: Domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain(type) : new Domain(min, max);
 
             defName = _pthis.getMockValue(defName);
             _pthis.definitions.push(new Definition(defName, domain)); // _pthis.agreement.terms.metrics[metricName].schema.type

@@ -2,18 +2,18 @@
 
 const jsyaml = require("js-yaml");
 const fs = require("fs");
-const logger = require("../../src/logger/logger");
+const logger = require("../../../src/logger/logger");
 var expect = require("chai").expect;
 var Promise = require("bluebird");
 
 const folder = process.cwd() + "/tests/resources/agreements/cases-of-study";
-const cspFolder = "csp_files";
 const AgreementAnalyzer = require(process.cwd());
-const expectedResults = require("../resources/agreements/cases-of-study/expected/results");
+const expectedResults = require("../../resources/agreements/cases-of-study/expected/results");
+const testConfig = require("../../configurations/config");
 
 describe("Local compensation execution", function () {
 
-    this.timeout(100000);
+    this.timeout(testConfig.default.timeout);
 
     it("", function (done) {
 
@@ -60,7 +60,7 @@ describe("Local compensation execution", function () {
                             },
                             reasoner: {
                                 type: "local",
-                                folder: cspFolder
+                                folder: testConfig.compensation.local.folder
                             }
                         });
                         analyzerPromises.push({

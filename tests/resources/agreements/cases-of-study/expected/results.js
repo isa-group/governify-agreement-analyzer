@@ -1,5 +1,5 @@
 module.exports = {
-    "00 - GNWT-article.ag": {
+    "00 - GNWT-article-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": true,
@@ -8,7 +8,7 @@ module.exports = {
         "OGT": true,
         "OBT": true
     },
-    "01 - Amazon EC2.ag": {
+    "01 - Amazon EC2-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": false,
@@ -17,7 +17,7 @@ module.exports = {
         "OGT": true,
         "OBT": true
     },
-    "07 - Microsoft Azure Cloud Services.ag": {
+    "07 - Microsoft Azure Cloud Services-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": false,
@@ -26,25 +26,25 @@ module.exports = {
         "OGT": true,
         "OBT": true
     },
-    "10 - Host Europe.ag": {
-        "CFC": true,
-        "VFC": false,
-        "CCC": false,
-        "CSC": true,
-        "GCC": false,
-        "OGT": true,
-        "OBT": true
-    },
-    "13 - Factobyte Hosting.ag": {
+    "10 - Host Europe-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": true,
         "CSC": true,
+        "GCC": false,
+        "OGT": true,
+        "OBT": true
+    },
+    "13 - Factobyte Hosting-INT.ag": {
+        "CFC": true,
+        "VFC": false,
+        "CCC": true,
+        "CSC": true,
         "GCC": true,
         "OGT": true,
         "OBT": true
     },
-    "14 - Cloud Lock CyberSecurity.ag": {
+    "14 - Cloud Lock CyberSecurity-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": true,
@@ -53,7 +53,7 @@ module.exports = {
         "OGT": true,
         "OBT": true
     },
-    "15 - Cisco Meraki Hosted Software.ag": {
+    "15 - Cisco Meraki Hosted Software-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": false,
@@ -62,7 +62,7 @@ module.exports = {
         "OGT": true,
         "OBT": true
     },
-    "16 - Cdmon Virtual Server.ag": {
+    "16 - Cdmon Virtual Server-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": true,
@@ -71,7 +71,7 @@ module.exports = {
         "OGT": true,
         "OBT": true
     },
-    "22 - Sandetel (partial).ag": {
+    "22 - Sandetel (partial)-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": false,
@@ -80,7 +80,7 @@ module.exports = {
         "OGT": true,
         "OBT": true
     },
-    "22 - Sandetel.ag": {
+    "22 - Sandetel-INT.ag": {
         "CFC": true,
         "VFC": false,
         "CCC": false,

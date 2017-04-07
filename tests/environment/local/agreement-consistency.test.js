@@ -23,17 +23,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"; // unsecure
 
 const expect = require('chai').expect;
-const Analyzer = require("../../src/operators/Analyzer").default;
+const Analyzer = require("../../../src/operators/Analyzer").default;
 const fs = require("fs");
-const logger = ("../../src/logger/logger");
+const logger = ("../../../src/logger/logger");
+const testConfig = require("../../configurations/config");
 
-describe('Local reasoner consistency tests', function () {
+describe('Using local reasoner to check agreement consistency', function () {
 
-    this.timeout(600000);
+    this.timeout(testConfig.default.timeout);
 
     // Local agreements
 
-    describe('Local agreement files', function () {
+    describe('over local agreements', function () {
 
         it('Satisfiable agreement returns true', function (done) {
 
@@ -44,7 +45,7 @@ describe('Local reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'local',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.local.folder
                 }
             });
 
@@ -64,7 +65,7 @@ describe('Local reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'local',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.local.folder
                 }
             });
 
@@ -85,7 +86,7 @@ describe('Local reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'local',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.local.folder
                 }
             });
 
@@ -100,7 +101,7 @@ describe('Local reasoner consistency tests', function () {
 
     // Remote agreements
 
-    describe('Remote agreement files', function () {
+    describe('over remote agreements', function () {
 
         it('Satisfiable agreement returns true', function (done) {
 
@@ -111,7 +112,7 @@ describe('Local reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'local',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.local.folder
                 }
             });
 
@@ -131,7 +132,7 @@ describe('Local reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'local',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.local.folder
                 }
             });
 
@@ -152,7 +153,7 @@ describe('Local reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'local',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.local.folder
                 }
             });
 

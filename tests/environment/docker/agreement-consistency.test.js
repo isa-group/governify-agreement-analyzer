@@ -23,17 +23,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"; // unsecure
 
 const expect = require('chai').expect;
-const Analyzer = require("../../src/operators/Analyzer").default;
+const Analyzer = require("../../../src/operators/Analyzer").default;
 const fs = require("fs");
-const logger = ("../../src/logger/logger");
+const logger = ("../../../src/logger/logger");
+const testConfig = require("../../configurations/config");
 
-describe('Docker reasoner consistency tests', function () {
+describe('Using reasoner located in docker container to check agreement consistency', function () {
 
-    this.timeout(600000);
+    this.timeout(testConfig.default.timeout);
 
     // Local agreements
 
-    describe('Local agreement files', function () {
+    describe('over local agreements', function () {
 
         it('Consistent agreement returns true', function (done) {
 
@@ -44,7 +45,7 @@ describe('Docker reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'docker',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.docker.folder
                 }
             });
 
@@ -64,7 +65,7 @@ describe('Docker reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'docker',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.docker.folder
                 }
             });
 
@@ -84,7 +85,7 @@ describe('Docker reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'docker',
-                    folder: 'csp_files_test'
+                    folder: testConfig.consistency.docker.folder
                 }
             });
 
@@ -99,7 +100,7 @@ describe('Docker reasoner consistency tests', function () {
 
     // Remote agreements
 
-    describe('Remote agreement files', function () {
+    describe('over remote agreements', function () {
 
         it('Consistent agreement returns true', function (done) {
 
@@ -110,32 +111,12 @@ describe('Docker reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: "docker",
-                    folder: "csp_files_test"
+                    folder: testConfig.consistency.docker.folder
                 }
             });
 
             analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
                 expect(isSatisfiable).to.be.equal(true);
-                done();
-            });
-
-        });
-
-        it('Inconsistent agreement returns false', function (done) {
-
-            // Create docker analyzer for remote inconsistent agreement
-            var analyzer = new Analyzer({
-                agreement: {
-                    url: "https://gist.github.com/feserafim/01b9bdd21b3e047e166c32c0cfe5ecac/raw/258a622c3bd8e833ef5ffac2c2c3b1fc84614dc2/agreement-inconsistent.yaml"
-                },
-                reasoner: {
-                    type: "docker",
-                    folder: "csp_files_test"
-                }
-            });
-
-            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
-                expect(isSatisfiable).to.be.equal(false);
                 done();
             });
 
@@ -150,7 +131,7 @@ describe('Docker reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: "docker",
-                    folder: "csp_files_test"
+                    folder: testConfig.consistency.docker.folder
                 }
             });
 

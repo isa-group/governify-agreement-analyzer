@@ -1,0 +1,61 @@
+--- 
+id: CISCO_MERAKI_HOSTED_SOFTWARE
+version: "1.0"
+type: agreement
+context:
+  provider: CISCO
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      DaysCredited:
+        description: Days to be credited in a calendar month
+        type: integer
+        minimum: 0
+        maximum: 10000
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            DaysCredited:
+              $ref: '#/context/definitions/schemas/DaysCredited'
+  metrics:
+    MUP:
+      schema:
+        description: Monthly Uptime Percentage
+        type: integer
+        minimum: 0
+        maximum: 10000
+        unit: '%'
+      computer: >-
+        http://Cisco/Meraki/MUP/
+  guarantees:
+    - id: MERAKI_HOSTED_SOFTWARE
+      scope: {}
+      of:
+        - objective: 'MUP >= 9999'
+          with:
+            MUP: {}
+          scope: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                DaysCredited:
+                  $ref: '#/context/definitions/schemas/DaysCredited'
+              of:
+                - value: '3'		
+                  condition: 'MUP >= 9990 && MUP < 9999'
+                - value: '7'		
+                  condition: 'MUP >= 9900 && MUP < 9990'
+                - value: '15'		
+                  condition: 'MUP < 9900'
+              upTo: 15

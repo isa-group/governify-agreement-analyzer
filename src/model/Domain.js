@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.3.1, built on: 2017-04-03
+governify-agreement-analyzer 0.3.1, built on: 2017-04-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -23,7 +23,7 @@ const logger = require("../logger/logger");
 const CSPRange = CSPTools.CSPRange;
 class Domain {
     constructor(minOrType, max) {
-        if (!isNaN(max)) {
+        if (!isNaN(Number(max))) {
             this._min = minOrType;
             this._max = max;
         }
@@ -42,7 +42,7 @@ class Domain {
         return rangeOrType;
     }
     get min() {
-        if (isNaN(this._min) && !this._min) {
+        if (isNaN(Number(this._min)) && !this._min) {
             let errorMsg = "Unable to get min value from Domain";
             logger.error(errorMsg);
             throw new Error(errorMsg);
@@ -52,7 +52,7 @@ class Domain {
         }
     }
     get max() {
-        if (isNaN(this._max) && !this._max) {
+        if (isNaN(Number(this._max)) && !this._max) {
             let errorMsg = "Unable to get max value from Domain";
             logger.error(errorMsg);
             throw new Error(errorMsg);

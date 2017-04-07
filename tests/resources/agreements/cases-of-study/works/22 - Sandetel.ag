@@ -13,7 +13,7 @@ context:
     schemas:
       MonthlyBillPenaltyPercentage:
         description: percentage of the fee to pay for a month of the service. 
-        type: integer
+        type: double
         minimum: 0
         maximum: 100
         unit: '%'
@@ -36,7 +36,7 @@ terms:
     NormalInterventionsSolved:
       schema:
         description: Percentage of non-urgent interventions solved in a month
-        type: integer
+        type: double
         minimum: 0
         maximum: 100
         unit: '%'
@@ -45,7 +45,7 @@ terms:
     UrgentInterventionsSolved:
       schema:
         description: Percentage of urgent interventions solved in a month
-        type: integer
+        type: double
         minimum: 0
         maximum: 100
         unit: '%'

@@ -12,14 +12,14 @@ executed as a Node.js module. Also, it has been developed by following the [proj
 
 ## Install
 ```bash
-$ npm install governify-agreement-analyzer
+$ npm install E:\\Documents\\Coding\\Designer\\governify-agreement-analyzer
 ```
 
 ## Basic usage
 You can easily use this library in your project:
 ```javascript
 // Import
-var AgreementAnalyzer = require("governify-agreement-analyzer");
+var AgreementAnalyzer = require("E:\\Documents\\Coding\\Designer\\governify-agreement-analyzer");
 
 // Configure analyzer
 var config = {
@@ -53,7 +53,7 @@ analyzer.isConsistent(function (err, sol) {
 or deploy the analyzer as an API REST service:
 ```javascript
 // Import Agreement Analyzer API
-var AgreementAnalyzerServer = require("governify-agreement-analyzer").api;
+var AgreementAnalyzerServer = require("E:\\Documents\\Coding\\Designer\\governify-agreement-analyzer").api;
 var api = new AgreementAnalyzerServer();
 var app = require("connect")();
 

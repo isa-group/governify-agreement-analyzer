@@ -1,0 +1,116 @@
+---
+id: SANDETEL
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: Sandetel - Andalusian administration
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    scopes: {}
+    schemas:
+      MonthlyBillPenaltyPercentage:
+        description: percentage of the fee to pay for a month of the service. 
+        type: integer
+        minimum: 0
+        maximum: 10000
+        unit: '%'
+      TotalBudget:
+        description: total budget to pay to the provider for the service. 
+        type: integer
+        minimum: 0
+        maximum: 10000
+        unit: 'euros'
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            MonthlyBillPenaltyPercentage:
+              $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
+  metrics:
+    NormalInterventionsSolved:
+      schema:
+        description: Percentage of non-urgent interventions solved in a month
+        type: integer
+        minimum: 0
+        maximum: 10000
+        unit: '%'
+      computer: >-
+        http://Sandetel/NormalInterventionsSolved/
+    UrgentInterventionsSolved:
+      schema:
+        description: Percentage of urgent interventions solved in a month
+        type: integer
+        minimum: 0
+        maximum: 10000
+        unit: '%'
+      computer: >-
+        http://Sandetel/UrgentInterventionsSolved/
+  guarantees:
+    - id: NormalInterventions_GT
+      scope: {}
+      of:
+        - objective: 'NormalInterventionsSolved > 9000'
+          scope: {}
+          with:
+            NormalInterventionsSolved: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                MonthlyBillPenaltyPercentage:
+                  $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
+              of:
+                - value: '-1' 
+                  condition: '(NormalInterventionsSolved >= 9400) /\ (NormalInterventionsSolved < 9500)'
+                - value: '-2' 
+                  condition: '(NormalInterventionsSolved >= 9300) /\ (NormalInterventionsSolved < 9400)'
+                - value: '-3' 
+                  condition: '(NormalInterventionsSolved >= 9200) /\ (NormalInterventionsSolved < 9300)' 
+                - value: '-4' 
+                  condition: '(NormalInterventionsSolved >= 9100) /\ (NormalInterventionsSolved < 9200)' 
+                - value: '-5' 
+                  condition: '(NormalInterventionsSolved >= 9000) /\ (NormalInterventionsSolved < 9100)' 
+                - value: '-10' 
+                  condition: 'NormalInterventionsSolved < 9000' 
+              #upTo:
+              #  - value: 'MonthlyBill * 0.25'
+              #  - value: 'TotalBudget * 0.10'
+    - id: UrgentInterventions_GT
+      scope: {}
+      of:
+        - objective: 'UrgentInterventionsSolved > 9500'
+          scope: {}
+          with:
+            UrgentInterventionsSolved: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                MonthlyBillPenaltyPercentage:
+                  $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
+              of:
+                - value: '-100' 
+                  condition: '(UrgentInterventionsSolved >= 9400) /\ (UrgentInterventionsSolved < 9500)'
+                - value: '-200' 
+                  condition: '(UrgentInterventionsSolved >= 9300) /\ (UrgentInterventionsSolved < 9400)'
+                - value: '-300' 
+                  condition: '(UrgentInterventionsSolved >= 9200) /\ (UrgentInterventionsSolved < 9300)' 
+                - value: '-400' 
+                  condition: '(UrgentInterventionsSolved >= 9100) /\ (UrgentInterventionsSolved < 9200)' 
+                - value: '-500' 
+                  condition: '(UrgentInterventionsSolved >= 9000) /\ (UrgentInterventionsSolved < 9100)' 
+                - value: '-1000' 
+                  condition: 'UrgentInterventionsSolved < 9000' 
+              #upTo:
+              #  - value: 'MonthlyBill * 0.25'
+              #  - value: 'TotalBudget * 0.10'

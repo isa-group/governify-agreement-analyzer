@@ -11,7 +11,7 @@ context:
     schemas:
       InvoicePercentage:
         description: Percent affecting next monthly bill
-        type: float
+        type: double
         minimum: 0
         maximum: 100
         unit: '%'
@@ -31,7 +31,7 @@ terms:
     elapsedDaysPercent:
       schema:
         description: elapsedDaysPercent
-        type: int32
+        type: double
         minimum: 0
         maximum: 100
         unit: '%'
