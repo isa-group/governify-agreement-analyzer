@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.3.1, built on: 2017-04-03
+governify-agreement-analyzer 0.3.1, built on: 2017-04-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -24,12 +24,12 @@ const CSPRange = CSPTools.CSPRange;
 
 export default class Domain {
 
-    _min: number;
-    _max: number;
+    private _min: string;
+    private _max: string;
     type: string;
 
-    constructor(minOrType: any, max?: number) {
-        if (!isNaN(max)) {
+    constructor(minOrType: string, max?: string) {
+        if (!isNaN(Number(max))) {
             this._min = minOrType;
             this._max = max;
         } else {
@@ -47,8 +47,8 @@ export default class Domain {
         return rangeOrType;
     }
 
-    get min(): number {
-        if (isNaN(this._min) && !this._min) {
+    get min(): string {
+        if (isNaN(Number(this._min)) && !this._min) {
             let errorMsg: string = "Unable to get min value from Domain";
             logger.error(errorMsg);
             throw new Error(errorMsg);
@@ -57,8 +57,8 @@ export default class Domain {
         }
     }
 
-    get max(): number {
-        if (isNaN(this._max) && !this._max) {
+    get max(): string {
+        if (isNaN(Number(this._max)) && !this._max) {
             let errorMsg: string = "Unable to get max value from Domain";
             logger.error(errorMsg);
             throw new Error(errorMsg);

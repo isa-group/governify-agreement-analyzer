@@ -27,6 +27,7 @@ const fs = require("fs");
 const yaml = require("js-yaml");
 const logger = ("../src/logger/logger");
 const AgreementModel = require("../src/model/AgreementModel").default;
+const testConfig = require(".");
 
 /*
  * USE MOCHA AND CHAI for testing your code

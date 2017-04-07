@@ -67,3 +67,7 @@ data/
 .tscache/
 csp_files_test/
 csp_files/
+
+csp_test_local_files/
+
+csp_test_docker_files/

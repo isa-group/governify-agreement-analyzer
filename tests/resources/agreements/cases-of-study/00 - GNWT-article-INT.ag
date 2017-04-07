@@ -1,0 +1,60 @@
+id: GNWT-article
+version: "1.0"
+type: agreement
+context:
+  provider: Provider
+  consumer: Northwest Territories Government
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      InvoicePercentage:
+        description: Percent affecting next monthly bill
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over: 
+            InvoicePercentage: {}
+      rewards:
+        - over: 
+            InvoicePercentage: {}
+  metrics:
+    elapsedDaysPercent:
+      schema:
+        description: elapsedDaysPercent
+        type: integer
+        minimum: 0
+        maximum: 100
+        unit: '%'
+  guarantees:
+    - id: GNWT_4
+      scope: {}
+      of:
+        - objective: elapsedDaysPercent < 120
+          scope: {}
+          with: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                InvoicePercentage: {}
+              of:
+                - value: '-10'
+                  condition: elapsedDaysPercent >= 120
+          rewards:
+            - over:
+                InvoicePercentage: {}
+              of:
+                - value: '5'
+                  condition: elapsedDaysPercent == 80

@@ -20,35 +20,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 'use strict';
 
-process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"; // unsecure
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0"; // insecure
 
 const expect = require('chai').expect;
-const Analyzer = require("../../src/operators/Analyzer").default;
+const Analyzer = require("../../../src/operators/Analyzer").default;
 const fs = require("fs");
-const logger = ("../../src/logger/logger");
+const logger = ("../../../src/logger/logger");
 
-const apiVersion = "v2";
-const apiServer = "https://designer.governify.io:10044/module-minizinc";
-const apiOperation = "models/csp/operations/execute";
+const apiVersion = "v1";
+const apiServer = "https://localhost:10045/reasoner";
+const apiOperation = "execute";
+const testConfig = require("../../configurations/config");
+const api = require("governify-csp-tools").api;
 
-describe('Remote reasoner consistency tests', function () {
+describe('Using remote reasoner to check agreement consistency', function () {
 
-    this.timeout(600000);
+    this.timeout(testConfig.default.timeout);
+
+    before(api.initialize);
 
     // Local agreements
 
-    describe('with local agreement files', function () {
+    describe('local agreements', function () {
 
-        it('for a consistent agreement returns true', function (done) {
+        it('consistent agreement returns true', function (done) {
 
-            // Create remote analyzer for local consistent agreement
+            // Create remote analyzer for local consistent local agreement
             var analyzer = new Analyzer({
                 agreement: {
                     file: "./tests/resources/agreements/agreement-valid.yaml"
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'csp_files_test',
+                    folder: testConfig.consistency.remote.folder,
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -57,14 +61,14 @@ describe('Remote reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, stdout) {
-                expect(isSatisfiable(err, stdout)).to.be.equal(true);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(true);
                 done();
             });
 
         });
 
-        it('for an inconsistent agreement returns false', function (done) {
+        it('inconsistent agreement returns false', function (done) {
 
             // Create remote analyzer for local inconsistent agreement
             var analyzer = new Analyzer({
@@ -73,7 +77,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'csp_files_test',
+                    folder: testConfig.consistency.remote.folder,
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -82,14 +86,14 @@ describe('Remote reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, stdout) {
-                expect(isSatisfiable(err, stdout)).to.be.equal(false);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(false);
                 done();
             });
 
         });
 
-        it('for an invalid agreement', function (done) {
+        it('invalid agreement returns execution error', function (done) {
 
             // Create remote analyzer for local invalid agreement
             var analyzer = new Analyzer({
@@ -98,7 +102,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'csp_files_test',
+                    folder: testConfig.consistency.remote.folder,
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -118,18 +122,18 @@ describe('Remote reasoner consistency tests', function () {
 
     // Remote agreements
 
-    describe('with remote agreement files', function () {
+    describe('remote agreements', function () {
 
-        it('for a consistent agreement returns true', function (done) {
+        it('consistent agreement returns true', function (done) {
 
-            // Create remote analyzer for remote consistent agreement
+            // Create remote analyzer for remote consistent local agreement
             var analyzer = new Analyzer({
                 agreement: {
                     url: "https://gist.github.com/feserafim/eaba5c2ad4eb82245c2eca154a64c264/raw/732706de8e1b12e6b8c4e75bb02802b165779b17/agreement-valid.yaml"
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'csp_files_test',
+                    folder: testConfig.consistency.remote.folder,
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -138,14 +142,14 @@ describe('Remote reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, stdout) {
-                expect(isSatisfiable(err, stdout)).to.be.equal(true);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(true);
                 done();
             });
 
         });
 
-        it('for an inconsistent agreement returns false', function (done) {
+        it('inconsistent agreement returns false', function (done) {
 
             // Create remote analyzer for remote inconsistent agreement
             var analyzer = new Analyzer({
@@ -154,7 +158,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'csp_files_test',
+                    folder: testConfig.consistency.remote.folder,
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -163,14 +167,14 @@ describe('Remote reasoner consistency tests', function () {
                 }
             });
 
-            analyzer.isConsistent(function (err, stdout) {
-                expect(isSatisfiable(err, stdout)).to.be.equal(false);
+            analyzer.isConsistent(function (err, stdout, stderr, isSatisfiable) {
+                expect(isSatisfiable).to.be.equal(false);
                 done();
             });
 
         });
 
-        it('for an invalid agreement', function (done) {
+        it('invalid agreement returns execution error', function (done) {
 
             // Create remote analyzer for Remote invalid agreement
             var analyzer = new Analyzer({
@@ -179,7 +183,7 @@ describe('Remote reasoner consistency tests', function () {
                 },
                 reasoner: {
                     type: 'api',
-                    folder: 'csp_files_test',
+                    folder: testConfig.consistency.remote.folder,
                     api: {
                         version: apiVersion,
                         server: apiServer,
@@ -198,11 +202,3 @@ describe('Remote reasoner consistency tests', function () {
     });
 
 });
-
-function isSatisfiable(err, sol) {
-    if (err) {
-        logger.info("Reasoner returned an error:", err);
-    }
-    return (typeof sol === "string" && sol.indexOf("----------") !== -1) ||
-        (typeof sol === "object" && sol.status === "OK" && sol.message.indexOf("----------") !== -1);
-}

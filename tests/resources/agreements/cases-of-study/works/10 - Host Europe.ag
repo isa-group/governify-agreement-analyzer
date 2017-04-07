@@ -1,9 +1,9 @@
 ---
-id: CDMON VIRTUAL SERVER
+id: HostEurope
 version: "1.0"
 type: agreement
 context:
-  provider: Cdmon
+  provider: Host Europe
   consumer: Consumer
   validity:
     timeZone: Europe/Madrid
@@ -11,8 +11,8 @@ context:
   definitions:
     schemas:
       Compensation:
-        description: Percentage to be deduced from yearly quota
-        type: integer
+        description: Percentage to be deduced from monthly bill
+        type: double
         minimum: 0
         maximum: 100
         unit: '%'
@@ -35,27 +35,30 @@ terms:
         maximum: 100.0
         unit: '%'
       computer: >-
-        http://Cdmon/Availability/
+        http://HostEurope/Availability/
   guarantees:
-    - id: Virtual_Server_SLA
+    - id: Hosting
       scope: {}
       of:
-        - objective: 'Availability <= 99.95'
+        - objective: 'Availability == 99.9'
           with:
             Availability: {}
-          scope: {}
           window:
             type: static
             period: monthly
             initial: '2016-07-13T00:00:00.000Z'
+          scope: {}
           penalties:
             - over:
                 Compensation:
                   $ref: '#/context/definitions/schemas/Compensation'
               of:
-                - value: '-2'	
-                  condition: 'Availability >= 99 && Availability < 99.95'
-                - value: '-4'	
-                  condition: 'Availability >= 95 && Availability < 99'
-                - value: '-5'	
-                  condition: 'Availability < 95'
+                - value: '-10'
+                  condition: 'Availability >= 98 && Availability <= 99.8'
+                - value: '-25'
+                  condition: 'Availability >= 95 && Availability <= 97.9'
+                - value: '-50'
+                  condition: 'Availability >= 90 && Availability <= 94.9'
+                - value: '-100'
+                  condition: 'Availability <= 89.9'  
+              upTo: -100

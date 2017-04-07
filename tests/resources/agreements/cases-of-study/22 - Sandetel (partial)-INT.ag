@@ -15,13 +15,13 @@ context:
         description: percentage of the fee to pay for a month of the service. 
         type: integer
         minimum: 0
-        maximum: 100
+        maximum: 10000
         unit: '%'
       TotalBudget:
         description: total budget to pay to the provider for the service. 
-        type: double
-        minimum: 0.0
-        maximum: 100.0
+        type: integer
+        minimum: 0
+        maximum: 10000
         unit: 'euros'
 terms:
   pricing:
@@ -38,7 +38,7 @@ terms:
         description: Percentage of non-urgent interventions solved in a month
         type: integer
         minimum: 0
-        maximum: 100
+        maximum: 10000
         unit: '%'
       computer: >-
         http://Sandetel/NormalInterventionsSolved/
@@ -47,7 +47,7 @@ terms:
         description: Percentage of urgent interventions solved in a month
         type: integer
         minimum: 0
-        maximum: 100
+        maximum: 10000
         unit: '%'
       computer: >-
         http://Sandetel/UrgentInterventionsSolved/
@@ -55,7 +55,7 @@ terms:
     - id: NormalInterventions_GT
       scope: {}
       of:
-        - objective: 'NormalInterventionsSolved > 90'
+        - objective: 'NormalInterventionsSolved > 9000'
           scope: {}
           with:
             NormalInterventionsSolved: {}
@@ -68,18 +68,18 @@ terms:
                 MonthlyBillPenaltyPercentage:
                   $ref: '#/context/definitions/schemas/MonthlyBillPenaltyPercentage'
               of:
-                - value: '-1' 
-                  condition: '(NormalInterventionsSolved >= 94) /\ (NormalInterventionsSolved < 95)'
-                - value: '-2' 
-                  condition: '(NormalInterventionsSolved >= 93) /\ (NormalInterventionsSolved < 94)'
-                - value: '-3' 
-                  condition: '(NormalInterventionsSolved >= 92) /\ (NormalInterventionsSolved < 93)' 
-                - value: '-4' 
-                  condition: '(NormalInterventionsSolved >= 91) /\ (NormalInterventionsSolved < 92)' 
-                - value: '-5' 
-                  condition: '(NormalInterventionsSolved >= 90) /\ (NormalInterventionsSolved < 91)' 
-                - value: '-10' 
-                  condition: 'NormalInterventionsSolved < 90' 
+                - value: '-100' 
+                  condition: '(NormalInterventionsSolved >= 9400) /\ (NormalInterventionsSolved < 9500)'
+                - value: '-200' 
+                  condition: '(NormalInterventionsSolved >= 9300) /\ (NormalInterventionsSolved < 9400)'
+                - value: '-300' 
+                  condition: '(NormalInterventionsSolved >= 9200) /\ (NormalInterventionsSolved < 9300)' 
+                - value: '-400' 
+                  condition: '(NormalInterventionsSolved >= 9100) /\ (NormalInterventionsSolved < 9200)' 
+                - value: '-500' 
+                  condition: '(NormalInterventionsSolved >= 9000) /\ (NormalInterventionsSolved < 9100)' 
+                - value: '-1000' 
+                  condition: 'NormalInterventionsSolved < 9000' 
               #upTo:
               #  - value: 'MonthlyBill * 0.25'
               #  - value: 'TotalBudget * 0.10'

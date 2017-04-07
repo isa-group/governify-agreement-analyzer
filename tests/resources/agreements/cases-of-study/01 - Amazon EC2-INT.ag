@@ -1,0 +1,59 @@
+--- 
+id: Amazon_EC2
+version: "1.0"
+type: agreement
+context:
+  provider: Amazon
+  consumer: Consumer
+  validity:
+    timeZone: Europe/Madrid
+    initial: '2016-07-13T00:00:00.000Z'
+  definitions:
+    schemas:
+      ServiceCredit:
+        description: Percentage to decrease the next monthly bill
+        type: integer
+        minimum: 0
+        maximum: 10000
+        unit: '%'
+    scopes: {}
+terms:
+  pricing:
+    billing:
+      period: monthly
+      initial: '2016-05-12T10:35:36.000Z'
+      penalties:
+        - over:
+            ServiceCredit:
+              $ref: '#/context/definitions/schemas/ServiceCredit'
+  metrics:
+    MUP:
+      schema:
+        description: Monthly Uptime Percentage
+        type: integer
+        minimum: 0
+        maximum: 10000
+        unit: '%'
+      computer: >-
+        http://aws/Amazon_MUP/
+  guarantees:
+    - id: Amazon_GT
+      scope: {}
+      of:
+        - objective: MUP >= 9995
+          scope: {}
+          with:
+            MUP: {}
+          window:
+            type: static
+            period: monthly
+            initial: '2016-07-13T00:00:00.000Z'
+          penalties:
+            - over:
+                ServiceCredit:
+                  $ref: '#/context/definitions/schemas/ServiceCredit'
+              of:
+                - value: '-10'
+                  condition: MUP >= 9900 && MUP < 9995
+                - value: '-30'
+                  condition: MUP < 9900
