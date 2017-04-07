@@ -1,7 +1,11 @@
-Not found issues for this milestones.### v0.3.1 - 2017-31-3
+### v0.4.0 - 2017-31-7
+
+- [#9](https://github.com/isa-group/governify-agreement-analyzer/issues/9) - Implement test based on "results.js" file for travis
+
+
+### v0.3.1 - 2017-31-3
 
 - [#8](https://github.com/isa-group/governify-agreement-analyzer/issues/8) - Add VFC compensation operation
-
 - [#7](https://github.com/isa-group/governify-agreement-analyzer/issues/7) - Always use the latest version of csp-tools
 
 ### v0.3.0 - 2017-21-30
