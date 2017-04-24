@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.3.1, built on: 2017-04-07
+governify-agreement-analyzer 0.4.0, built on: 2017-04-20
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -32,6 +32,7 @@ const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const Reasoner = CSPTools.Reasoner;
 var Promise = require("bluebird");
+const ERROR_INTERNAL_SERVER_MSG = "Error 500: Internal server error.";
 class Analyzer {
     constructor(configuration, notValidable) {
         this.notValidable = notValidable;
@@ -145,6 +146,9 @@ class Analyzer {
             reasoner.solve(mznDocument, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
     isConsistent(callback) {
@@ -157,6 +161,9 @@ class Analyzer {
             reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
     isSatisfiableCFC(callback) {
@@ -168,6 +175,9 @@ class Analyzer {
             reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
     isSatisfiableVFC(callback) {
@@ -179,6 +189,9 @@ class Analyzer {
             reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
     isSatisfiableCCC(callback) {
@@ -190,6 +203,9 @@ class Analyzer {
             reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
     isSatisfiableCSC(callback) {
@@ -201,6 +217,9 @@ class Analyzer {
             reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
     isSatisfiableGCC(callback) {
@@ -212,6 +231,9 @@ class Analyzer {
             reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
     isSatisfiableOGT(callback) {
@@ -223,6 +245,9 @@ class Analyzer {
             reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
     isSatisfiableOBT(callback) {
@@ -234,6 +259,9 @@ class Analyzer {
             reasoner.solve(model, callback);
         }, function (error) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
     }
 }

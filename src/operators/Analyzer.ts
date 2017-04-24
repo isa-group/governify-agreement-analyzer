@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.4.0, built on: 2017-04-07
+governify-agreement-analyzer 0.4.0, built on: 2017-04-20
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -33,6 +33,7 @@ const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const Reasoner = CSPTools.Reasoner;
 var Promise = require("bluebird");
+const ERROR_INTERNAL_SERVER_MSG = "Error 500: Internal server error.";
 
 interface AnalyzerInterface {
     isConsistent(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
@@ -105,6 +106,7 @@ export default class Analyzer implements AnalyzerInterface {
 
         var _pthis = this;
         this._agreementPromise = new Promise((resolve, reject) => {
+
             if (!_pthis.agreement) {
                 if (_pthis.configuration.agreement.file && _pthis.configuration.agreement.file !== "") {
                     // If is a local agreement
@@ -113,6 +115,7 @@ export default class Analyzer implements AnalyzerInterface {
 
                     // Read file content
                     fs.readFile(filePath, "utf8", function (error: any, data: any) {
+
                         if (error) {
                             throw new Error("Cannot find local agreement in: " + _pthis.configuration.agreement.url + "\n" + error);
                         } else {
@@ -132,12 +135,14 @@ export default class Analyzer implements AnalyzerInterface {
                                 resolve(agreementObj);
                             }
                         }
+
                     });
 
                 } else if (_pthis.configuration.agreement.url && _pthis.configuration.agreement.url !== "") {
                     // If is a remote agreement
                     var url: string = _pthis.configuration.agreement.url;
                     request(url, function (error: any, response: any, data: any) {
+
                         if (error) {
                             throw new Error("Cannot find remote agreement in: " + url + "\n" + error);
                         } else {
@@ -155,6 +160,7 @@ export default class Analyzer implements AnalyzerInterface {
                                 resolve(agreementObj);
                             }
                         }
+
                     });
 
                 } else {
@@ -180,7 +186,11 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
+
 
     }
 
@@ -200,6 +210,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
@@ -216,6 +229,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
@@ -232,6 +248,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
@@ -248,6 +267,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
@@ -264,6 +286,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
@@ -280,6 +305,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
@@ -296,6 +324,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
@@ -312,6 +343,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }

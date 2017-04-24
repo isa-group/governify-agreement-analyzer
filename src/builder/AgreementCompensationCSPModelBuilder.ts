@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.4.0, built on: 2017-04-07
+governify-agreement-analyzer 0.4.0, built on: 2017-04-20
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -636,20 +636,50 @@ export default class AgreementCompensationCSPModelBuilder {
 
     private loadConstraints(): void {
         var _pthis = this;
+        var conditionExpressions = [];
         this.agreement.terms.guarantees.forEach(function (g: any, gi: number) {
             g.of.forEach(function (of: any, ofi: number) {
+
                 var _id: string = "C" + gi + "_" + ofi;
+
                 if (of.precondition && of.precondition !== "") {
                     // Use "precondition->objective" to define constraint
-                    _pthis.cspModel.constraints.push(new CSPTools.CSPConstraint(_id, "(" + of.precondition + ") -> (" + of.objective + ")"));
+                    conditionExpressions.push("(" + of.precondition + ") -> (" + of.objective + ")");
                 } else if (of.objective && of.objective !== "") {
                     // Use "objective" property to define constraint
-                    _pthis.cspModel.constraints.push(new CSPTools.CSPConstraint(_id, of.objective));
-                } else {
-                    logger.info("Unable to load constraint: " + _id);
+                    conditionExpressions.push("(" + of.objective + ")");
                 }
+
+                // Add penalty expressions as contraints
+                if (of.penalties) {
+                    of.penalties.forEach(function (p: any, pi: number) {
+                        if (p.of) {
+                            p.of.forEach(function (ofp: any, ofpi: number) {
+                                if (ofp.condition && ofp.condition !== "") {
+                                    conditionExpressions.push("(" + ofp.condition + ")");
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Add reward expressions as contraints
+                if (of.rewards) {
+                    of.rewards.forEach(function (r: any, ri: number) {
+                        if (r.of) {
+                            r.of.forEach(function (ofr: any, ofri: number) {
+                                if (ofr.condition && ofr.condition !== "") {
+                                    conditionExpressions.push("(" + ofr.condition + ")");
+                                }
+                            });
+                        }
+                    });
+                }
+
             });
         });
+
+        this.cspModel.constraints.push(new CSPTools.CSPConstraint("compensation_exprs", conditionExpressions.join(" \\/ ")));
     }
 
     private getMockInstance(mockSuffix: string): AgreementCompensationCSPModelBuilder {
