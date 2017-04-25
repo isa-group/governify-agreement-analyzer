@@ -141,7 +141,7 @@ module.exports = function (grunt) {
                 //npmtag: true, //default: no tag
                 updateVars: ['pkg'], //NOT CHANGE
                 github: {
-                    repo: "isa-group/E:\\Documents\\Coding\\Designer\\governify-agreement-analyzer", //SET WITH YOUR PROJECT ID
+                    repo: "isa-group/governify-agreement-analyzer", //SET WITH YOUR PROJECT ID
                     accessTokenVar: "GITHUB_ACCESS_TOKEN", //SET ENVIRONMENT VARIABLE WITH THIS NAME
                     usernameVar: "GITHUB_USERNAME" //SET ENVIRONMENT VARIABLE WITH THIS NAME
                 }
