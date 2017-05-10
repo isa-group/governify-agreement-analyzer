@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.4.0, built on: 2017-04-07
+governify-agreement-analyzer 0.5.1, built on: 2017-05-10
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -33,16 +33,17 @@ const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const Reasoner = CSPTools.Reasoner;
 var Promise = require("bluebird");
+const ERROR_INTERNAL_SERVER_MSG = "Error 500: Internal server error.";
 
 interface AnalyzerInterface {
-    isConsistent(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
-    isSatisfiableCFC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
-    isSatisfiableCFC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
-    isSatisfiableCCC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
-    isSatisfiableCSC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
-    isSatisfiableGCC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
-    isSatisfiableOGT(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
-    isSatisfiableOBT(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void);
+    isConsistent(callback: (...args: any[]) => void);
+    isSatisfiableCFC(callback: (...args: any[]) => void);
+    isSatisfiableCFC(callback: (...args: any[]) => void);
+    isSatisfiableCCC(callback: (...args: any[]) => void);
+    isSatisfiableCSC(callback: (...args: any[]) => void);
+    isSatisfiableGCC(callback: (...args: any[]) => void);
+    isSatisfiableOGT(callback: (...args: any[]) => void);
+    isSatisfiableOBT(callback: (...args: any[]) => void);
 }
 
 export default class Analyzer implements AnalyzerInterface {
@@ -105,6 +106,7 @@ export default class Analyzer implements AnalyzerInterface {
 
         var _pthis = this;
         this._agreementPromise = new Promise((resolve, reject) => {
+
             if (!_pthis.agreement) {
                 if (_pthis.configuration.agreement.file && _pthis.configuration.agreement.file !== "") {
                     // If is a local agreement
@@ -113,6 +115,7 @@ export default class Analyzer implements AnalyzerInterface {
 
                     // Read file content
                     fs.readFile(filePath, "utf8", function (error: any, data: any) {
+
                         if (error) {
                             throw new Error("Cannot find local agreement in: " + _pthis.configuration.agreement.url + "\n" + error);
                         } else {
@@ -132,12 +135,14 @@ export default class Analyzer implements AnalyzerInterface {
                                 resolve(agreementObj);
                             }
                         }
+
                     });
 
                 } else if (_pthis.configuration.agreement.url && _pthis.configuration.agreement.url !== "") {
                     // If is a remote agreement
                     var url: string = _pthis.configuration.agreement.url;
                     request(url, function (error: any, response: any, data: any) {
+
                         if (error) {
                             throw new Error("Cannot find remote agreement in: " + url + "\n" + error);
                         } else {
@@ -155,6 +160,7 @@ export default class Analyzer implements AnalyzerInterface {
                                 resolve(agreementObj);
                             }
                         }
+
                     });
 
                 } else {
@@ -169,7 +175,7 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableConstraints(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isSatisfiableConstraints(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -180,11 +186,15 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
+
 
     }
 
-    isConsistent(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isConsistent(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -200,11 +210,14 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
 
-    isSatisfiableCFC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isSatisfiableCFC(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -216,11 +229,14 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
 
-    isSatisfiableVFC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isSatisfiableVFC(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -232,11 +248,14 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
 
-    isSatisfiableCCC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isSatisfiableCCC(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -248,11 +267,14 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
 
-    isSatisfiableCSC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isSatisfiableCSC(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -264,11 +286,14 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
 
-    isSatisfiableGCC(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isSatisfiableGCC(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -280,11 +305,14 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
 
-    isSatisfiableOGT(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isSatisfiableOGT(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -296,11 +324,14 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }
 
-    isSatisfiableOBT(callback: (error: any, stdout?: string, stderr?: string, isSatisfiable?: boolean) => void) {
+    isSatisfiableOBT(callback: (...args: any[]) => void) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -312,6 +343,9 @@ export default class Analyzer implements AnalyzerInterface {
 
         }, function (error: any) {
             callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(ERROR_INTERNAL_SERVER_MSG);
         });
 
     }

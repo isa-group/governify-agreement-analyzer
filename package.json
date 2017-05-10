@@ -1,11 +1,11 @@
 {
   "name": "governify-agreement-analyzer",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "Governify Agreement Analyzer",
   "homepage": "https://github.com/isa-group/governify-agreement-analyzer",
   "main": "index.js",
   "dependencies": {
-    "governify-csp-tools": "*",
+    "governify-csp-tools": "^0.3.6",
     "ajv": "^4.11.3",
     "bluebird": "^3.4.7",
     "connect": "^3.2.0",

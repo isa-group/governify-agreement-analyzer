@@ -12,14 +12,14 @@ executed as a Node.js module. Also, it has been developed by following the [proj
 
 ## Install
 ```bash
-$ npm install E:\\Documents\\Coding\\Designer\\governify-agreement-analyzer
+$ npm install governify-agreement-analyzer
 ```
 
 ## Basic usage
 You can easily use this library in your project:
 ```javascript
 // Import
-var AgreementAnalyzer = require("E:\\Documents\\Coding\\Designer\\governify-agreement-analyzer");
+var AgreementAnalyzer = require("governify-agreement-analyzer");
 
 // Configure analyzer
 var config = {
@@ -31,7 +31,7 @@ var config = {
       folder: "csp_files",
       api: {
         version: "v2",
-        server: "https://designer.governify.io:10044/module-minizinc",
+        server: "https://minizinc.modules.designer.governify.io/module-minizinc",
         operationPath: "models/csp/operations/execute"
       }
     }
@@ -53,7 +53,7 @@ analyzer.isConsistent(function (err, sol) {
 or deploy the analyzer as an API REST service:
 ```javascript
 // Import Agreement Analyzer API
-var AgreementAnalyzerServer = require("E:\\Documents\\Coding\\Designer\\governify-agreement-analyzer").api;
+var AgreementAnalyzerServer = require("governify-agreement-analyzer").api;
 var api = new AgreementAnalyzerServer();
 var app = require("connect")();
 
@@ -125,11 +125,11 @@ properties:
 
 ## Latest release
 
-The version 0.4.0 is the latest stable version of governify-agreement-analyzer component.
-see [release note](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.4.0) for details.
+The version 0.5.1 is the latest stable version of governify-agreement-analyzer component.
+see [release note](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.5.1) for details.
 
 For running:
 
-- Download latest version from [0.4.0](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.4.0)
+- Download latest version from [0.5.1](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.5.1)
 
 [![Build Status](https://travis-ci.org/isa-group/governify-agreement-analyzer.svg?branch=master)](https://travis-ci.org/http://github.com/isa-group/governify-agreement-analyzer)

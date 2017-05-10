@@ -1,3 +1,10 @@
+### v0.5.1 - 2017-31-25
+
+- [#11](https://github.com/isa-group/governify-agreement-analyzer/issues/11) - Fix npm documetation
+
+### v0.5.0 - 2017-31-7
+- [#10](https://github.com/isa-group/governify-agreement-analyzer/issues/10) - Bug fixes
+
 ### v0.4.0 - 2017-31-7
 
 - [#9](https://github.com/isa-group/governify-agreement-analyzer/issues/9) - Implement test based on "results.js" file for travis

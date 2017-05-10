@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.4.0, built on: 2017-04-07
+governify-agreement-analyzer 0.5.1, built on: 2017-05-10
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -141,7 +141,7 @@ module.exports = function (grunt) {
                 //npmtag: true, //default: no tag
                 updateVars: ['pkg'], //NOT CHANGE
                 github: {
-                    repo: "isa-group/E:\\Documents\\Coding\\Designer\\governify-agreement-analyzer", //SET WITH YOUR PROJECT ID
+                    repo: "isa-group/governify-agreement-analyzer", //SET WITH YOUR PROJECT ID
                     accessTokenVar: "GITHUB_ACCESS_TOKEN", //SET ENVIRONMENT VARIABLE WITH THIS NAME
                     usernameVar: "GITHUB_USERNAME" //SET ENVIRONMENT VARIABLE WITH THIS NAME
                 }
