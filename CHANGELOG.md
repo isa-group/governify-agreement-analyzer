@@ -1,3 +1,7 @@
+### v0.5.2 - 2017-41-10
+
+- [#12](https://github.com/isa-group/governify-agreement-analyzer/issues/12) - Remove analyzer callback dependency with csp-tools
+
 ### v0.5.1 - 2017-31-25
 
 - [#11](https://github.com/isa-group/governify-agreement-analyzer/issues/11) - Fix npm documetation
