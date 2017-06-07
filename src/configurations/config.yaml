@@ -6,8 +6,8 @@ production:
       min: 0
       max: 100
     float:
-      min: 0.0
-      max: 100.0
+      min: '0.0'
+      max: '100.0'
 
 development:
   loglevel: debug
@@ -17,5 +17,5 @@ development:
       min: 0
       max: 100
     float:
-      min: 0.0
-      max: 100.0
+      min: '0.0'
+      max: '100.0'
