@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.5.2, built on: 2017-06-07
+governify-agreement-analyzer 0.5.3, built on: 2017-06-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
