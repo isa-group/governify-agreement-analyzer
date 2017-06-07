@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.5.2, built on: 2017-05-10
+governify-agreement-analyzer 0.5.2, built on: 2017-06-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -277,22 +277,24 @@ class AgreementCompensationCSPModelBuilder {
         var _pthis = this;
         metricNames.forEach((metricName) => {
             var type = _pthis.agreement.terms.metrics[metricName].schema.type;
-            let _min = _pthis.agreement.terms.metrics[metricName].schema.minimum;
-            let _max = _pthis.agreement.terms.metrics[metricName].schema.maximum;
-            var min;
-            var max;
-            if (cspTypeMap[type] === "float") {
-                min = Util_1.default.toStringFloat(_min);
-                max = Util_1.default.toStringFloat(_max);
+            if (cspTypeMap[type] !== "string" && cspTypeMap[type] !== "bool") {
+                let _min = _pthis.agreement.terms.metrics[metricName].schema.minimum;
+                let _max = _pthis.agreement.terms.metrics[metricName].schema.maximum;
+                var min;
+                var max;
+                if (cspTypeMap[type] === "float") {
+                    min = isNaN(_min) ? minMaxMap[cspTypeMap[type]].min : Util_1.default.toStringFloat(_min);
+                    max = isNaN(_max) ? minMaxMap[cspTypeMap[type]].max : Util_1.default.toStringFloat(_max);
+                }
+                else {
+                    min = isNaN(_min) ? minMaxMap[cspTypeMap[type]].min : _min.toString();
+                    max = isNaN(_max) ? minMaxMap[cspTypeMap[type]].max : _max.toString();
+                }
+                var domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain_1.default(type) : new Domain_1.default(min, max);
+                metricName = _pthis.getMockValue(metricName);
+                _pthis.metrics.push(new Metric_1.default(metricName, domain));
+                _pthis.cspModel.variables.push(new CSPTools.CSPVar(metricName, domain.getRangeOrType()));
             }
-            else {
-                min = _min.toString();
-                max = _max.toString();
-            }
-            var domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain_1.default(type) : new Domain_1.default(min, max);
-            metricName = _pthis.getMockValue(metricName);
-            _pthis.metrics.push(new Metric_1.default(metricName, domain));
-            _pthis.cspModel.variables.push(new CSPTools.CSPVar(metricName, domain.getRangeOrType()));
         });
     }
     loadDefinitions() {
@@ -301,22 +303,24 @@ class AgreementCompensationCSPModelBuilder {
         var _pthis = this;
         definitionNames.forEach((defName) => {
             var type = _pthis.agreement.context.definitions.schemas[defName].type;
-            let _min = _pthis.agreement.context.definitions.schemas[defName].minimum;
-            let _max = _pthis.agreement.context.definitions.schemas[defName].maximum;
-            var min;
-            var max;
-            if (cspTypeMap[type] === "float") {
-                min = Util_1.default.toStringFloat(_min);
-                max = Util_1.default.toStringFloat(_max);
+            if (cspTypeMap[type] !== "string" && cspTypeMap[type] !== "bool") {
+                let _min = _pthis.agreement.context.definitions.schemas[defName].minimum;
+                let _max = _pthis.agreement.context.definitions.schemas[defName].maximum;
+                var min;
+                var max;
+                if (cspTypeMap[type] === "float") {
+                    min = isNaN(_min) ? "0.0" : Util_1.default.toStringFloat(_min);
+                    max = isNaN(_max) ? "100.0" : Util_1.default.toStringFloat(_max);
+                }
+                else {
+                    min = isNaN(_min) ? "0" : _min.toString();
+                    max = isNaN(_max) ? "100" : _max.toString();
+                }
+                var domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain_1.default(type) : new Domain_1.default(min, max);
+                defName = _pthis.getMockValue(defName);
+                _pthis.definitions.push(new Definition_1.default(defName, domain));
+                _pthis.cspModel.variables.push(new CSPTools.CSPVar(defName, domain.getRangeOrType()));
             }
-            else {
-                min = _min.toString();
-                max = _max.toString();
-            }
-            var domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain_1.default(type) : new Domain_1.default(min, max);
-            defName = _pthis.getMockValue(defName);
-            _pthis.definitions.push(new Definition_1.default(defName, domain));
-            _pthis.cspModel.variables.push(new CSPTools.CSPVar(defName, domain.getRangeOrType()));
         });
     }
     loadPenaltiesAndRewards() {
@@ -324,13 +328,12 @@ class AgreementCompensationCSPModelBuilder {
         this.guarantees = [];
         this.agreement.terms.guarantees.forEach((g) => {
             var objectives = [];
-            g.of.forEach((ofi) => {
+            g.of.forEach((ofe, ofi) => {
                 var penalties = [];
                 var rewards = [];
-                if (ofi.penalties) {
-                    ofi.penalties.forEach((p, pi) => {
+                if (ofe.penalties) {
+                    ofe.penalties.forEach((p, pi) => {
                         var def = _pthis.definitions.filter((d) => d.name === _pthis.getMockValue(Object.keys(p.over)[0]))[0];
-                        var penalCondition = "";
                         var arrayValues = [];
                         p.of.forEach((pofi) => {
                             arrayValues.push({
@@ -338,21 +341,20 @@ class AgreementCompensationCSPModelBuilder {
                                 condition: _pthis.getMockValue(new Expression_1.default(pofi.condition))
                             });
                         });
-                        var newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty" + pi), def, arrayValues, _pthis.getMockValue(new Expression_1.default(ofi.objective)));
+                        var newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_" + pi), def, arrayValues, _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                         penalties.push(newPenalty);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
                     });
                 }
                 else {
                     let def = _pthis.getPricingPenalty();
-                    let newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty0"), def, [{ value: 0, condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofi.objective)));
+                    let newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: 0, condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                     penalties.push(newPenalty);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
                 }
-                if (ofi.rewards) {
-                    ofi.rewards.forEach((r, ri) => {
+                if (ofe.rewards) {
+                    ofe.rewards.forEach((r, ri) => {
                         var def = _pthis.definitions.filter((d) => d.name === _pthis.getMockValue(Object.keys(r.over)[0]))[0];
-                        var penalCondition = "";
                         var arrayValues = [];
                         r.of.forEach((rofi) => {
                             arrayValues.push({
@@ -360,18 +362,18 @@ class AgreementCompensationCSPModelBuilder {
                                 condition: _pthis.getMockValue(new Expression_1.default(rofi.condition))
                             });
                         });
-                        var newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward" + ri), def, arrayValues, _pthis.getMockValue(new Expression_1.default(ofi.objective)));
+                        var newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward_" + ofi + "_" + ri), def, arrayValues, _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                         rewards.push(newReward);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
                     });
                 }
                 else {
                     let def = _pthis.getPricingReward();
-                    let newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward0"), def, [{ value: 0, condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofi.objective)));
+                    let newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), def, [{ value: 0, condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                     rewards.push(newReward);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
                 }
-                objectives.push(new Objective_1.default(ofi.objective, penalties, rewards));
+                objectives.push(new Objective_1.default(ofe.objective, penalties, rewards));
             });
             _pthis.guarantees.push(new Guarantee_1.default(g.id, objectives));
         });
