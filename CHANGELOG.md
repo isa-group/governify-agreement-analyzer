@@ -1,3 +1,7 @@
+### v0.5.4 - 2017-51-7
+
+- [#15](https://github.com/isa-group/governify-agreement-analyzer/issues/15) - Fix rounded float numbers set on configuration file
+
 ### v0.5.3 - 2017-51-7
 
 - [#14](https://github.com/isa-group/governify-agreement-analyzer/issues/14) - Set a default min/max value for a 'int' and 'float' variable types
