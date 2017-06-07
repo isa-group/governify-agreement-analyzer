@@ -1,3 +1,9 @@
+### v0.5.3 - 2017-51-7
+
+- [#14](https://github.com/isa-group/governify-agreement-analyzer/issues/14) - Set a default min/max value for a 'int' and 'float' variable types
+
+- [#13](https://github.com/isa-group/governify-agreement-analyzer/issues/13) - Ignore type 'string' and 'boolean' for agreement compensation
+
 ### v0.5.2 - 2017-41-10
 
 - [#12](https://github.com/isa-group/governify-agreement-analyzer/issues/12) - Remove analyzer callback dependency with csp-tools
