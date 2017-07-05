@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.5.4, built on: 2017-06-07
+governify-agreement-analyzer 0.5.4, built on: 2017-07-05
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -53,6 +53,14 @@ export default class Expression {
             expr = expr.replace(re, v + suffix);
         });
         return expr;
+    }
+
+    /**
+     * Check if all variables used in expression are included as a defined variable.
+     * @param declaredProperties 
+     */
+    validateVariables(definedVariable: string[]): boolean {
+        return [...this.variables].reduce((_acc, v) => _acc && definedVariable.indexOf(v) !== -1, true);
     }
 
 }

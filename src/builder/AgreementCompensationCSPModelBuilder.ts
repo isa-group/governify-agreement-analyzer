@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.5.4, built on: 2017-06-07
+governify-agreement-analyzer 0.5.4, built on: 2017-07-05
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -177,11 +177,17 @@ export default class AgreementCompensationCSPModelBuilder {
     private getCCCExpressionFromGuarantee(mockBuilder: AgreementCompensationCSPModelBuilder, guarantee: Guarantee, guaranteeIndex: number): string {
 
         var _pthis = this;
-        return guarantee.ofs.map((_of: Objective, _ofi: number) => _pthis.getCCCExpressionFromObjective(mockBuilder, guarantee, guaranteeIndex, _of, _ofi)).join(" \\/ ");
+        return guarantee.ofs.map((_of: Objective, _ofi: number) =>
+            _pthis.getCCCExpressionFromObjective(mockBuilder, guarantee, guaranteeIndex, _of, _ofi)).join(" \\/ ");
 
     }
 
-    private getCCCExpressionFromObjective(mockBuilder: AgreementCompensationCSPModelBuilder, guarantee: Guarantee, guaranteeIndex: number, _of: Objective, _ofi: number): string {
+    private getCCCExpressionFromObjective(
+        mockBuilder: AgreementCompensationCSPModelBuilder,
+        guarantee: Guarantee,
+        guaranteeIndex: number,
+        _of: Objective,
+        _ofi: number): string {
 
         // CFC(m1,p1,r1,{CondP},{AsigP},{CondR},{AsigR})
         let cfc1: string = this.getCFCExpressionFromObjective(_of);
@@ -575,6 +581,17 @@ export default class AgreementCompensationCSPModelBuilder {
 
                 var penalties = [];
                 var rewards = [];
+                var declaredProperties = Object.keys(ofe.with);
+
+                if (!ofe.objective || ofe.objective === "") {
+                    throw "Guarantee objective is not defined";
+                } else {
+                    // Validate objective properties
+                    let expr = new Expression(ofe.objective);
+                    if (!expr.validateVariables(declaredProperties)) {
+                        throw "All SLO metrics must be defined (" + ofe.objective + ")";
+                    }
+                }
 
                 if (ofe.penalties) {
                     ofe.penalties.forEach((p, pi) => {
@@ -589,6 +606,9 @@ export default class AgreementCompensationCSPModelBuilder {
                             });
                         });
                         var newPenalty: Penalty = new Penalty(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_" + pi), def, arrayValues, _pthis.getMockValue(new Expression(ofe.objective)));
+                        if (!newPenalty.validateProperties(declaredProperties)) {
+                            throw 'All penalty metrics must be declared \'' + newPenalty.valueCondition.map(vc => vc.condition.expr) + '\'';
+                        }
                         penalties.push(newPenalty);
                         // _pthis.addPenaltyToCache(g, newPenalty);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
@@ -616,6 +636,9 @@ export default class AgreementCompensationCSPModelBuilder {
                             });
                         });
                         var newReward: Reward = new Reward(_pthis.getMockValue(g.id + "_reward_" + ofi + "_" + ri), def, arrayValues, _pthis.getMockValue(new Expression(ofe.objective)));
+                        if (!newReward.validateProperties(declaredProperties)) {
+                            throw 'All reward metrics must be declared \'' + newReward.valueCondition.map(vc => vc.condition.expr) + '\'';
+                        }
                         rewards.push(newReward);
                         // _pthis.addRewardToCache(g, newReward);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));

@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.5.4, built on: 2017-06-07
+governify-agreement-analyzer 0.5.4, built on: 2017-07-05
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -46,6 +46,16 @@ export default class Reward {
         return "((" + this.toLessComparison() + ") /\\ not (" + this.valueCondition.map((valueCondition: ValueCondition, index) => {
             return "(" + this.valueCondition[index].condition.expr + ")";
         }).join(" \\/ ") + "))";
+    }
+
+    /**
+     * Check if all properties used in reward condition are declared
+     * @param declaredProperties 
+     */
+    validateProperties(declaredProperties: string[]): boolean {
+        return this.valueCondition.reduce((acc, vc) => {
+            return acc && vc.condition.validateVariables(declaredProperties);
+        }, true);
     }
 
     static getCFC1(rewards: Reward[]): string {

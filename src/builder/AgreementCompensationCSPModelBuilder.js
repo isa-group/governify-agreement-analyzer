@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.5.2, built on: 2017-06-07
+governify-agreement-analyzer 0.5.4, built on: 2017-07-05
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -331,6 +331,16 @@ class AgreementCompensationCSPModelBuilder {
             g.of.forEach((ofe, ofi) => {
                 var penalties = [];
                 var rewards = [];
+                var declaredProperties = Object.keys(ofe.with);
+                if (!ofe.objective || ofe.objective === "") {
+                    throw "Guarantee objective is not defined";
+                }
+                else {
+                    let expr = new Expression_1.default(ofe.objective);
+                    if (!expr.validateVariables(declaredProperties)) {
+                        throw "All SLO metrics must be defined (" + ofe.objective + ")";
+                    }
+                }
                 if (ofe.penalties) {
                     ofe.penalties.forEach((p, pi) => {
                         var def = _pthis.definitions.filter((d) => d.name === _pthis.getMockValue(Object.keys(p.over)[0]))[0];
@@ -342,6 +352,9 @@ class AgreementCompensationCSPModelBuilder {
                             });
                         });
                         var newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_" + pi), def, arrayValues, _pthis.getMockValue(new Expression_1.default(ofe.objective)));
+                        if (!newPenalty.validateProperties(declaredProperties)) {
+                            throw 'All penalty metrics must be declared \'' + newPenalty.valueCondition.map(vc => vc.condition.expr) + '\'';
+                        }
                         penalties.push(newPenalty);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
                     });
@@ -363,6 +376,9 @@ class AgreementCompensationCSPModelBuilder {
                             });
                         });
                         var newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward_" + ofi + "_" + ri), def, arrayValues, _pthis.getMockValue(new Expression_1.default(ofe.objective)));
+                        if (!newReward.validateProperties(declaredProperties)) {
+                            throw 'All reward metrics must be declared \'' + newReward.valueCondition.map(vc => vc.condition.expr) + '\'';
+                        }
                         rewards.push(newReward);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
                     });
