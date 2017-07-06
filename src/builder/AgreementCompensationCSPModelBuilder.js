@@ -331,12 +331,12 @@ class AgreementCompensationCSPModelBuilder {
             g.of.forEach((ofe, ofi) => {
                 var penalties = [];
                 var rewards = [];
-                var declaredProperties = Object.keys(ofe.with);
+                var declaredProperties = Object.keys(ofe.with).map(n => _pthis.getMockValue(n));
                 if (!ofe.objective || ofe.objective === "") {
                     throw "Guarantee objective is not defined";
                 }
                 else {
-                    let expr = new Expression_1.default(ofe.objective);
+                    let expr = (this.mock) ? new Expression_1.default(new Expression_1.default(ofe.objective).getMockExpression(this.mockSuffix)) : new Expression_1.default(ofe.objective);
                     if (!expr.validateVariables(declaredProperties)) {
                         throw "All SLO metrics must be defined (" + ofe.objective + ")";
                     }

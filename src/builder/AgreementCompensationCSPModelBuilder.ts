@@ -581,13 +581,15 @@ export default class AgreementCompensationCSPModelBuilder {
 
                 var penalties = [];
                 var rewards = [];
-                var declaredProperties = Object.keys(ofe.with);
+                var declaredProperties = Object.keys(ofe.with).map(n => _pthis.getMockValue(n));
 
+                // Validate if objective metrics have been declared in 'with' object
                 if (!ofe.objective || ofe.objective === "") {
                     throw "Guarantee objective is not defined";
                 } else {
                     // Validate objective properties
-                    let expr = new Expression(ofe.objective);
+                    // It's necessary to create two expressions to mock each variable of guarantee objective
+                    let expr = (this.mock) ? new Expression(new Expression(ofe.objective).getMockExpression(this.mockSuffix)) : new Expression(ofe.objective);
                     if (!expr.validateVariables(declaredProperties)) {
                         throw "All SLO metrics must be defined (" + ofe.objective + ")";
                     }

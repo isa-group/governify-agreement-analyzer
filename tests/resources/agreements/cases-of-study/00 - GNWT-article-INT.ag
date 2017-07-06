@@ -41,7 +41,8 @@ terms:
       of:
         - objective: elapsedDaysPercent < 120
           scope: {}
-          with: {}
+          with: 
+            elapsedDaysPercent: {}
           window:
             type: static
             period: monthly
