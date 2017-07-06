@@ -26,7 +26,7 @@ class Penalty {
         this.objective = objective;
     }
     toComparison(index) {
-        let value = this.valueCondition[index].value;
+        let value = this.valueCondition[index].value.expr;
         let m = value.match(/^[\(\s]*\-(.*)$/);
         return this.name + " == " + (m && m.length === 2 ? m[1] : value);
     }
@@ -45,7 +45,7 @@ class Penalty {
     }
     validateProperties(declaredProperties) {
         return this.valueCondition.reduce((acc, vc) => {
-            return acc && vc.condition.validateVariables(declaredProperties);
+            return acc && vc.value.validateVariables(declaredProperties) && vc.condition.validateVariables(declaredProperties);
         }, true);
     }
     static getCFC1(penalties) {

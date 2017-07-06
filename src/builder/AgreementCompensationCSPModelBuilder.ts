@@ -603,13 +603,13 @@ export default class AgreementCompensationCSPModelBuilder {
                         var arrayValues: ValueCondition[] = [];
                         p.of.forEach((pofi) => {
                             arrayValues.push({
-                                value: pofi.value,
+                                value: new Expression(pofi.value),
                                 condition: _pthis.getMockValue(new Expression(pofi.condition))
                             });
                         });
                         var newPenalty: Penalty = new Penalty(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_" + pi), def, arrayValues, _pthis.getMockValue(new Expression(ofe.objective)));
                         if (!newPenalty.validateProperties(declaredProperties)) {
-                            throw 'All penalty metrics must be declared \'' + newPenalty.valueCondition.map(vc => vc.condition.expr) + '\'';
+                            throw 'All penalty metrics must be declared \'' + newPenalty.valueCondition.map(vc => '{value:' + vc.value.expr + ", condition: " + vc.condition.expr + "}") + '\'';
                         }
                         penalties.push(newPenalty);
                         // _pthis.addPenaltyToCache(g, newPenalty);
@@ -617,7 +617,7 @@ export default class AgreementCompensationCSPModelBuilder {
                     });
                 } else {
                     let def = _pthis.getPricingPenalty();
-                    let newPenalty: Penalty = new Penalty(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: "0", condition: new Expression("true") }],
+                    let newPenalty: Penalty = new Penalty(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: new Expression("0"), condition: new Expression("true") }],
                         _pthis.getMockValue(new Expression(ofe.objective))
                     );
                     penalties.push(newPenalty);
@@ -633,13 +633,13 @@ export default class AgreementCompensationCSPModelBuilder {
                         var arrayValues: ValueCondition[] = [];
                         r.of.forEach((rofi) => {
                             arrayValues.push({
-                                value: rofi.value,
+                                value: new Expression(rofi.value),
                                 condition: _pthis.getMockValue(new Expression(rofi.condition))
                             });
                         });
                         var newReward: Reward = new Reward(_pthis.getMockValue(g.id + "_reward_" + ofi + "_" + ri), def, arrayValues, _pthis.getMockValue(new Expression(ofe.objective)));
                         if (!newReward.validateProperties(declaredProperties)) {
-                            throw 'All reward metrics must be declared \'' + newReward.valueCondition.map(vc => vc.condition.expr) + '\'';
+                            throw 'All reward metrics must be declared \'' + newReward.valueCondition.map(vc => '{value:' + vc.value.expr + ", condition: " + vc.condition.expr + "}") + '\'';
                         }
                         rewards.push(newReward);
                         // _pthis.addRewardToCache(g, newReward);
@@ -649,7 +649,7 @@ export default class AgreementCompensationCSPModelBuilder {
                     let def = _pthis.getPricingReward();
                     let newReward: Reward = new Reward(
                         _pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), def,
-                        [{ value: "0", condition: new Expression("true") }],
+                        [{ value: new Expression("0"), condition: new Expression("true") }],
                         _pthis.getMockValue(new Expression(ofe.objective))
                     );
                     rewards.push(newReward);
@@ -843,6 +843,6 @@ interface UtilityFunction {
 }
 
 interface ValueCondition {
-    value?: string;
+    value?: Expression;
     condition?: Expression;
 }

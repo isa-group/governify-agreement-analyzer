@@ -347,13 +347,13 @@ class AgreementCompensationCSPModelBuilder {
                         var arrayValues = [];
                         p.of.forEach((pofi) => {
                             arrayValues.push({
-                                value: pofi.value,
+                                value: new Expression_1.default(pofi.value),
                                 condition: _pthis.getMockValue(new Expression_1.default(pofi.condition))
                             });
                         });
                         var newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_" + pi), def, arrayValues, _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                         if (!newPenalty.validateProperties(declaredProperties)) {
-                            throw 'All penalty metrics must be declared \'' + newPenalty.valueCondition.map(vc => vc.condition.expr) + '\'';
+                            throw 'All penalty metrics must be declared \'' + newPenalty.valueCondition.map(vc => '{value:' + vc.value.expr + ", condition: " + vc.condition.expr + "}") + '\'';
                         }
                         penalties.push(newPenalty);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
@@ -361,7 +361,7 @@ class AgreementCompensationCSPModelBuilder {
                 }
                 else {
                     let def = _pthis.getPricingPenalty();
-                    let newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: "0", condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
+                    let newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: new Expression_1.default("0"), condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                     penalties.push(newPenalty);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
                 }
@@ -371,13 +371,13 @@ class AgreementCompensationCSPModelBuilder {
                         var arrayValues = [];
                         r.of.forEach((rofi) => {
                             arrayValues.push({
-                                value: rofi.value,
+                                value: new Expression_1.default(rofi.value),
                                 condition: _pthis.getMockValue(new Expression_1.default(rofi.condition))
                             });
                         });
                         var newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward_" + ofi + "_" + ri), def, arrayValues, _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                         if (!newReward.validateProperties(declaredProperties)) {
-                            throw 'All reward metrics must be declared \'' + newReward.valueCondition.map(vc => vc.condition.expr) + '\'';
+                            throw 'All reward metrics must be declared \'' + newReward.valueCondition.map(vc => '{value:' + vc.value.expr + ", condition: " + vc.condition.expr + "}") + '\'';
                         }
                         rewards.push(newReward);
                         _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
@@ -385,7 +385,7 @@ class AgreementCompensationCSPModelBuilder {
                 }
                 else {
                     let def = _pthis.getPricingReward();
-                    let newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), def, [{ value: "0", condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
+                    let newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), def, [{ value: new Expression_1.default("0"), condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                     rewards.push(newReward);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
                 }
