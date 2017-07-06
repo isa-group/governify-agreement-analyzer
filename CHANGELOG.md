@@ -1,3 +1,7 @@
+### v0.5.5 - 2017-61-6
+
+- [#16](https://github.com/isa-group/governify-agreement-analyzer/issues/16) - Throw exception for SLO and compensation conditions that use undeclared metrics
+
 ### v0.5.4 - 2017-51-7
 
 - [#15](https://github.com/isa-group/governify-agreement-analyzer/issues/15) - Fix rounded float numbers set on configuration file
