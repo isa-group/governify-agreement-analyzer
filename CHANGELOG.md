@@ -1,3 +1,7 @@
+### v0.5.6 - 2017-61-6
+
+- [#17](https://github.com/isa-group/governify-agreement-analyzer/issues/17) - Set compensation value as a expression instead of a number
+
 ### v0.5.5 - 2017-61-6
 
 - [#16](https://github.com/isa-group/governify-agreement-analyzer/issues/16) - Throw exception for SLO and compensation conditions that use undeclared metrics
