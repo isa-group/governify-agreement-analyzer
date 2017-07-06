@@ -617,7 +617,7 @@ export default class AgreementCompensationCSPModelBuilder {
                     });
                 } else {
                     let def = _pthis.getPricingPenalty();
-                    let newPenalty: Penalty = new Penalty(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: 0, condition: new Expression("true") }],
+                    let newPenalty: Penalty = new Penalty(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: "0", condition: new Expression("true") }],
                         _pthis.getMockValue(new Expression(ofe.objective))
                     );
                     penalties.push(newPenalty);
@@ -649,7 +649,7 @@ export default class AgreementCompensationCSPModelBuilder {
                     let def = _pthis.getPricingReward();
                     let newReward: Reward = new Reward(
                         _pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), def,
-                        [{ value: 0, condition: new Expression("true") }],
+                        [{ value: "0", condition: new Expression("true") }],
                         _pthis.getMockValue(new Expression(ofe.objective))
                     );
                     rewards.push(newReward);
@@ -843,6 +843,6 @@ interface UtilityFunction {
 }
 
 interface ValueCondition {
-    value?: number;
+    value?: string;
     condition?: Expression;
 }

@@ -29,7 +29,9 @@ export default class Penalty {
         public valueCondition: ValueCondition[], public objective: Expression) { }
 
     toComparison(index: number): string {
-        return this.name + " == " + Math.abs(this.valueCondition[index].value);
+        let value = this.valueCondition[index].value;
+        let m = value.match(/^[\(\s]*\-(.*)$/);
+        return this.name + " == " + (m && m.length === 2 ? m[1] : value);
     }
 
     toLessComparison(): string {
@@ -72,6 +74,6 @@ export default class Penalty {
 }
 
 interface ValueCondition {
-    value?: number;
+    value?: string;
     condition?: Expression;
 }

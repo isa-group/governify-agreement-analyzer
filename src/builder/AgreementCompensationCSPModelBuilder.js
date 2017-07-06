@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.5.4, built on: 2017-07-05
+governify-agreement-analyzer 0.5.5, built on: 2017-07-06
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -361,7 +361,7 @@ class AgreementCompensationCSPModelBuilder {
                 }
                 else {
                     let def = _pthis.getPricingPenalty();
-                    let newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: 0, condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
+                    let newPenalty = new Penalty_1.default(_pthis.getMockValue(g.id + "_penalty_" + ofi + "_0"), def, [{ value: "0", condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                     penalties.push(newPenalty);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newPenalty.name, def.domain.getRangeOrType()));
                 }
@@ -385,7 +385,7 @@ class AgreementCompensationCSPModelBuilder {
                 }
                 else {
                     let def = _pthis.getPricingReward();
-                    let newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), def, [{ value: 0, condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
+                    let newReward = new Reward_1.default(_pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), def, [{ value: "0", condition: new Expression_1.default("true") }], _pthis.getMockValue(new Expression_1.default(ofe.objective)));
                     rewards.push(newReward);
                     _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
                 }
