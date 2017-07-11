@@ -1,3 +1,9 @@
+### v0.5.7 - 2017-61-11
+
+- [#19](https://github.com/isa-group/governify-agreement-analyzer/issues/19) - Fix metrics of compensation value expression not being 'mocked'
+
+- [#18](https://github.com/isa-group/governify-agreement-analyzer/issues/18) - Retrieve CSP modeling errors in Analyzer operations
+
 ### v0.5.6 - 2017-61-6
 
 - [#17](https://github.com/isa-group/governify-agreement-analyzer/issues/17) - Set compensation value as a expression instead of a number
