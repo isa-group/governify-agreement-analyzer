@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.5.5, built on: 2017-07-06
+governify-agreement-analyzer 0.5.6, built on: 2017-07-11
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -347,7 +347,7 @@ class AgreementCompensationCSPModelBuilder {
                         var arrayValues = [];
                         p.of.forEach((pofi) => {
                             arrayValues.push({
-                                value: new Expression_1.default(pofi.value),
+                                value: _pthis.getMockValue(new Expression_1.default(pofi.value)),
                                 condition: _pthis.getMockValue(new Expression_1.default(pofi.condition))
                             });
                         });
@@ -371,7 +371,7 @@ class AgreementCompensationCSPModelBuilder {
                         var arrayValues = [];
                         r.of.forEach((rofi) => {
                             arrayValues.push({
-                                value: new Expression_1.default(rofi.value),
+                                value: _pthis.getMockValue(new Expression_1.default(rofi.value)),
                                 condition: _pthis.getMockValue(new Expression_1.default(rofi.condition))
                             });
                         });
