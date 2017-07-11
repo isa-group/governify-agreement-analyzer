@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.5.6, built on: 2017-07-06
+governify-agreement-analyzer 0.5.6, built on: 2017-07-11
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -212,7 +212,7 @@ export default class Analyzer implements AnalyzerInterface {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
 
     }
@@ -231,7 +231,7 @@ export default class Analyzer implements AnalyzerInterface {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
 
     }
@@ -250,7 +250,7 @@ export default class Analyzer implements AnalyzerInterface {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
 
     }
@@ -269,7 +269,7 @@ export default class Analyzer implements AnalyzerInterface {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
 
     }
@@ -288,7 +288,7 @@ export default class Analyzer implements AnalyzerInterface {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
 
     }
@@ -307,7 +307,7 @@ export default class Analyzer implements AnalyzerInterface {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
 
     }
@@ -326,7 +326,7 @@ export default class Analyzer implements AnalyzerInterface {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
 
     }
@@ -345,7 +345,7 @@ export default class Analyzer implements AnalyzerInterface {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
 
     }

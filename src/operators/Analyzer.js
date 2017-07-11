@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.5.5, built on: 2017-07-06
+governify-agreement-analyzer 0.5.6, built on: 2017-07-11
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -163,7 +163,7 @@ class Analyzer {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
     }
     isSatisfiableCFC(callback) {
@@ -177,7 +177,7 @@ class Analyzer {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
     }
     isSatisfiableVFC(callback) {
@@ -191,7 +191,7 @@ class Analyzer {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
     }
     isSatisfiableCCC(callback) {
@@ -205,7 +205,7 @@ class Analyzer {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
     }
     isSatisfiableCSC(callback) {
@@ -219,7 +219,7 @@ class Analyzer {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
     }
     isSatisfiableGCC(callback) {
@@ -233,7 +233,7 @@ class Analyzer {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
     }
     isSatisfiableOGT(callback) {
@@ -247,7 +247,7 @@ class Analyzer {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
     }
     isSatisfiableOBT(callback) {
@@ -261,7 +261,7 @@ class Analyzer {
             callback(error);
         }).catch((err) => {
             logger.error(err);
-            callback(ERROR_INTERNAL_SERVER_MSG);
+            callback(err);
         });
     }
 }
