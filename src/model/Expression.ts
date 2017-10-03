@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.5.7, built on: 2017-07-11
+governify-agreement-analyzer 0.5.7, built on: 2017-10-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -46,11 +46,14 @@ export default class Expression {
         this._expr = expr;
     }
 
-    getMockExpression(suffix: string): string {
+    getMockExpression(suffix: string, option?: { keepOriginal }): string {
         var expr: string = this.expr;
+        var keepOriginalMetrics: string[] = option && "keepOriginal" in option ? option.keepOriginal : [];
         this.variables.forEach((v) => {
-            var re = new RegExp(v, "g");
-            expr = expr.replace(re, v + suffix);
+            if (keepOriginalMetrics.indexOf(v) === -1) {
+                var re = new RegExp(v, "g");
+                expr = expr.replace(re, v + suffix);
+            }
         });
         return expr;
     }

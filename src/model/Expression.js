@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.5.5, built on: 2017-07-06
+governify-agreement-analyzer 0.5.7, built on: 2017-10-03
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -38,11 +38,14 @@ class Expression {
     set expr(expr) {
         this._expr = expr;
     }
-    getMockExpression(suffix) {
+    getMockExpression(suffix, option) {
         var expr = this.expr;
+        var keepOriginalMetrics = option && "keepOriginal" in option ? option.keepOriginal : [];
         this.variables.forEach((v) => {
-            var re = new RegExp(v, "g");
-            expr = expr.replace(re, v + suffix);
+            if (keepOriginalMetrics.indexOf(v) === -1) {
+                var re = new RegExp(v, "g");
+                expr = expr.replace(re, v + suffix);
+            }
         });
         return expr;
     }
