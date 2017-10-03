@@ -1,3 +1,7 @@
+### v0.6.0 - 2017-91-3
+
+- [#20](https://github.com/isa-group/governify-agreement-analyzer/issues/20) - Add support for "free variables"
+
 ### v0.5.7 - 2017-61-11
 
 - [#19](https://github.com/isa-group/governify-agreement-analyzer/issues/19) - Fix metrics of compensation value expression not being 'mocked'
