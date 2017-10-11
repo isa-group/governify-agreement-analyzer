@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.5.7, built on: 2017-10-03
+governify-agreement-analyzer 0.6.0, built on: 2017-10-11
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -255,6 +255,48 @@ class Analyzer {
         this.agreementPromise.then(function (agreement) {
             let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
             let model = builder.buildOBT();
+            var reasoner = new Reasoner(_pthis.configuration.reasoner);
+            reasoner.solve(model, callback);
+        }, function (error) {
+            callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(err);
+        });
+    }
+    mapVCG(callback) {
+        var _pthis = this;
+        this.agreementPromise.then(function (agreement) {
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let model = builder.buildVCG();
+            var reasoner = new Reasoner(_pthis.configuration.reasoner);
+            reasoner.solve(model, callback);
+        }, function (error) {
+            callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(err);
+        });
+    }
+    mapVCF(callback) {
+        var _pthis = this;
+        this.agreementPromise.then(function (agreement) {
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let model = builder.buildVCF();
+            var reasoner = new Reasoner(_pthis.configuration.reasoner);
+            reasoner.solve(model, callback);
+        }, function (error) {
+            callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(err);
+        });
+    }
+    mapCompensations(callback) {
+        var _pthis = this;
+        this.agreementPromise.then(function (agreement) {
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let model = builder.buildCompensations();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
         }, function (error) {

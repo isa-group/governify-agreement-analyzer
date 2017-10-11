@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.5.7, built on: 2017-10-03
+governify-agreement-analyzer 0.6.0, built on: 2017-10-11
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -292,6 +292,98 @@ export default class AgreementCompensationCSPModelBuilder {
         cspModel.goal = "satisfy";
 
         return cspModel;
+
+    }
+
+    /**
+     * Obtain a CSP model for VCG execution.
+     */
+    buildVCG(): typeof CSPModel {
+
+        // ccg
+        var builderCCG: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+        let ccgConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "ccg", builderCCG.guarantees.map((g, gi) => builderCCG.getGCCExpressionFromGuarantee(g)).join(" \\/ "));
+
+
+        // scf
+        var builderSCF: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+        let scfConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "scf", builderSCF.guarantees.map((g, gi) => builderSCF.getCSCExpressionFromGuarantee(g)).join(" \\/ "));
+
+
+        // ccf
+        var builderCCF: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+        var mockBuilder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement, "2");
+        let ccfConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "ccf", builderCCF.guarantees.map((g, gi) => builderCCF.getCCCExpressionFromGuarantee(mockBuilder, g, gi)).join(" \\/ "));
+
+        let cspModel: typeof CSPModel = new CSPModel();
+        cspModel.variables = [
+            ...builderCCG.cspModel.variables,
+            ...builderSCF.cspModel.variables,
+            ...builderCCF.cspModel.variables,
+            ...mockBuilder.cspModel.variables].filter((e, i, a) => {
+                // Remove duplicated variable declaration
+                return a.map(mapObj => mapObj["id"]).indexOf(e["id"]) === i;
+            });
+
+        // Not
+        ccgConstraints.expression = "not (" + ccgConstraints.expression + ")";
+        scfConstraints.expression = "not (" + scfConstraints.expression + ")";
+        ccgConstraints.expression = "not (" + ccgConstraints.expression + ")";
+        mockBuilder.cspModel.constraints = mockBuilder.cspModel.constraints.map(constraint => {
+            return "not (" + constraint.expression + ")";
+        });
+        ccfConstraints.expression = "not (" + ccfConstraints.expression + ")";
+
+        cspModel.constraints = [ccgConstraints, scfConstraints, ...mockBuilder.cspModel.constraints, ccfConstraints];
+
+        cspModel.goal = "satisfy";
+
+        return cspModel;
+
+    }
+
+    /**
+     * Obtain a CSP model for VCG execution.
+     */
+    buildVCF(): typeof CSPModel {
+
+        // scf
+        var builderSCF: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+        let scfConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "scf", builderSCF.guarantees.map((g, gi) => builderSCF.getCSCExpressionFromGuarantee(g)).join(" \\/ "));
+
+
+        // ccf
+        var builderCCF: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement);
+        var mockBuilder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(this.agreement, "2");
+        let ccfConstraints: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint(
+            "ccf", builderCCF.guarantees.map((g, gi) => builderCCF.getCCCExpressionFromGuarantee(mockBuilder, g, gi)).join(" \\/ "));
+
+        let cspModel: typeof CSPModel = new CSPModel();
+        cspModel.variables = [
+            ...builderSCF.cspModel.variables,
+            ...builderCCF.cspModel.variables,
+            ...mockBuilder.cspModel.variables].filter((e, i, a) => {
+                // Remove duplicated variable declaration
+                return a.map(mapObj => mapObj["id"]).indexOf(e["id"]) === i;
+            });
+        cspModel.constraints = [scfConstraints, ...mockBuilder.cspModel.constraints, ccfConstraints];
+
+        cspModel.goal = "satisfy";
+
+        return cspModel;
+
+    }
+
+    /**
+     * Obtain a CSP model for VCG execution.
+     */
+    buildCompensations(): typeof CSPModel {
+
+        return this.buildVCG();
 
     }
 

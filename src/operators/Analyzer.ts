@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.5.7, built on: 2017-10-03
+governify-agreement-analyzer 0.6.0, built on: 2017-10-11
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -44,6 +44,9 @@ interface AnalyzerInterface {
     isSatisfiableGCC(callback: (...args: any[]) => void);
     isSatisfiableOGT(callback: (...args: any[]) => void);
     isSatisfiableOBT(callback: (...args: any[]) => void);
+    mapVCG(callback: (...args: any[]) => void);
+    mapVCF(callback: (...args: any[]) => void);
+    mapCompensations(callback: (...args: any[]) => void);
 }
 
 export default class Analyzer implements AnalyzerInterface {
@@ -349,5 +352,57 @@ export default class Analyzer implements AnalyzerInterface {
         });
 
     }
+
+    mapVCG(callback: (...args: any[]) => void) {
+        var _pthis = this;
+        this.agreementPromise.then(function (agreement: any) {
+
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let model: typeof CSPModel = builder.buildVCG();
+            var reasoner = new Reasoner(_pthis.configuration.reasoner);
+            reasoner.solve(model, callback);
+
+        }, function (error: any) {
+            callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(err);
+        });
+    }
+
+    mapVCF(callback: (...args: any[]) => void) {
+        var _pthis = this;
+        this.agreementPromise.then(function (agreement: any) {
+
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let model: typeof CSPModel = builder.buildVCF();
+            var reasoner = new Reasoner(_pthis.configuration.reasoner);
+            reasoner.solve(model, callback);
+
+        }, function (error: any) {
+            callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(err);
+        });
+    }
+
+    mapCompensations(callback: (...args: any[]) => void) {
+        var _pthis = this;
+        this.agreementPromise.then(function (agreement: any) {
+
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let model: typeof CSPModel = builder.buildCompensations();
+            var reasoner = new Reasoner(_pthis.configuration.reasoner);
+            reasoner.solve(model, callback);
+
+        }, function (error: any) {
+            callback(error);
+        }).catch((err) => {
+            logger.error(err);
+            callback(err);
+        });
+    }
+
 
 }

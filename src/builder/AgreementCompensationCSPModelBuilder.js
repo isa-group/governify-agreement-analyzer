@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.5.7, built on: 2017-10-03
+governify-agreement-analyzer 0.6.0, built on: 2017-10-11
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -173,6 +173,55 @@ class AgreementCompensationCSPModelBuilder {
         cspModel.constraints = [cfcConstraints];
         cspModel.goal = "satisfy";
         return cspModel;
+    }
+    buildVCG() {
+        var builderCCG = new AgreementCompensationCSPModelBuilder(this.agreement);
+        let ccgConstraints = new CSPTools.CSPConstraint("ccg", builderCCG.guarantees.map((g, gi) => builderCCG.getGCCExpressionFromGuarantee(g)).join(" \\/ "));
+        var builderSCF = new AgreementCompensationCSPModelBuilder(this.agreement);
+        let scfConstraints = new CSPTools.CSPConstraint("scf", builderSCF.guarantees.map((g, gi) => builderSCF.getCSCExpressionFromGuarantee(g)).join(" \\/ "));
+        var builderCCF = new AgreementCompensationCSPModelBuilder(this.agreement);
+        var mockBuilder = new AgreementCompensationCSPModelBuilder(this.agreement, "2");
+        let ccfConstraints = new CSPTools.CSPConstraint("ccf", builderCCF.guarantees.map((g, gi) => builderCCF.getCCCExpressionFromGuarantee(mockBuilder, g, gi)).join(" \\/ "));
+        let cspModel = new CSPModel();
+        cspModel.variables = [
+            ...builderCCG.cspModel.variables,
+            ...builderSCF.cspModel.variables,
+            ...builderCCF.cspModel.variables,
+            ...mockBuilder.cspModel.variables
+        ].filter((e, i, a) => {
+            return a.map(mapObj => mapObj["id"]).indexOf(e["id"]) === i;
+        });
+        ccgConstraints.expression = "not (" + ccgConstraints.expression + ")";
+        scfConstraints.expression = "not (" + scfConstraints.expression + ")";
+        ccgConstraints.expression = "not (" + ccgConstraints.expression + ")";
+        mockBuilder.cspModel.constraints = mockBuilder.cspModel.constraints.map(constraint => {
+            return "not (" + constraint.expression + ")";
+        });
+        ccfConstraints.expression = "not (" + ccfConstraints.expression + ")";
+        cspModel.constraints = [ccgConstraints, scfConstraints, ...mockBuilder.cspModel.constraints, ccfConstraints];
+        cspModel.goal = "satisfy";
+        return cspModel;
+    }
+    buildVCF() {
+        var builderSCF = new AgreementCompensationCSPModelBuilder(this.agreement);
+        let scfConstraints = new CSPTools.CSPConstraint("scf", builderSCF.guarantees.map((g, gi) => builderSCF.getCSCExpressionFromGuarantee(g)).join(" \\/ "));
+        var builderCCF = new AgreementCompensationCSPModelBuilder(this.agreement);
+        var mockBuilder = new AgreementCompensationCSPModelBuilder(this.agreement, "2");
+        let ccfConstraints = new CSPTools.CSPConstraint("ccf", builderCCF.guarantees.map((g, gi) => builderCCF.getCCCExpressionFromGuarantee(mockBuilder, g, gi)).join(" \\/ "));
+        let cspModel = new CSPModel();
+        cspModel.variables = [
+            ...builderSCF.cspModel.variables,
+            ...builderCCF.cspModel.variables,
+            ...mockBuilder.cspModel.variables
+        ].filter((e, i, a) => {
+            return a.map(mapObj => mapObj["id"]).indexOf(e["id"]) === i;
+        });
+        cspModel.constraints = [scfConstraints, ...mockBuilder.cspModel.constraints, ccfConstraints];
+        cspModel.goal = "satisfy";
+        return cspModel;
+    }
+    buildCompensations() {
+        return this.buildVCG();
     }
     getGCCExpressionFromGuarantee(guarantee) {
         var _pthis = this;
