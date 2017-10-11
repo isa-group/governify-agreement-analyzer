@@ -1,3 +1,7 @@
+### v0.6.1 - 2017-91-11
+
+- [#22](https://github.com/isa-group/governify-agreement-analyzer/issues/22) - Add new Analyzer operations
+
 ### v0.6.0 - 2017-91-3
 
 - [#20](https://github.com/isa-group/governify-agreement-analyzer/issues/20) - Add support for "free variables"
