@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.6.0, built on: 2017-10-11
+governify-agreement-analyzer 0.6.1, built on: 2017-10-11
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -191,14 +191,19 @@ class AgreementCompensationCSPModelBuilder {
         ].filter((e, i, a) => {
             return a.map(mapObj => mapObj["id"]).indexOf(e["id"]) === i;
         });
-        ccgConstraints.expression = "not (" + ccgConstraints.expression + ")";
-        scfConstraints.expression = "not (" + scfConstraints.expression + ")";
-        ccgConstraints.expression = "not (" + ccgConstraints.expression + ")";
-        mockBuilder.cspModel.constraints = mockBuilder.cspModel.constraints.map(constraint => {
-            return "not (" + constraint.expression + ")";
-        });
-        ccfConstraints.expression = "not (" + ccfConstraints.expression + ")";
-        cspModel.constraints = [ccgConstraints, scfConstraints, ...mockBuilder.cspModel.constraints, ccfConstraints];
+        let ccgConstraintsExpr = "not (" + ccgConstraints.expression + ")";
+        let scfConstraintsExpr = "not (" + scfConstraints.expression + ")";
+        let mockBuilderConstraintsExpr = "not (" +
+            mockBuilder.cspModel.constraints.map(constraint => {
+                return "(" + constraint.expression + ")";
+            }).join(" /\\ ") + ")";
+        let ccfConstraintsExpr = "not (" + ccfConstraints.expression + ")";
+        let expression = ccgConstraintsExpr + " /\\ " +
+            scfConstraintsExpr + " /\\ " +
+            mockBuilderConstraintsExpr + " /\\ " +
+            ccfConstraintsExpr;
+        let vcgConstraint = new CSPTools.CSPConstraint("vcg", expression);
+        cspModel.constraints = [vcgConstraint];
         cspModel.goal = "satisfy";
         return cspModel;
     }
@@ -216,7 +221,17 @@ class AgreementCompensationCSPModelBuilder {
         ].filter((e, i, a) => {
             return a.map(mapObj => mapObj["id"]).indexOf(e["id"]) === i;
         });
-        cspModel.constraints = [scfConstraints, ...mockBuilder.cspModel.constraints, ccfConstraints];
+        let scfConstraintsExpr = "not (" + scfConstraints.expression + ")";
+        let mockBuilderConstraintsExpr = "not (" +
+            mockBuilder.cspModel.constraints.map(constraint => {
+                return "(" + constraint.expression + ")";
+            }).join(" /\\ ") + ")";
+        let ccfConstraintsExpr = "not (" + ccfConstraints.expression + ")";
+        let expression = scfConstraintsExpr + " /\\ " +
+            mockBuilderConstraintsExpr + " /\\ " +
+            ccfConstraintsExpr;
+        let vcfConstraint = new CSPTools.CSPConstraint("vcf", expression);
+        cspModel.constraints = [vcfConstraint];
         cspModel.goal = "satisfy";
         return cspModel;
     }

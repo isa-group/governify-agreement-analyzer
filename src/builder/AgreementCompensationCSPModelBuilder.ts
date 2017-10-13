@@ -329,15 +329,22 @@ export default class AgreementCompensationCSPModelBuilder {
             });
 
         // Not
-        ccgConstraints.expression = "not (" + ccgConstraints.expression + ")";
-        scfConstraints.expression = "not (" + scfConstraints.expression + ")";
-        ccgConstraints.expression = "not (" + ccgConstraints.expression + ")";
-        mockBuilder.cspModel.constraints = mockBuilder.cspModel.constraints.map(constraint => {
-            return "not (" + constraint.expression + ")";
-        });
-        ccfConstraints.expression = "not (" + ccfConstraints.expression + ")";
+        let ccgConstraintsExpr: string = "not (" + ccgConstraints.expression + ")";
+        let scfConstraintsExpr: string = "not (" + scfConstraints.expression + ")";
+        let mockBuilderConstraintsExpr: string = "not (" +
+            mockBuilder.cspModel.constraints.map(constraint => {
+                return "(" + constraint.expression + ")";
+            }).join(" /\\ ") + ")";
+        let ccfConstraintsExpr: string = "not (" + ccfConstraints.expression + ")";
 
-        cspModel.constraints = [ccgConstraints, scfConstraints, ...mockBuilder.cspModel.constraints, ccfConstraints];
+        // Unify all constraints
+        let expression: string = ccgConstraintsExpr + " /\\ " +
+            scfConstraintsExpr + " /\\ " +
+            mockBuilderConstraintsExpr + " /\\ " +
+            ccfConstraintsExpr;
+        let vcgConstraint: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint("vcg", expression);
+
+        cspModel.constraints = [vcgConstraint];
 
         cspModel.goal = "satisfy";
 
@@ -370,7 +377,23 @@ export default class AgreementCompensationCSPModelBuilder {
                 // Remove duplicated variable declaration
                 return a.map(mapObj => mapObj["id"]).indexOf(e["id"]) === i;
             });
-        cspModel.constraints = [scfConstraints, ...mockBuilder.cspModel.constraints, ccfConstraints];
+
+
+        // Not
+        let scfConstraintsExpr: string = "not (" + scfConstraints.expression + ")";
+        let mockBuilderConstraintsExpr: string = "not (" +
+            mockBuilder.cspModel.constraints.map(constraint => {
+                return "(" + constraint.expression + ")";
+            }).join(" /\\ ") + ")";
+        let ccfConstraintsExpr: string = "not (" + ccfConstraints.expression + ")";
+
+        // Unify all constraints
+        let expression: string = scfConstraintsExpr + " /\\ " +
+            mockBuilderConstraintsExpr + " /\\ " +
+            ccfConstraintsExpr;
+        let vcfConstraint: typeof CSPTools.CSPConstraint = new CSPTools.CSPConstraint("vcf", expression);
+
+        cspModel.constraints = [vcfConstraint];
 
         cspModel.goal = "satisfy";
 
