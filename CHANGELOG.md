@@ -1,3 +1,7 @@
+### v0.6.2 - 2017-91-13
+
+- [#24](https://github.com/isa-group/governify-agreement-analyzer/issues/24) - Fix VCF and VCG operations
+
 ### v0.6.1 - 2017-91-11
 
 - [#22](https://github.com/isa-group/governify-agreement-analyzer/issues/22) - Add new Analyzer operations
