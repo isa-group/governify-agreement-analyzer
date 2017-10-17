@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.6.2, built on: 2017-10-13
+governify-agreement-analyzer 0.6.2, built on: 2017-10-17
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -212,12 +212,12 @@ export default class AgreementCompensationCSPModelBuilder {
         // CFC(m2,p2,r2,{CondP},{AsigP},{CondR},{AsigR})
         let cfc2: string = mockBuilder.getCFCExpressionFromObjective(mockBuilder.guarantees[guaranteeIndex].ofs[_ofi]);
 
-        // (p1 > p2 OR r1 < r2)
+        // (p1 > p2 OR r1 > r2)
         let penalCompareExpr: string = "(" + _of.penalties.map((p, pi) => {
             return "(" + p.name + " > " + mockBuilder.getMockValue(p.name) + ")";
         }).join(" /\\ ") + ")";
-        let rewardCompareExpr: string = "(" + _of.rewards.map((p, pi) => {
-            return "(" + p.name + " < " + mockBuilder.getMockValue(p.name) + ")";
+        let rewardCompareExpr: string = "(" + _of.rewards.map((r, ri) => {
+            return "(" + r.name + " > " + mockBuilder.getMockValue(r.name) + ")";
         }).join(" /\\ ") + ")";
 
         // (Utility(m1) > Utility(m2))
@@ -270,7 +270,7 @@ export default class AgreementCompensationCSPModelBuilder {
         }).join(" /\\ ") + ")";
 
         let cscRewards: string = "(" + _of.rewards.map((r) => {
-            return "(" + r.name + " == " + r.over.domain.max + ")";
+            return "(" + r.name + " == " + r.over.domain.min + ")";
         }).join(" /\\ ") + ")";
 
         return "(" + cfc + " /\\ (" + cscPenalties + " \\/ " + cscRewards + "))";
@@ -428,7 +428,7 @@ export default class AgreementCompensationCSPModelBuilder {
         }).join(" /\\ ") + ")";
 
         let gccRewards: string = "(" + _of.rewards.map((r) => {
-            return "(" + r.name + " > 0 /\\ not (" + r.objective.expr + "))";
+            return "(" + r.name + " < 0 /\\ not (" + r.objective.expr + "))";
         }).join(" /\\ ") + ")";
 
         return "(" + cfc + " /\\ (" + gccPenalties + " \\/ " + gccRewards + "))";

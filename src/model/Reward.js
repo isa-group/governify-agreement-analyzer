@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.6.1, built on: 2017-10-13
+governify-agreement-analyzer 0.6.2, built on: 2017-10-17
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -27,8 +27,7 @@ class Reward {
     }
     toComparison(index) {
         let value = this.valueCondition[index].value.expr;
-        let m = value.match(/^[\(\s]*\-(.*)$/);
-        return this.name + " == " + (m && m.length === 2 ? m[1] : value);
+        return this.name + " == " + value;
     }
     toLessComparison() {
         return this.name + " == 0";

@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.6.1, built on: 2017-10-11
+governify-agreement-analyzer 0.6.2, built on: 2017-10-17
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -129,8 +129,8 @@ class AgreementCompensationCSPModelBuilder {
         let penalCompareExpr = "(" + _of.penalties.map((p, pi) => {
             return "(" + p.name + " > " + mockBuilder.getMockValue(p.name) + ")";
         }).join(" /\\ ") + ")";
-        let rewardCompareExpr = "(" + _of.rewards.map((p, pi) => {
-            return "(" + p.name + " < " + mockBuilder.getMockValue(p.name) + ")";
+        let rewardCompareExpr = "(" + _of.rewards.map((r, ri) => {
+            return "(" + r.name + " > " + mockBuilder.getMockValue(r.name) + ")";
         }).join(" /\\ ") + ")";
         let objectiveExpression = new Expression_1.default(_of.objective);
         let utilityName = "ccc_utility_" + [...objectiveExpression.variables].join("") + "_" + _ofi;
@@ -161,7 +161,7 @@ class AgreementCompensationCSPModelBuilder {
             return "(" + p.name + " == " + p.over.domain.max + ")";
         }).join(" /\\ ") + ")";
         let cscRewards = "(" + _of.rewards.map((r) => {
-            return "(" + r.name + " == " + r.over.domain.max + ")";
+            return "(" + r.name + " == " + r.over.domain.min + ")";
         }).join(" /\\ ") + ")";
         return "(" + cfc + " /\\ (" + cscPenalties + " \\/ " + cscRewards + "))";
     }
@@ -248,7 +248,7 @@ class AgreementCompensationCSPModelBuilder {
             return "(" + p.name + " > 0 /\\ (" + p.objective.expr + "))";
         }).join(" /\\ ") + ")";
         let gccRewards = "(" + _of.rewards.map((r) => {
-            return "(" + r.name + " > 0 /\\ not (" + r.objective.expr + "))";
+            return "(" + r.name + " < 0 /\\ not (" + r.objective.expr + "))";
         }).join(" /\\ ") + ")";
         return "(" + cfc + " /\\ (" + gccPenalties + " \\/ " + gccRewards + "))";
     }
