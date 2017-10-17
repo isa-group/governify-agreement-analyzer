@@ -1,3 +1,7 @@
+### v0.6.3 - 2017-91-17
+
+- [#25](https://github.com/isa-group/governify-agreement-analyzer/issues/25) - Update reward sign on agreement compensation mappings
+
 ### v0.6.2 - 2017-91-13
 
 - [#24](https://github.com/isa-group/governify-agreement-analyzer/issues/24) - Fix VCF and VCG operations
