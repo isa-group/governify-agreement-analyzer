@@ -1,3 +1,4 @@
+"use strict";
 /*!
 governify-agreement-analyzer 0.6.3, built on: 2017-10-25
 Copyright (C) 2017 ISA group
@@ -16,10 +17,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
-
-import Domain from "./Domain";
-
-export default class Definition {
-    constructor(public name: string, public domain: Domain) { }
+Object.defineProperty(exports, "__esModule", { value: true });
+class AnalyzerMapOptions {
+    constructor(options) {
+        Object.assign(this, options);
+    }
 }
+exports.AnalyzerMapOptions = AnalyzerMapOptions;

@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.6.3, built on: 2017-10-17
+governify-agreement-analyzer 0.6.3, built on: 2017-10-25
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -27,6 +27,7 @@ import Domain from "../model/Domain";
 import Guarantee from "../model/Guarantee";
 import Objective from "../model/Objective";
 import Util from "../util/Util";
+import { IAnalyzerMapOptions, AnalyzerMapOptions } from "../operators/AnalyzerMapOptions";
 
 const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
@@ -48,9 +49,24 @@ export default class AgreementCompensationCSPModelBuilder {
     cspModel: typeof CSPModel;
     mock: boolean;
 
-    constructor(private agreement: any, private mockSuffix?: string) {
-        if (mockSuffix) {
-            this.mock = true;
+    private agreement: any;
+    private mockSuffix: string;
+    private analyzerMapOptions: IAnalyzerMapOptions;
+
+    constructor(agreement: any);
+    constructor(agreement: any, mockSuffixOrAnalyzerMapOptions?: any);
+    constructor(agreement: any, mockSuffixOrAnalyzerMapOptions?: any, analyzerMapOptions?: IAnalyzerMapOptions) {
+        this.agreement = agreement;
+        if (mockSuffixOrAnalyzerMapOptions) {
+            if (mockSuffixOrAnalyzerMapOptions && typeof mockSuffixOrAnalyzerMapOptions === "string") {
+                this.mockSuffix = mockSuffixOrAnalyzerMapOptions;
+                this.mock = true;
+            } else if (analyzerMapOptions && analyzerMapOptions instanceof AnalyzerMapOptions) {
+                this.analyzerMapOptions = analyzerMapOptions;
+            }
+        }
+        if (analyzerMapOptions && analyzerMapOptions instanceof AnalyzerMapOptions) {
+            this.analyzerMapOptions = analyzerMapOptions;
         }
         this.cspModel = new CSPModel();
         this.guaranteePenaltyRewardCache = {};
@@ -665,10 +681,10 @@ export default class AgreementCompensationCSPModelBuilder {
 
                 if (cspTypeMap[type] === "float") {
                     min = isNaN(_min) ? "0.0" : Util.toStringFloat(_min);
-                    max = isNaN(_max) ? "100.0" : Util.toStringFloat(_max);
+                    max = isNaN(_max) ? "65536.0" : Util.toStringFloat(_max);
                 } else {
                     min = isNaN(_min) ? "0" : _min.toString();
-                    max = isNaN(_max) ? "100" : _max.toString();
+                    max = isNaN(_max) ? "65536" : _max.toString();
                 }
 
                 var domain: Domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain(type) : new Domain(min, max);

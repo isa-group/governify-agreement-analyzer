@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.6.3, built on: 2017-10-17
+governify-agreement-analyzer 0.6.3, built on: 2017-10-25
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -23,6 +23,7 @@ import Translator from "../translator/Translator";
 import AgreementModel from "../model/AgreementModel";
 import AnalyzerConfiguration from "./AnalyzerConfiguration";
 import AgreementCompensationCSPModelBuilder from "../builder/AgreementCompensationCSPModelBuilder";
+import { IAnalyzerMapOptions } from "./AnalyzerMapOptions";
 
 const request = require("request");
 const fs = require("fs");
@@ -178,12 +179,12 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableConstraints(callback: (...args: any[]) => void) {
+    isSatisfiableConstraints(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let mznDocument: string = new AgreementCompensationCSPModelBuilder(agreement).buildConstraints();
+            let mznDocument: string = new AgreementCompensationCSPModelBuilder(agreement, mapOptions).buildConstraints();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(mznDocument, callback);
 
@@ -197,7 +198,7 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isConsistent(callback: (...args: any[]) => void) {
+    isConsistent(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
@@ -220,12 +221,12 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableCFC(callback: (...args: any[]) => void) {
+    isSatisfiableCFC(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildCFC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -239,12 +240,12 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableVFC(callback: (...args: any[]) => void) {
+    isSatisfiableVFC(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildVFC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -258,12 +259,12 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableCCC(callback: (...args: any[]) => void) {
+    isSatisfiableCCC(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildCCC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -277,12 +278,12 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableCSC(callback: (...args: any[]) => void) {
+    isSatisfiableCSC(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildCSC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -296,12 +297,12 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableGCC(callback: (...args: any[]) => void) {
+    isSatisfiableGCC(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildGCC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -315,12 +316,12 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableOGT(callback: (...args: any[]) => void) {
+    isSatisfiableOGT(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildOGT();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -334,12 +335,12 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    isSatisfiableOBT(callback: (...args: any[]) => void) {
+    isSatisfiableOBT(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
 
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildOBT();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -353,11 +354,11 @@ export default class Analyzer implements AnalyzerInterface {
 
     }
 
-    mapVCG(callback: (...args: any[]) => void) {
+    mapVCG(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildVCG();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -370,11 +371,11 @@ export default class Analyzer implements AnalyzerInterface {
         });
     }
 
-    mapVCF(callback: (...args: any[]) => void) {
+    mapVCF(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildVCF();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -387,11 +388,11 @@ export default class Analyzer implements AnalyzerInterface {
         });
     }
 
-    mapCompensations(callback: (...args: any[]) => void) {
+    mapCompensations(callback: (...args: any[]) => void, mapOptions?: IAnalyzerMapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement: any) {
 
-            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement);
+            let builder: AgreementCompensationCSPModelBuilder = new AgreementCompensationCSPModelBuilder(agreement, mapOptions);
             let model: typeof CSPModel = builder.buildCompensations();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);

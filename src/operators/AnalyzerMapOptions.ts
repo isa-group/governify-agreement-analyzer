@@ -17,9 +17,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
+export interface IAnalyzerMapOptions {
+    // Consider compensation upTo constraint
+    upTo: boolean;
+}
 
-import Domain from "./Domain";
-
-export default class Definition {
-    constructor(public name: string, public domain: Domain) { }
+export class AnalyzerMapOptions {
+    constructor(options: IAnalyzerMapOptions) {
+        Object.assign(this, options);
+    }
 }

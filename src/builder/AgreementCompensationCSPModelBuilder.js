@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.6.3, built on: 2017-10-17
+governify-agreement-analyzer 0.6.3, built on: 2017-10-25
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -27,6 +27,7 @@ const Domain_1 = require("../model/Domain");
 const Guarantee_1 = require("../model/Guarantee");
 const Objective_1 = require("../model/Objective");
 const Util_1 = require("../util/Util");
+const AnalyzerMapOptions_1 = require("../operators/AnalyzerMapOptions");
 const CSPTools = require("governify-csp-tools");
 const CSPModel = CSPTools.CSPModel;
 const CSPVar = CSPTools.CSPVar;
@@ -36,11 +37,19 @@ const minMaxMap = require("../configurations/config").minMaxMap;
 const logger = require("../logger/logger");
 const jsep = require("jsep");
 class AgreementCompensationCSPModelBuilder {
-    constructor(agreement, mockSuffix) {
+    constructor(agreement, mockSuffixOrAnalyzerMapOptions, analyzerMapOptions) {
         this.agreement = agreement;
-        this.mockSuffix = mockSuffix;
-        if (mockSuffix) {
-            this.mock = true;
+        if (mockSuffixOrAnalyzerMapOptions) {
+            if (mockSuffixOrAnalyzerMapOptions && typeof mockSuffixOrAnalyzerMapOptions === "string") {
+                this.mockSuffix = mockSuffixOrAnalyzerMapOptions;
+                this.mock = true;
+            }
+            else if (analyzerMapOptions && analyzerMapOptions instanceof AnalyzerMapOptions_1.AnalyzerMapOptions) {
+                this.analyzerMapOptions = analyzerMapOptions;
+            }
+        }
+        if (analyzerMapOptions && analyzerMapOptions instanceof AnalyzerMapOptions_1.AnalyzerMapOptions) {
+            this.analyzerMapOptions = analyzerMapOptions;
         }
         this.cspModel = new CSPModel();
         this.guaranteePenaltyRewardCache = {};
@@ -386,11 +395,11 @@ class AgreementCompensationCSPModelBuilder {
                 var max;
                 if (cspTypeMap[type] === "float") {
                     min = isNaN(_min) ? "0.0" : Util_1.default.toStringFloat(_min);
-                    max = isNaN(_max) ? "100.0" : Util_1.default.toStringFloat(_max);
+                    max = isNaN(_max) ? "65536.0" : Util_1.default.toStringFloat(_max);
                 }
                 else {
                     min = isNaN(_min) ? "0" : _min.toString();
-                    max = isNaN(_max) ? "100" : _max.toString();
+                    max = isNaN(_max) ? "65536" : _max.toString();
                 }
                 var domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain_1.default(type) : new Domain_1.default(min, max);
                 defName = _pthis.getMockValue(defName);

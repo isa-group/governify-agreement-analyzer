@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.6.3, built on: 2017-10-17
+governify-agreement-analyzer 0.6.3, built on: 2017-10-25
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -138,10 +138,10 @@ class Analyzer {
             }
         });
     }
-    isSatisfiableConstraints(callback) {
+    isSatisfiableConstraints(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let mznDocument = new AgreementCompensationCSPModelBuilder_1.default(agreement).buildConstraints();
+            let mznDocument = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions).buildConstraints();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(mznDocument, callback);
         }, function (error) {
@@ -151,7 +151,7 @@ class Analyzer {
             callback(err);
         });
     }
-    isConsistent(callback) {
+    isConsistent(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
             var translator = new Translator_1.default(new CSPBuilder_1.default());
@@ -166,10 +166,10 @@ class Analyzer {
             callback(err);
         });
     }
-    isSatisfiableCFC(callback) {
+    isSatisfiableCFC(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildCFC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -180,10 +180,10 @@ class Analyzer {
             callback(err);
         });
     }
-    isSatisfiableVFC(callback) {
+    isSatisfiableVFC(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildVFC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -194,10 +194,10 @@ class Analyzer {
             callback(err);
         });
     }
-    isSatisfiableCCC(callback) {
+    isSatisfiableCCC(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildCCC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -208,10 +208,10 @@ class Analyzer {
             callback(err);
         });
     }
-    isSatisfiableCSC(callback) {
+    isSatisfiableCSC(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildCSC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -222,10 +222,10 @@ class Analyzer {
             callback(err);
         });
     }
-    isSatisfiableGCC(callback) {
+    isSatisfiableGCC(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildGCC();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -236,10 +236,10 @@ class Analyzer {
             callback(err);
         });
     }
-    isSatisfiableOGT(callback) {
+    isSatisfiableOGT(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildOGT();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -250,10 +250,10 @@ class Analyzer {
             callback(err);
         });
     }
-    isSatisfiableOBT(callback) {
+    isSatisfiableOBT(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildOBT();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -264,10 +264,10 @@ class Analyzer {
             callback(err);
         });
     }
-    mapVCG(callback) {
+    mapVCG(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildVCG();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -278,10 +278,10 @@ class Analyzer {
             callback(err);
         });
     }
-    mapVCF(callback) {
+    mapVCF(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildVCF();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
@@ -292,10 +292,10 @@ class Analyzer {
             callback(err);
         });
     }
-    mapCompensations(callback) {
+    mapCompensations(callback, mapOptions) {
         var _pthis = this;
         this.agreementPromise.then(function (agreement) {
-            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement);
+            let builder = new AgreementCompensationCSPModelBuilder_1.default(agreement, mapOptions);
             let model = builder.buildCompensations();
             var reasoner = new Reasoner(_pthis.configuration.reasoner);
             reasoner.solve(model, callback);
