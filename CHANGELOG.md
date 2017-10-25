@@ -1,3 +1,7 @@
+### v0.6.4 - 2017-91-25
+
+- [#27](https://github.com/isa-group/governify-agreement-analyzer/issues/27) - Increase default max value for unspecified domains
+
 ### v0.6.3 - 2017-91-17
 
 - [#25](https://github.com/isa-group/governify-agreement-analyzer/issues/25) - Update reward sign on agreement compensation mappings
