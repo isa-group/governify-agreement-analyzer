@@ -4,10 +4,10 @@ production:
   minMaxMap:
     int:
       min: 0
-      max: 100
+      max: 65536
     float:
       min: '0.0'
-      max: '100.0'
+      max: '65536.0'
 
 development:
   loglevel: debug
@@ -15,7 +15,7 @@ development:
   minMaxMap:
     int:
       min: 0
-      max: 100
+      max: 65536
     float:
       min: '0.0'
-      max: '100.0'
+      max: '65536.0'

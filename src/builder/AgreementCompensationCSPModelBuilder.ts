@@ -680,11 +680,11 @@ export default class AgreementCompensationCSPModelBuilder {
                 var max: string;
 
                 if (cspTypeMap[type] === "float") {
-                    min = isNaN(_min) ? "0.0" : Util.toStringFloat(_min);
-                    max = isNaN(_max) ? "65536.0" : Util.toStringFloat(_max);
+                    min = isNaN(_min) ? minMaxMap[cspTypeMap[type]].min : Util.toStringFloat(_min);
+                    max = isNaN(_max) ? minMaxMap[cspTypeMap[type]].max : Util.toStringFloat(_max);
                 } else {
-                    min = isNaN(_min) ? "0" : _min.toString();
-                    max = isNaN(_max) ? "65536" : _max.toString();
+                    min = isNaN(_min) ? minMaxMap[cspTypeMap[type]].min : Util.toStringFloat(_min);
+                    max = isNaN(_max) ? minMaxMap[cspTypeMap[type]].max : Util.toStringFloat(_max);
                 }
 
                 var domain: Domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain(type) : new Domain(min, max);

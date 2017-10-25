@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.6.3, built on: 2017-10-25
+governify-agreement-analyzer 0.6.4, built on: 2017-10-25
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -394,12 +394,12 @@ class AgreementCompensationCSPModelBuilder {
                 var min;
                 var max;
                 if (cspTypeMap[type] === "float") {
-                    min = isNaN(_min) ? "0.0" : Util_1.default.toStringFloat(_min);
-                    max = isNaN(_max) ? "65536.0" : Util_1.default.toStringFloat(_max);
+                    min = isNaN(_min) ? minMaxMap[cspTypeMap[type]].min : Util_1.default.toStringFloat(_min);
+                    max = isNaN(_max) ? minMaxMap[cspTypeMap[type]].max : Util_1.default.toStringFloat(_max);
                 }
                 else {
-                    min = isNaN(_min) ? "0" : _min.toString();
-                    max = isNaN(_max) ? "65536" : _max.toString();
+                    min = isNaN(_min) ? minMaxMap[cspTypeMap[type]].min : Util_1.default.toStringFloat(_min);
+                    max = isNaN(_max) ? minMaxMap[cspTypeMap[type]].max : Util_1.default.toStringFloat(_max);
                 }
                 var domain = (isNaN(Number(min)) || isNaN(Number(max))) ? new Domain_1.default(type) : new Domain_1.default(min, max);
                 defName = _pthis.getMockValue(defName);
