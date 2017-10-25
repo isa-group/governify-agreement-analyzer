@@ -1,6 +1,6 @@
 {
   "name": "governify-agreement-analyzer",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Governify Agreement Analyzer",
   "homepage": "https://github.com/isa-group/governify-agreement-analyzer",
   "main": "index.js",

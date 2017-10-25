@@ -1,3 +1,7 @@
+### v0.6.5 - 2017-91-25
+
+- [#28](https://github.com/isa-group/governify-agreement-analyzer/issues/28) - Set default domain for agreement definitions and metric in configuration file
+
 ### v0.6.4 - 2017-91-25
 
 - [#27](https://github.com/isa-group/governify-agreement-analyzer/issues/27) - Increase default max value for unspecified domains
