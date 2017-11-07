@@ -1,3 +1,7 @@
+### v0.6.6 - 2017-101-7
+
+- [#29](https://github.com/isa-group/governify-agreement-analyzer/issues/29) - Fix reward domain
+
 ### v0.6.5 - 2017-91-25
 
 - [#28](https://github.com/isa-group/governify-agreement-analyzer/issues/28) - Set default domain for agreement definitions and metric in configuration file
