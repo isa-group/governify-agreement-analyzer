@@ -125,11 +125,11 @@ properties:
 
 ## Latest release
 
-The version 0.6.5 is the latest stable version of governify-agreement-analyzer component.
-see [release note](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.6.5) for details.
+The version 0.6.6 is the latest stable version of governify-agreement-analyzer component.
+see [release note](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.6.6) for details.
 
 For running:
 
-- Download latest version from [0.6.5](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.6.5)
+- Download latest version from [0.6.6](http://github.com/isa-group/governify-agreement-analyzer/releases/tag/0.6.6)
 
 [![Build Status](https://travis-ci.org/isa-group/governify-agreement-analyzer.svg?branch=master)](https://travis-ci.org/http://github.com/isa-group/governify-agreement-analyzer)
