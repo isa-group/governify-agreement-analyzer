@@ -1,6 +1,6 @@
 "use strict";
 /*!
-governify-agreement-analyzer 0.6.4, built on: 2017-10-25
+governify-agreement-analyzer 0.6.5, built on: 2017-11-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -60,6 +60,12 @@ class Domain {
         else {
             return this._max;
         }
+    }
+    setMin(min) {
+        this._min = min;
+    }
+    setMax(max) {
+        this._max = max;
     }
 }
 exports.default = Domain;

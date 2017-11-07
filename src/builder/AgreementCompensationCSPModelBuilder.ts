@@ -1,5 +1,5 @@
 /*!
-governify-agreement-analyzer 0.6.5, built on: 2017-10-25
+governify-agreement-analyzer 0.6.5, built on: 2017-11-07
 Copyright (C) 2017 ISA group
 http://www.isa.us.es/
 https://github.com/isa-group/governify-agreement-analyzer
@@ -759,6 +759,13 @@ export default class AgreementCompensationCSPModelBuilder {
                 if (ofe.rewards) {
                     ofe.rewards.forEach((r, ri) => {
                         var def = _pthis.definitions.filter((d) => d.name === _pthis.getMockValue(Object.keys(r.over)[0]))[0]; // only considers the first "over"
+                        var _def = Object.assign({}, def);
+                        // Negative domain for rewards based on definition
+                        let rangeOrType = _def.domain.getRangeOrType();
+                        if (rangeOrType && rangeOrType.hasOwnProperty("min") && rangeOrType.hasOwnProperty("max")) {
+                            _def.domain = new Domain("-" + _def.domain.max, _def.domain.min);
+                        }
+
                         // Consider multiple "of"s in a reward
                         var arrayValues: ValueCondition[] = [];
                         r.of.forEach((rofi) => {
@@ -767,23 +774,30 @@ export default class AgreementCompensationCSPModelBuilder {
                                 condition: _pthis.getMockValue(new Expression(rofi.condition))
                             });
                         });
-                        var newReward: Reward = new Reward(_pthis.getMockValue(g.id + "_reward_" + ofi + "_" + ri), def, arrayValues, _pthis.getMockValue(new Expression(ofe.objective)));
+                        var newReward: Reward = new Reward(_pthis.getMockValue(g.id + "_reward_" + ofi + "_" + ri), _def, arrayValues, _pthis.getMockValue(new Expression(ofe.objective)));
                         // if (!newReward.validateProperties(declaredProperties)) {
                         //     throw 'All reward metrics must be declared \'' + newReward.valueCondition.map(vc => '{value:' + vc.value.expr + ", condition: " + vc.condition.expr + "}") + '\'';
                         // }
                         rewards.push(newReward);
-                        _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType()));
+                        _pthis.cspModel.variables.push(new CSPTools.CSPVar(newReward.name, _def.domain.getRangeOrType()));
                     });
                 } else {
                     let def = _pthis.getPricingReward();
+                    var _def = Object.assign({}, def);
+                    // Negative domain for rewards based on definition
+                    let rangeOrType = _def.domain.getRangeOrType();
+                    if (rangeOrType && rangeOrType.hasOwnProperty("min") && rangeOrType.hasOwnProperty("max")) {
+                        _def.domain = new Domain("-" + _def.domain.max, _def.domain.min);
+                    }
+
                     let newReward: Reward = new Reward(
-                        _pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), def,
+                        _pthis.getMockValue(g.id + "_reward_" + ofi + "_0"), _def,
                         [{ value: new Expression("0"), condition: new Expression("true") }],
                         _pthis.getMockValue(new Expression(ofe.objective))
                     );
                     rewards.push(newReward);
                     _pthis.cspModel.variables.push(
-                        new CSPTools.CSPVar(newReward.name, def.domain.getRangeOrType())
+                        new CSPTools.CSPVar(newReward.name, _def.domain.getRangeOrType())
                     );
                 }
 
